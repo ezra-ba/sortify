@@ -1,4 +1,6 @@
- # Grundsätzliches
+#awl
+
+# Grundsätzliches
 - SV ermittelt und überweist der Arbeitgeber am 15. des nächsten Monats an die ÖGK
 - Zu diesen Beiträgen zählen:
 	- Krankenversicherung

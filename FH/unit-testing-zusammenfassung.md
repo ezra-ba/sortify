@@ -49,6 +49,7 @@ Testbarkeit sollte während des gesamten Entwicklungsprozesses berücksichtigt w
 
 ## 5. Regeln und Aufbau guter Unit-Tests
 
+### 5.1 FIRST-Regeln
 Die **FIRST-Regeln** für Unit-Tests lauten:
 
 - **Fast:** Tests laufen schnell und werden daher oft ausgeführt.
@@ -57,6 +58,7 @@ Die **FIRST-Regeln** für Unit-Tests lauten:
 - **Self-validating:** Jeder Test zeigt eindeutig Erfolg oder Fehlschlag.
 - **Timely:** Tests werden rechtzeitig geschrieben und verbessern das Produktionsdesign.
 
+### 5.2 AAA-Muster
 Beim Aufbau eines Tests wird das **AAA-Muster** verwendet:
 
 1. **Arrange:** Testobjekt, Eingaben und Abhängigkeiten vorbereiten.
@@ -65,7 +67,8 @@ Beim Aufbau eines Tests wird das **AAA-Muster** verwendet:
 
 Ein Test sollte möglichst genau einen Aspekt prüfen und eine klare Assertion besitzen. Direkte Ein- und Ausgaben, interner Zustand sowie Interaktionen mit externen Abhängigkeiten müssen vorbereitet und überprüft werden. Abhängigkeiten wie Datenbanken, Netzwerk oder Dateisystem werden bei Unit-Tests normalerweise durch Test-Doubles ersetzt.
 
-Testnamen sollen angeben, **was** getestet wird, **unter welchen Bedingungen** und **welches Ergebnis** erwartet wird, zum Beispiel `Add_WithTwoNumbers_ReturnsSum`. Tests sollen verständlich und eigenständig sein. Für Testcode gilt daher eher **DAMP** (Descriptive And Meaningful Phrases) als **DRY** (Don't Repeat Yourself): Lesbarkeit und Verständlichkeit sind wichtiger als maximale Wiederverwendung.
+### 5.3 Testnamen
+**Testnamen** sollen angeben, **was** getestet wird, **unter welchen Bedingungen** und **welches Ergebnis** erwartet wird, zum Beispiel `Add_WithTwoNumbers_ReturnsSum`. Tests sollen verständlich und eigenständig sein. Für Testcode gilt daher eher **DAMP** (Descriptive And Meaningful Phrases) als **DRY** (Don't Repeat Yourself): Lesbarkeit und Verständlichkeit sind wichtiger als maximale Wiederverwendung.
 
 ## 6. Test-Doubles und Abgrenzung
 

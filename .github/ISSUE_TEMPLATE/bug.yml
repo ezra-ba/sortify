@@ -1,0 +1,39 @@
+name: Bug
+description: Einen reproduzierbaren Fehler in Sortify melden.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Fehlerbeschreibung
+      description: Was funktioniert nicht wie erwartet?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Schritte zum Reproduzieren
+      placeholder: |
+        1. Sortify starten
+        2. ...
+        3. Fehler tritt auf
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Umgebung
+      description: Betriebssystem, .NET-Version und betroffener Commit oder Release.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs oder Screenshots
+      description: Keine vertraulichen Daten oder privaten Dateiinhalte einfügen.

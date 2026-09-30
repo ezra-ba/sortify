@@ -1,0 +1,35 @@
+name: Task
+description: Eine klar abgegrenzte Entwicklungs- oder Projektaufgabe planen.
+title: "[Task]: "
+labels:
+  - "type:task"
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Ziel
+      description: Welches überprüfbare Ergebnis soll erreicht werden?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Arbeitsumfang
+      description: Welche konkreten Schritte gehören zu dieser Aufgabe?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Abnahmekriterien
+      description: Woran ist erkennbar, dass die Aufgabe vollständig erledigt ist?
+      placeholder: |
+        - [ ] Kriterium 1
+        - [ ] Kriterium 2
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Zusätzliche Hinweise
+      description: Abhängigkeiten, Links, Screenshots oder offene Fragen.

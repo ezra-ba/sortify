@@ -1,12 +1,16 @@
 # Sortify
 
+<p align="center">
+  <img src="assets/branding/sortify-logo.png" alt="Sortify" width="520">
+</p>
+
 Sortify ist eine geplante Desktop-Anwendung, die neue Dateien erkennt und Benutzer beim einheitlichen Benennen und Einsortieren unterstützt. Statt Dateien automatisch und unbemerkt zu verändern, zeigt Sortify zuerst einen verständlichen Vorschlag an. Erst nach einer Bestätigung wird die Datei umbenannt oder verschoben.
 
-Das Projekt wird von **ETM Software Solutions** im Rahmen des Projektpraktikums entwickelt.
+Das Projekt wird von **SYD – Sort Your Data GmbH** im Rahmen des Projektpraktikums entwickelt.
 
 ## Projektstatus
 
-Sortify befindet sich in der Planungs- und Startphase. Projektidee, Name und grundlegende Anforderungen wurden festgelegt. Als UI-Technologie wurde **Avalonia** ausgewählt. Die Projektstruktur und der erste lauffähige Prototyp werden als Nächstes aufgebaut.
+Sortify befindet sich in der Startphase. Projektidee, Name und grundlegende Anforderungen wurden festgelegt. Als UI-Technologie wurde **Avalonia** ausgewählt und die erste Solution-Struktur wurde angelegt. Die Kernfunktionen werden als Nächstes entwickelt.
 
 ## Problemstellung
 
@@ -62,6 +66,32 @@ Für die erste verwendbare Version sind folgende Kernfunktionen vorgesehen:
 
 Die erste Version ist als Desktop-Anwendung vorgesehen. Durch Avalonia bleibt eine spätere Nutzung auf mehreren Betriebssystemen möglich.
 
+## Projektstruktur
+
+```text
+Sortify.sln
+├── src/
+│   ├── Sortify.App/             Avalonia-Oberfläche und MVVM
+│   ├── Sortify.Core/            Modelle, Regeln und Schnittstellen
+│   └── Sortify.Infrastructure/  Dateisystem und lokale Speicherung
+├── tests/Sortify.Core.Tests/    Tests der fachlichen Logik
+├── assets/branding/             Logos und App-Icon
+└── docs/architecture.md         Architekturentscheidungen
+```
+
+Weitere Details stehen in [`docs/architecture.md`](docs/architecture.md).
+
+## Entwicklung
+
+Voraussetzung ist das .NET 10 SDK.
+
+```powershell
+dotnet restore
+dotnet build
+dotnet run --project .\src\Sortify.App
+dotnet test
+```
+
 ## Geplante Architektur
 
 | Bereich | Verantwortung |
@@ -86,9 +116,14 @@ Sortify soll vollständig lokal funktionieren. KI-Endpunkte, Cloud-Dienste und e
 
 ## Nächste Schritte
 
-- Avalonia-Projektstruktur anlegen,
-- grundlegendes MVVM-Gerüst erstellen,
 - Verwaltung eines überwachten Ordners umsetzen,
 - Regelmodell und lokale Speicherung definieren,
 - ersten Ablauf von Dateierkennung bis Vorschau als Prototyp entwickeln,
 - Kernfunktionen mit Tests absichern.
+
+---
+
+<p align="center">
+  <strong>Ein Projekt von SYD – Sort Your Data GmbH</strong><br>
+  <img src="assets/branding/syd-firmen-logo.png" alt="SYD – Sort Your Data GmbH" width="360">
+</p>

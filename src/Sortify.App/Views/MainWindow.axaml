@@ -1,138 +1,137 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Sortify.App.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1120" d:DesignHeight="720"
-        x:Class="Sortify.App.Views.MainWindow"
-        x:DataType="vm:MainViewModel"
-        Icon="/Assets/Branding/sortify-icon.png"
-        Title="Sortify"
-        Width="1120"
-        Height="720"
-        MinWidth="860"
-        MinHeight="560"
-        Background="#F5F6F8">
-
-    <Design.DataContext>
-        <vm:MainViewModel />
-    </Design.DataContext>
-
-    <Grid RowDefinitions="Auto,*">
-        <Border Grid.Row="0"
-                Padding="24,14"
-                Background="White"
-                BorderBrush="#E2E5EA"
-                BorderThickness="0,0,0,1">
-            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
-                <Image Width="156"
-                       Height="44"
-                       Stretch="Uniform"
-                       Source="/Assets/Branding/sortify-logo.png" />
-
-                <TextBlock Grid.Column="2"
-                           VerticalAlignment="Center"
-                           Foreground="#667085"
-                           Text="Lokale Dateiorganisation" />
-            </Grid>
-        </Border>
-
-        <Grid Grid.Row="1" ColumnDefinitions="220,*">
-            <Border Padding="20,24"
-                    Background="#191C24"
-                    BorderBrush="#2A2E38"
-                    BorderThickness="0,0,1,0">
-                <StackPanel Spacing="8">
-                    <TextBlock Margin="8,0,0,12"
-                               Foreground="#98A2B3"
-                               FontSize="12"
-                               Text="NAVIGATION" />
-                    <Border Padding="12,10" Background="#302443" CornerRadius="4">
-                        <TextBlock Foreground="White" Text="Übersicht" />
-                    </Border>
-                    <TextBlock Padding="12,10" Foreground="#D0D5DD" Text="Überwachte Ordner" />
-                    <TextBlock Padding="12,10" Foreground="#D0D5DD" Text="Sortierregeln" />
-                    <TextBlock Padding="12,10" Foreground="#D0D5DD" Text="Verlauf" />
-                    <TextBlock Padding="12,10" Foreground="#D0D5DD" Text="Einstellungen" />
-                </StackPanel>
-            </Border>
-
-            <ScrollViewer Grid.Column="1">
-                <StackPanel Margin="36" Spacing="24" MaxWidth="920">
-                    <StackPanel Spacing="6">
-                        <TextBlock FontSize="28"
-                                   FontWeight="SemiBold"
-                                   Foreground="#101828"
-                                   Text="Übersicht" />
-                        <TextBlock Foreground="#667085"
-                                   Text="{Binding ProjectStatus}" />
-                    </StackPanel>
-
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                        <Border Padding="22"
-                                Background="White"
-                                BorderBrush="#E2E5EA"
-                                BorderThickness="1"
-                                CornerRadius="6">
-                            <StackPanel Spacing="10">
-                                <TextBlock FontSize="13"
-                                           Foreground="#667085"
-                                           Text="ÜBERWACHTER ORDNER" />
-                                <TextBlock FontSize="18"
-                                           FontWeight="SemiBold"
-                                           Foreground="#101828"
-                                           Text="{Binding WatchedFolder}" />
-                                <TextBlock Foreground="#667085"
-                                           TextWrapping="Wrap"
-                                           Text="Im nächsten Entwicklungsschritt wird hier der erste Eingangsordner eingerichtet." />
-                            </StackPanel>
-                        </Border>
-
-                        <Border Grid.Column="1"
-                                Padding="22"
-                                Background="White"
-                                BorderBrush="#E2E5EA"
-                                BorderThickness="1"
-                                CornerRadius="6">
-                            <StackPanel Spacing="10">
-                                <TextBlock FontSize="13"
-                                           Foreground="#667085"
-                                           Text="AKTIVE REGELN" />
-                                <TextBlock FontSize="32"
-                                           FontWeight="SemiBold"
-                                           Foreground="#7F27C8"
-                                           Text="0" />
-                                <TextBlock Foreground="#667085"
-                                           Text="Noch keine Sortierregeln konfiguriert" />
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-
-                    <Border Padding="28"
-                            Background="White"
-                            BorderBrush="#E2E5EA"
-                            BorderThickness="1"
-                            CornerRadius="6">
-                        <StackPanel HorizontalAlignment="Center" Spacing="10">
-                            <Image Width="72"
-                                   Height="72"
-                                   Source="/Assets/Branding/sortify-icon.png" />
-                            <TextBlock HorizontalAlignment="Center"
-                                       FontSize="20"
-                                       FontWeight="SemiBold"
-                                       Foreground="#101828"
-                                       Text="Sortify wird eingerichtet" />
-                            <TextBlock MaxWidth="500"
-                                       HorizontalAlignment="Center"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap"
-                                       Foreground="#667085"
-                                       Text="Die Oberfläche steht als Ausgangspunkt bereit. Als Nächstes folgen Ordnerauswahl, Regelverwaltung und Sortiervorschläge." />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>
-    </Grid>
-
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:Sortify.App.ViewModels" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="760" x:Class="Sortify.App.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/Branding/sortify-icon.png" Title="Sortify · Ordnerverwaltung" Width="1180" Height="760" MinWidth="900" MinHeight="620" Background="#F4F1EC">
+	<Design.DataContext>
+		<vm:MainViewModel />
+	</Design.DataContext>
+	<Window.Styles>
+		<Style Selector="TextBlock.heading">
+			<Setter Property="Foreground" Value="#25231F"/>
+			<Setter Property="FontSize" Value="26"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+		</Style>
+		<Style Selector="TextBlock.eyebrow">
+			<Setter Property="Foreground" Value="#867E73"/>
+			<Setter Property="FontSize" Value="11"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+		</Style>
+		<Style Selector="TextBlock.muted">
+			<Setter Property="Foreground" Value="#756F66"/>
+			<Setter Property="FontSize" Value="13"/>
+		</Style>
+		<Style Selector="Button.primary">
+			<Setter Property="Background" Value="#6D665B"/>
+			<Setter Property="Foreground" Value="White"/>
+			<Setter Property="Padding" Value="16,10"/>
+			<Setter Property="CornerRadius" Value="5"/>
+		</Style>
+		<Style Selector="Button.primary:pointerover">
+			<Setter Property="Background" Value="#82796B"/>
+			<Setter Property="Foreground" Value="#FFFFFF"/>
+		</Style>
+		<Style Selector="Button.primary:pressed">
+			<Setter Property="Background" Value="#5D574E"/>
+			<Setter Property="Foreground" Value="#FFFFFF"/>
+		</Style>
+		<Style Selector="Button.secondary">
+			<Setter Property="Background" Value="#F4F1EC"/>
+			<Setter Property="Foreground" Value="#4D4942"/>
+			<Setter Property="BorderBrush" Value="#D8D1C7"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="Padding" Value="14,9"/>
+			<Setter Property="CornerRadius" Value="5"/>
+		</Style>
+		<Style Selector="Button.secondary:pointerover">
+			<Setter Property="Background" Value="#E8E2D8"/>
+			<Setter Property="Foreground" Value="#302D28"/>
+			<Setter Property="BorderBrush" Value="#BDB4A7"/>
+		</Style>
+		<Style Selector="Button.secondary:pressed">
+			<Setter Property="Background" Value="#DCD4C8"/>
+			<Setter Property="Foreground" Value="#25231F"/>
+			<Setter Property="BorderBrush" Value="#AFA597"/>
+		</Style>
+	</Window.Styles>
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+		<StackPanel Margin="44,34" Spacing="26">
+			<Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="14">
+				<Image Width="48" Height="48" Stretch="Uniform" Source="/Assets/Branding/sortify-icon.png"/>
+				<TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="32" FontWeight="SemiBold" Foreground="#25231F" Text="Sortify"/>
+			</Grid>
+			<Border Padding="24" Background="#FFFFFF" BorderBrush="#DED8CE" BorderThickness="1" CornerRadius="8">
+				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="22">
+					<Border Width="42" Height="42" Background="#EEE9E1" CornerRadius="21">
+						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Text="◉" Foreground="#6D665B"/>
+					</Border>
+					<StackPanel Grid.Column="1" Spacing="5">
+						<TextBlock Classes="eyebrow" Text="ÜBERWACHUNGS-ORDNER"/>
+						<TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#25231F" Text="{Binding WatchedFolder}"/>
+						<TextBlock Classes="muted" Text="Neue Dateien in diesem Ordner werden überwacht."/>
+					</StackPanel>
+					<Button Grid.Column="2" Classes="secondary" Content="Ordner wechseln"/>
+				</Grid>
+			</Border>
+			<Grid ColumnDefinitions="*,300" ColumnSpacing="22">
+				<Border Padding="24" Background="#FFFFFF" BorderBrush="#DED8CE" BorderThickness="1" CornerRadius="8">
+					<StackPanel Spacing="18">
+						<Grid ColumnDefinitions="*,Auto">
+							<StackPanel Spacing="4">
+								<TextBlock FontSize="19" FontWeight="SemiBold" Foreground="#25231F" Text="Target-Ordner"/>
+								<TextBlock Classes="muted" Text="Ziele für die automatische Dateisortierung"/>
+							</StackPanel>
+							<Border Grid.Column="1" Padding="10,5" Background="#EEE9E1" CornerRadius="12">
+								<TextBlock FontSize="12" Foreground="#6D665B" Text="3 Ziele"/>
+							</Border>
+						</Grid>
+						<Border Padding="16" Background="#FAF9F7" BorderBrush="#E8E3DB" BorderThickness="1" CornerRadius="6">
+							<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+								<Border Width="34" Height="34" Background="#E9E2D7" CornerRadius="17">
+									<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="1" Foreground="#6D665B" FontWeight="SemiBold"/>
+								</Border>
+								<StackPanel Grid.Column="1" Spacing="4">
+									<TextBlock FontWeight="SemiBold" Foreground="#302D28" Text="Dokumente"/>
+									<TextBlock Classes="muted" Text="C:\Users\Manuel\Dokumente"/>
+								</StackPanel>
+								<TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#B0925D" Text="STANDARD" FontSize="10" FontWeight="SemiBold"/>
+							</Grid>
+						</Border>
+						<Border Padding="16" Background="#FFFFFF" BorderBrush="#E8E3DB" BorderThickness="1" CornerRadius="6">
+							<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+								<Border Width="34" Height="34" Background="#E9E2D7" CornerRadius="17">
+									<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="2" Foreground="#6D665B" FontWeight="SemiBold"/>
+								</Border>
+								<StackPanel Grid.Column="1" Spacing="4">
+									<TextBlock FontWeight="SemiBold" Foreground="#302D28" Text="Bilder"/>
+									<TextBlock Classes="muted" Text="D:\Archiv\Bilder"/>
+								</StackPanel>
+								<TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#A7A096" Text="ZIEL" FontSize="10" FontWeight="SemiBold"/>
+							</Grid>
+						</Border>
+						<Border Padding="16" Background="#FFFFFF" BorderBrush="#E8E3DB" BorderThickness="1" CornerRadius="6">
+							<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+								<Border Width="34" Height="34" Background="#E9E2D7" CornerRadius="17">
+									<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="3" Foreground="#6D665B" FontWeight="SemiBold"/>
+								</Border>
+								<StackPanel Grid.Column="1" Spacing="4">
+									<TextBlock FontWeight="SemiBold" Foreground="#302D28" Text="Archiv"/>
+									<TextBlock Classes="muted" Text="D:\Archiv\Alt"/>
+								</StackPanel>
+								<TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#A7A096" Text="ZIEL" FontSize="10" FontWeight="SemiBold"/>
+							</Grid>
+						</Border>
+					</StackPanel>
+				</Border>
+				<Border Grid.Column="1" Padding="22" Background="#FFFFFF" BorderBrush="#DED8CE" BorderThickness="1" CornerRadius="8">
+					<StackPanel Spacing="14">
+						<TextBlock FontSize="19" FontWeight="SemiBold" Foreground="#25231F" Text="Verwaltung"/>
+						<TextBlock Classes="muted" TextWrapping="Wrap" Text="Wähle einen Target-Ordner aus, um ihn zu bearbeiten."/>
+						<Border Margin="0,4,0,2" Height="1" Background="#ECE7DF"/>
+						<Button Classes="primary" HorizontalContentAlignment="Center" Content="＋  Target-Ordner hinzufügen"/>
+						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Als Standard festlegen"/>
+						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Spitznamen ändern"/>
+						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Target-Ordner löschen"/>
+						<TextBlock Margin="0,12,0,0" Classes="muted" TextWrapping="Wrap" Text="Tipp: Der Spitzname wird in der Liste angezeigt und kann jederzeit angepasst werden."/>
+					</StackPanel>
+				</Border>
+			</Grid>
+		</StackPanel>
+	</ScrollViewer>
 </Window>

@@ -143,7 +143,10 @@ CREATE TABLE IF NOT EXISTS benutzer (
     benutzer_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     benutzername VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
-    registrierungsdatum DATE NOT NULL DEFAULT (CURRENT_DATE)
+    rolle VARCHAR(10) NOT NULL DEFAULT 'user',
+    registrierungsdatum DATE NOT NULL DEFAULT (CURRENT_DATE),
+    CONSTRAINT chk_benutzer_rolle
+        CHECK (rolle IN ('user', 'admin'))
 );
 
 CREATE TABLE IF NOT EXISTS bewertung (

@@ -1,5 +1,7 @@
 # Sortify
 
+[![CI](https://github.com/ezra-ba/sortify/actions/workflows/ci.yml/badge.svg)](https://github.com/ezra-ba/sortify/actions/workflows/ci.yml)
+
 <p align="center">
   <img src="assets/branding/sortify-logo.png" alt="Sortify" width="520">
 </p>
@@ -91,6 +93,16 @@ dotnet build
 dotnet run --project .\src\Sortify.App
 dotnet test
 ```
+
+## Mitarbeit
+
+Jede Änderung beginnt mit einem GitHub-Issue und wird über einen eigenen Branch und Pull Request eingebracht. Feature-Branches verwenden:
+
+```text
+features/<github-username>/<issue-number>/<kebab-case-description>
+```
+
+Alle Arbeits-, Architektur-, Build- und Review-Konventionen stehen in [`AGENTS.md`](AGENTS.md).
 
 ## Geplante Architektur
 

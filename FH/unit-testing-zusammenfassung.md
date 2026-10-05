@@ -56,7 +56,7 @@ Die **FIRST-Regeln** für Unit-Tests lauten:
 - **Independent:** Tests beeinflussen sich nicht gegenseitig.
 - **Repeatable:** Tests liefern in jeder Umgebung dasselbe Ergebnis.
 - **Self-validating:** Jeder Test zeigt eindeutig Erfolg oder Fehlschlag.
-- **Timely:** Tests werden rechtzeitig geschrieben und verbessern das Produktionsdesign.
+- **Timely:** Tests werden rechtzeitig geschrieben und verbessern das Produktionsdesign (Testbarkeit).
 
 ### 5.2 AAA-Muster
 Beim Aufbau eines Tests wird das **AAA-Muster** verwendet:

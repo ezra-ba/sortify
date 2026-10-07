@@ -12,21 +12,21 @@ public sealed class SortRuleTests
 
         var rule = new SortRule(
             id,
-            "School documents",
-            @"^questionnaire",
+            "Schuldokumente",
+            @"^fragenkatalog",
             extensions,
-            @"^School/",
-            "School/Documents",
+            @"^Schule/",
+            "Schule/Dokumente",
             "{name}-school{ext}",
             100,
             true);
 
         Assert.Equal(id, rule.Id);
-        Assert.Equal("School documents", rule.Name);
-        Assert.Equal(@"^questionnaire", rule.FileNamePattern);
+        Assert.Equal("Schuldokumente", rule.Name);
+        Assert.Equal(@"^fragenkatalog", rule.FileNamePattern);
         Assert.Equal(extensions, rule.AllowedExtensions);
-        Assert.Equal(@"^School/", rule.RelativePathPattern);
-        Assert.Equal("School/Documents", rule.TargetDirectory);
+        Assert.Equal(@"^Schule/", rule.RelativePathPattern);
+        Assert.Equal("Schule/Dokumente", rule.TargetDirectory);
         Assert.Equal("{name}-school{ext}", rule.RenamePattern);
         Assert.Equal(100, rule.Priority);
         Assert.True(rule.IsEnabled);

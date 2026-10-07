@@ -8,22 +8,27 @@ public sealed class SortRuleTests
     public void ConstructorPreservesRuleConfiguration()
     {
         var id = Guid.NewGuid();
+        string[] extensions = [".docx"];
 
         var rule = new SortRule(
             id,
             "School documents",
-            @"fragenkatalog.*\.docx$",
-            "school/documents",
-            "{name}-school{extension}",
-            10,
+            @"^questionnaire",
+            extensions,
+            @"^School/",
+            "School/Documents",
+            "{name}-school{ext}",
+            100,
             true);
 
         Assert.Equal(id, rule.Id);
         Assert.Equal("School documents", rule.Name);
-        Assert.Equal(@"fragenkatalog.*\.docx$", rule.FileNamePattern);
-        Assert.Equal("school/documents", rule.TargetDirectory);
-        Assert.Equal("{name}-school{extension}", rule.RenamePattern);
-        Assert.Equal(10, rule.Priority);
+        Assert.Equal(@"^questionnaire", rule.FileNamePattern);
+        Assert.Equal(extensions, rule.AllowedExtensions);
+        Assert.Equal(@"^School/", rule.RelativePathPattern);
+        Assert.Equal("School/Documents", rule.TargetDirectory);
+        Assert.Equal("{name}-school{ext}", rule.RenamePattern);
+        Assert.Equal(100, rule.Priority);
         Assert.True(rule.IsEnabled);
     }
 }

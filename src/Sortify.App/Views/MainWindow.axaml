@@ -52,9 +52,10 @@
 	</Window.Styles>
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="44,34" Spacing="26">
-			<Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="14">
+			<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
 				<Image Width="48" Height="48" Stretch="Uniform" Source="/Assets/Branding/sortify-icon.png"/>
 				<TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="32" FontWeight="SemiBold" Foreground="#25231F" Text="Sortify"/>
+				<Button Grid.Column="2" Classes="primary" Content="Popup-Vorschau öffnen" Click="OpenFileSuggestion"/>
 			</Grid>
 			<Border Padding="24" Background="#FFFFFF" BorderBrush="#DED8CE" BorderThickness="1" CornerRadius="8">
 				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="22">

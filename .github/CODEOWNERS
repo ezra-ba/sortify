@@ -1,0 +1,16 @@
+# Repository and automation
+/.github/ @ezra-ba
+/AGENTS.md @ezra-ba
+/Directory.Build.props @ezra-ba
+
+# Application and user experience
+/src/Sortify.App/ @smanuel89 @ezra-ba
+
+# Rules, domain logic, and file-system integration
+/src/Sortify.Core/ @TuNi02 @ezra-ba
+/src/Sortify.Infrastructure/ @TuNi02 @ezra-ba
+/tests/ @TuNi02 @smanuel89 @ezra-ba
+
+# Documentation and branding
+/docs/ @smanuel89 @ezra-ba
+/assets/branding/ @TuNi02 @ezra-ba

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - develop
+      - "features/**"
+      - "bugfix/**"
+      - "hotfix/**"
+      - "chore/**"
+      - "codex/**"
+      - "release/**"
+  pull_request:
+    branches:
+      - master
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  validate-branch-name:
+    name: Validate branch name
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Conventional Branch name
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        shell: bash
+        run: |
+          pattern='^((features|bugfix|hotfix|chore|codex)/[a-z0-9]+([a-z0-9-]*[a-z0-9])?/[0-9]+/[a-z0-9]+([a-z0-9-]*[a-z0-9])?|release/v[0-9]+\.[0-9]+\.[0-9]+)$'
+          if [[ ! "$BRANCH_NAME" =~ $pattern ]]; then
+            echo "Invalid branch name: $BRANCH_NAME"
+            echo "Expected: features/<username>/<issue-number>/<kebab-case-description>"
+            exit 1
+          fi
+
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore Sortify.sln
+
+      - name: Build
+        run: dotnet build Sortify.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Sortify.sln --configuration Release --no-build --no-restore

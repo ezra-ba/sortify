@@ -1,0 +1,44 @@
+name: Konzept
+description: Eine technische oder gestalterische Entscheidung ausarbeiten.
+title: "[Konzept]: "
+labels:
+  - "type:concept"
+  - documentation
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Fragestellung
+      description: Welche Entscheidung soll vorbereitet werden?
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Anforderungen und Grenzen
+      description: Welche Muss-Anforderungen, Risiken oder Abhängigkeiten sind zu berücksichtigen?
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Zu vergleichende Optionen
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Erwartetes Ergebnis
+      description: Wo und in welcher Form wird die Empfehlung dokumentiert?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Abnahmekriterien
+      placeholder: |
+        - [ ] Optionen nachvollziehbar verglichen
+        - [ ] Empfehlung begründet
+        - [ ] Auswirkungen auf die Architektur dokumentiert
+    validations:
+      required: true

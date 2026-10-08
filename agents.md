@@ -23,6 +23,7 @@
 | `INF`   | `Dieser Ordner für das Fach Informatik`                  | `Wenn ich im chat "INF" erwähne, ist immer dieser Ordner gemeint.`  |
 | `ITL`   | `Dieser Ordner für das Fach IT-Labor`                    | `Wenn ich im chat "ITL" erwähne, ist immer dieser Ordner gemeint.`  |
 | `PP`    | `Dieser Ordner für Projektpraktikum`                     | `Wenn ich im chat "PP" erwähne, ist immer dieser Ordner gemeint.`   |
+| `FH`    | `Dieser Ordner für die FH-Kurse`                         | `Wenn ich im chat "FH" erwähne, ist immer dieser Ordner gemeint.`   |
 
 ## 3. Arbeitsregeln
 

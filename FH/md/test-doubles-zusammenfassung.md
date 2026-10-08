@@ -28,9 +28,9 @@ Mocks können sich technisch wie Dummies oder Stubs verhalten. Ihr eigentlicher 
 
 ## 3. Zustands- und Verhaltensprüfung
 
-Bei der **State Verification** wird geprüft, ob das SUT nach der Ausführung den erwarteten Zustand erreicht hat. Assertions vergleichen den aktuellen mit dem erwarteten Zustand. Entscheidend ist also das Ergebnis, nicht der Weg dorthin.
+Bei der **<u>State Verification</u>** wird geprüft, ob das SUT nach der Ausführung den erwarteten Zustand erreicht hat. Assertions vergleichen den aktuellen mit dem erwarteten Zustand. Entscheidend ist also das Ergebnis, nicht der Weg dorthin.
 
-Bei der **Behavior Verification** wird geprüft, ob das SUT bestimmte Interaktionen mit einem Kollaborator ausgeführt hat. Dafür werden Mocks oder Spies verwendet.
+Bei der **<u>Behavior Verification</u>** wird geprüft, ob das SUT bestimmte Interaktionen mit einem Kollaborator ausgeführt hat. Dafür werden Mocks oder Spies verwendet.
 
 Die Verhaltensprüfung kann wichtige Aktionen absichern, koppelt den Test aber stärker an die interne Implementierung. Dadurch werden Tests tendenziell fragiler: Eine zulässige Änderung des Ablaufs kann den Test brechen, obwohl das fachliche Ergebnis unverändert bleibt.
 

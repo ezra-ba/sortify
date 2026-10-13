@@ -72,6 +72,6 @@ Am Ende kurz berichten:
 
 Wenn ich "cleanup" in den Chat schreibe, dann prüfe zuerst mit Git, welche Dateien und Ordner Änderungen aufweisen. Berücksichtige anschließend ausschließlich diese von Git als geändert, neu oder nicht versioniert ausgewiesenen Dateien und Ordner. Durchsuche nicht den gesamten Vault.
 
-Prüfe bei den gefundenen Dateien, ob sie sich im richtigen Unterfolder befinden und ob ihre Dateinamen der Konvention `kebab-case` entsprechen. Falls du nicht weißt, wohin eine Datei gehört, frage nach. Die `agents.md` bleibt natürlich wo sie ist. Gelöschte Dateien werden nicht wiederhergestellt oder verschoben.
+Prüfe bei den gefundenen Dateien, ob sie sich im richtigen Unterfolder befinden und ob ihre Dateinamen der Konvention `kebab-case` entsprechen. Falls du nicht weißt, wohin eine Datei gehört, frage nach. Die `agents.md` bleibt natürlich wo sie ist. Gelöschte Dateien werden nicht wiederhergestellt oder verschoben. Falls sich im Fach-Ordner weiter Unterordner mit Dateiendungen befinden, sortiere freiliegende Dateien dort richtig ein.
 
 Nach dem Cleanup alle vorgenommenen Änderungen mit Git hinzufügen und committen. Verwende dafür eine aussagekräftige Commit-Nachricht, zum Beispiel `Cleanup: Dateien und Ordner bereinigt`. Anschließend mit `git status` prüfen, dass keine offenen Änderungen mehr vorhanden sind. Falls der Commit fehlschlägt, den Cleanup nicht als vollständig abgeschlossen melden und auf das Problem hinweisen.

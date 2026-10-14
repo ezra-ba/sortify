@@ -1,0 +1,71 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Sortify.App.ViewModels"
+        x:Class="Sortify.App.Views.FileSuggestionWindow"
+        x:DataType="vm:FileSuggestionViewModel"
+        Icon="/Assets/Branding/sortify-icon.png"
+        Title="Neues Dokument · Sortify"
+        Width="540"
+        Height="390"
+        MinWidth="480"
+        MinHeight="350"
+        CanResize="False"
+        Background="#F4F1EC">
+    <Design.DataContext>
+        <vm:FileSuggestionViewModel />
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="TextBlock.muted">
+            <Setter Property="Foreground" Value="#756F66"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#6D665B"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover">
+            <Setter Property="Background" Value="#82796B"/>
+        </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#F4F1EC"/>
+            <Setter Property="Foreground" Value="#4D4942"/>
+            <Setter Property="BorderBrush" Value="#D8D1C7"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,9"/>
+            <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Margin="18" Padding="24" Background="#FFFFFF" BorderBrush="#DED8CE" BorderThickness="1" CornerRadius="8">
+        <StackPanel Spacing="20">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                <Border Width="42" Height="42" Background="#EEE9E1" CornerRadius="21">
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Text="＋" Foreground="#6D665B"/>
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                    <TextBlock FontSize="19" FontWeight="SemiBold" Foreground="#25231F" Text="Neues Dokument!"/>
+                    <TextBlock Classes="muted" Text="{Binding DetectedFileName}" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Spacing="8">
+                <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#867E73" Text="ZIEL UND DATEINAME"/>
+                <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="8">
+                    <ComboBox ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTargetFolder}" MinWidth="145"/>
+                    <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="18" Foreground="#A7A096" Text="/"/>
+                    <TextBox Grid.Column="2" Text="{Binding NewFileName, Mode=TwoWay}" Watermark="Dateiname" MinWidth="210"/>
+                </Grid>
+                <TextBlock Classes="muted" Text="Der Dateiname kann vor dem Verschieben angepasst werden."/>
+            </StackPanel>
+
+            <Border Height="1" Background="#ECE7DF"/>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <Button Classes="secondary" Content="Abbrechen" HorizontalAlignment="Left"/>
+                <Button Grid.Column="1" Classes="primary" Content="Datei einsortieren"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

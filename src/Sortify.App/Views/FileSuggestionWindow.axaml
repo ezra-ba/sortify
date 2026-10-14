@@ -27,7 +27,8 @@
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
         <Style Selector="Button.primary:pointerover">
-            <Setter Property="Background" Value="#82796B"/>
+            <Setter Property="Background" Value="#5A534A"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
         </Style>
         <Style Selector="Button.secondary">
             <Setter Property="Background" Value="#F4F1EC"/>
@@ -36,6 +37,11 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,9"/>
             <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+        <Style Selector="Button.secondary:pointerover">
+            <Setter Property="Background" Value="#D8D1C7"/>
+            <Setter Property="Foreground" Value="#25231F"/>
+            <Setter Property="BorderBrush" Value="#AFA597"/>
         </Style>
     </Window.Styles>
 

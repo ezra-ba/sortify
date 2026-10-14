@@ -2,8 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Sortify.App.App"
              xmlns:local="using:Sortify.App"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Light">
+             <!-- Sortify uses a light palette so custom button hover colors remain readable. -->
 
     <Application.DataTemplates>
         <local:ViewLocator />

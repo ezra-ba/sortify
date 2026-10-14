@@ -1,17 +1,112 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using Sortify.App.ViewModels;
 
 namespace Sortify.App.Views;
 
 public partial class MainWindow : Window
 {
+    private TargetFolderViewModel? _draggedTargetFolder;
+    private Avalonia.Point _dragStart;
+    private bool _hasDragged;
+
     public MainWindow()
     {
         InitializeComponent();
+        AddHandler(InputElement.PointerPressedEvent, TargetFolderPointerPressed, RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(InputElement.PointerMovedEvent, TargetFolderPointerMoved, RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(InputElement.PointerReleasedEvent, TargetFolderPointerReleased, RoutingStrategies.Bubble, handledEventsToo: true);
     }
 
     private void OpenFileSuggestion(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         new FileSuggestionWindow(new FileSuggestionViewModel()).Show(this);
+    }
+
+    private async void SelectWatchedFolder(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            AllowMultiple = false,
+            Title = "Überwachungs-Ordner auswählen"
+        });
+        if (folders.Count > 0 && DataContext is MainViewModel viewModel)
+            viewModel.WatchedFolder = folders[0].Path.LocalPath;
+    }
+
+    private async void AddTargetFolder(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            AllowMultiple = false,
+            Title = "Target-Ordner auswählen"
+        });
+        if (folders.Count > 0 && DataContext is MainViewModel viewModel)
+            viewModel.AddTargetFolder(folders[0].Path.LocalPath);
+    }
+
+    private void TargetFolderPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.Source is Button button && button.Classes.Contains("nickname-action"))
+            return;
+
+        var position = e.GetPosition(this);
+        var folder = FindTargetFolderAt(position);
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && folder is not null && !folder.IsEditingNickname)
+        {
+            e.Pointer.Capture(this);
+            _draggedTargetFolder = folder;
+            _dragStart = e.GetPosition(this);
+            _hasDragged = false;
+            if (e.ClickCount == 2)
+                folder.IsEditingNickname = true;
+        }
+    }
+
+    private void TargetFolderPointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (e.Source is Button button && button.Classes.Contains("nickname-action"))
+            return;
+
+        if (_draggedTargetFolder is null || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
+
+        var position = e.GetPosition(this);
+        var deltaX = position.X - _dragStart.X;
+        var deltaY = position.Y - _dragStart.Y;
+        if (!_hasDragged && (deltaX * deltaX) + (deltaY * deltaY) < 36) return;
+        _hasDragged = true;
+
+        var target = FindTargetFolderAt(position);
+        if (target is not null && DataContext is MainViewModel viewModel && target != _draggedTargetFolder)
+        {
+            viewModel.MoveTargetFolder(_draggedTargetFolder, target);
+        }
+    }
+
+    private TargetFolderViewModel? FindTargetFolderAt(Avalonia.Point position)
+    {
+        var visual = this.InputHitTest(position) as Visual;
+        while (visual is not null)
+        {
+            if (visual.DataContext is TargetFolderViewModel folder)
+                return folder;
+            visual = visual.GetVisualParent();
+        }
+
+        return null;
+    }
+
+    private void TargetFolderPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.Source is Button button && button.Classes.Contains("nickname-action"))
+            return;
+
+        e.Pointer.Capture(null);
+        _draggedTargetFolder = null;
+        _hasDragged = false;
     }
 }

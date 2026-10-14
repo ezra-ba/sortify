@@ -1,12 +1,14 @@
 # Technisches Konzept: Regelbasierte Sortiervorschläge
 
-Stand: 30. September 2026. Status: Konzept für die spätere Implementierung.
+Stand: 14. Oktober 2026. Status: Regelmodell, Kategoriezuordnung und Regelvalidierung implementiert; Regelauswertung und Dateiverarbeitung geplant.
 
 ## 1. Ziel und Umfang
 
 Sortify soll neue Dateien in einem ausdrücklich ausgewählten Eingangsordner erkennen und nachvollziehbare Vorschläge zum Umbenennen und Archivieren erzeugen. Die Verarbeitung erfolgt vollständig lokal, ohne KI- oder Cloud-Dienste. Dateien und Zielordner werden erst nach ausdrücklicher Bestätigung verändert.
 
-Dieses Dokument beschreibt die fachlichen Entscheidungen und die geplanten Schnittstellen. Es implementiert weder Ordnerüberwachung noch Regelprüfung, Einrichtung oder Dateioperationen. Die Aufteilung folgt [architecture.md](architecture.md).
+Dieses Dokument beschreibt die fachlichen Entscheidungen, den implementierten Stand und die geplanten Schnittstellen. In Core sind Regelmodell, Dateibeschreibung, Kategoriezuordnung und Regelvalidierung vorhanden. Regelengine, lokale Speicherung, Ordnerüberwachung, Einrichtung und Dateioperationen sind noch nicht implementiert. Die Aufteilung folgt [architecture.md](architecture.md).
+
+Die erste Version unterstützt genau einen ausgewählten Überwachungsordner. Mehrere auswählbare Überwachungsordner sind eine mögliche spätere Erweiterung. Rekursive Überwachung von Unterordnern ist davon unabhängig.
 
 Für die erste Version werden Dateiendung, Dateiname und optional der relative Quellpfad ausgewertet. Dokumentinhalte und unscharfe Ähnlichkeitssuche werden zunächst nicht implementiert.
 
@@ -70,9 +72,9 @@ Eine spätere lokale Inhaltsprüfung benötigt gepflegte Parser, Größen-, Text
 
 **Empfehlung:** Inhaltsprüfung als separate Erweiterung vorsehen, zunächst ausschließlich Metadaten prüfen. Damit bleibt der erste Ablauf schnell, verständlich und ohne zusätzliche Dokumentparser testbar. Auch eine spätere Inhaltsprüfung ist ohne Cloud und KI möglich; OCR ist für das MVP nicht erforderlich.
 
-## 4. Vorgeschlagenes Regelmodell
+## 4. Regelmodell
 
-Das vorhandene `SortRule` enthält bereits `Id`, `Name`, `FileNamePattern`, `TargetDirectory`, `RenamePattern`, `Priority` und `IsEnabled`. Es wird konzeptionell um Endungsfilter und einen optionalen Pfadfilter ergänzt.
+Das implementierte `SortRule` enthält alle nachfolgend aufgeführten Felder, einschließlich Endungsfilter und optionalem Pfadfilter. Die Validierung verändert oder normalisiert die übergebenen Werte nicht; zugelassene Endungen werden ohne Beachtung der Groß-/Kleinschreibung geprüft.
 
 | Feld | Typ | Vorgabe |
 |---|---|---|
@@ -90,11 +92,17 @@ Alle angegebenen Bedingungen werden mit UND verknüpft. Eine Regel kann die glob
 
 `TargetDirectory` ist bewusst relativ zur Kategorie. Beispielsweise ergibt `.pdf` mit `TargetDirectory = "Rechnungen"` den Pfad `<Archiv>/Dokumente/Rechnungen`. Kategorieübergreifende Ziele sind nicht Teil der ersten Version. Eine Regex wird nicht direkt als Ordnername verwendet.
 
+Gespeicherte Zielunterordner verwenden ausschließlich `/` als Trenner, beispielsweise `Schule/Mathematik`. Absolute Pfade, Backslashes, leere Pfadsegmente sowie `.` und `..` werden abgelehnt. Ein vollständig leerer Zielunterordner bleibt erlaubt. Infrastructure setzt später die tatsächlichen Dateisystempfade mit plattformgerechten Pfadfunktionen zusammen.
+
+`PortableNameValidator` prüft jeden Ordnernamen nach gemeinsamen Regeln für Windows, macOS und Linux. Leere Namen, Steuerzeichen unter U+0020, die Zeichen `< > : " / \ | ? *`, abschließende Punkte oder Leerzeichen und reservierte Windows-Gerätenamen werden abgelehnt. Reservierte Namen werden ohne Beachtung der Groß-/Kleinschreibung und auch mit Endung erkannt. Diese Prüfung ersetzt keine Prüfung von Pfadlängen, Berechtigungen, symbolischen Links oder tatsächlichen Dateisystemgrenzen.
+
 ### 4.1 Umbenennung
 
 Die erste Version unterstützt ausschließlich die Platzhalter `{name}` (Originalname ohne letzte Endung) und `{ext}` (Originalendung inklusive Punkt). Beispiel: `Schule_{name}{ext}` erzeugt aus `mathe_aufgaben.pdf` den Namen `Schule_mathe_aufgaben.pdf`.
 
 Bei einem gesetzten Schema ist `{ext}` genau einmal am Ende erforderlich; die Endung bleibt erhalten. Unbekannte Platzhalter, Pfadtrenner, leere Ergebnisse und ungültige beziehungsweise reservierte Dateinamen werden abgewiesen. Regex-Ersetzungszeichen wie `$1` werden nicht als Platzhalter interpretiert. Datumsvariablen und benannte Regex-Gruppen können später mit eigener Spezifikation ergänzt werden.
+
+Die implementierte Schema-Validierung akzeptiert `null` oder einen leeren String als „Originalname behalten“. Sie prüft Platzhalter und die grundsätzliche Namensform mit `{name} = "Beispiel"` und `{ext} = ".pdf"`. Das Schema `{ext}` allein wird abgelehnt. Die spätere Regelengine muss den tatsächlich erzeugten Dateinamen nach dem Einsetzen der Originalwerte erneut mit der portablen Namensprüfung prüfen. `$1` bleibt gewöhnlicher Text.
 
 ### 4.2 Vollständiges Regelbeispiel
 
@@ -137,9 +145,13 @@ Beispiel für einen optionalen Pfadfilter: `^Schule/` beschränkt die Mathematik
 1. Beim Anlegen oder Bearbeiten werden Pflichtfelder, Endungsfilter, Priorität, Ziel und Umbenennungsschema geprüft.
 2. Jedes Muster wird durch Erzeugen einer .NET-Regex syntaktisch validiert. Ungültige Muster verhindern Speichern beziehungsweise Aktivieren; die Oberfläche zeigt das betroffene Feld und eine verständliche Ursache.
 3. Geladene Regeln werden ebenfalls validiert. Fehlerhafte Regeln werden für die Sitzung ausgeschlossen und sichtbar gemeldet, ohne die gültigen Regeln zu blockieren.
-4. Jeder Regex-Abgleich erhält ein explizites Zeitlimit. Startwert für Metadaten: 100 ms pro Abgleich, später anhand von Messungen anzupassen. Eine Obergrenze für Musterlänge (Vorschlag: 2048 Zeichen) und ein abbrechbarer Hintergrundablauf begrenzen zusätzliche Belastung.
+4. Jeder Regex-Abgleich erhält ein explizites Zeitlimit. Startwert für Metadaten: 100 ms pro Abgleich, später anhand von Messungen anzupassen. Eine festgelegte Obergrenze von 2048 Zeichen pro Muster und ein abbrechbarer Hintergrundablauf begrenzen zusätzliche Belastung.
 5. Ein `RegexMatchTimeoutException` wird als Auswertungsfehler erfasst. Die betroffene Datei erhält keinen automatisch bevorzugten Vorschlag, da eine möglicherweise höher priorisierte Regel nicht vollständig geprüft wurde. Kein automatischer Wiederholungsversuch mit unbegrenzter Laufzeit.
 6. Ein Testbereich kann vor Aktivierung passende und nicht passende Beispieldateinamen anzeigen. Syntaktische Gültigkeit allein beweist weder fachliche Richtigkeit noch unproblematische Laufzeit.
+
+`IRuleValidator.Validate` liefert ein `RuleValidationResult` mit einer Liste von `RuleValidationError` (`FieldName`, `Message`). `IsValid` ist genau dann wahr, wenn keine Fehler vorliegen. Fehler verschiedener Felder werden gemeinsam gesammelt; die Validierung führt keine Dateisystemzugriffe aus. `FileNamePattern` darf nicht leer sein. `RelativePathPattern = null` wird übersprungen; ein leerer optionaler Pfadfilter ist eine gültige Regex ohne zusätzliche Einschränkung. Leerzeichen werden als Regex-Inhalt behandelt.
+
+Bei der Syntaxprüfung werden Regex-Instanzen mit `IgnoreCase`, `CultureInvariant` und 100 ms Abgleich-Zeitlimit erstellt. Die Syntaxprüfung führt keinen Abgleich aus. Die spätere Regelengine muss dieselben Optionen und das Zeitlimit bei ihren tatsächlichen Abgleichen verwenden. Speicherung und Oberfläche müssen die Validierung noch anbinden; die oben beschriebenen Abläufe für Speichern, Aktivieren und Laden sind geplant.
 
 Feste Infrastrukturfehler werden von Nichttreffern getrennt. Die Oberfläche darf einen Fehler nicht als „keine passende Regel“ ausgeben.
 
@@ -175,10 +187,12 @@ Core enthält keine Avalonia-Abhängigkeit und führt keine Dateisystemzugriffe 
 
 | Typ | Verantwortung |
 |---|---|
-| `SortRule` (bestehend, erweitern) | Regelmodell aus Abschnitt 4 |
-| `FileDescriptor` (neu) | Quelle, Dateiname ohne Endung, Endung, normalisierter relativer Pfad sowie erfasste Größe und Änderungszeit |
-| `FileCategoryMap` (neu) | Freigabeliste und Zuordnung von Endungen zu Kategorien |
-| `IRuleValidator` / `RuleValidator` (neu) | Regelkonfiguration prüfen und feldbezogene Fehler liefern |
+| `SortRule` (implementiert) | Regelmodell aus Abschnitt 4 |
+| `FileDescriptor` (implementiert) | Quelle, Dateiname ohne Endung, Endung, normalisierter relativer Pfad sowie erfasste Größe und Änderungszeit |
+| `FileCategoryMap` (implementiert) | Freigabeliste und Zuordnung von Endungen zu Kategorien |
+| `IRuleValidator` / `RuleValidator` (implementiert) | Regelkonfiguration prüfen und feldbezogene Fehler liefern |
+| `RuleValidationResult` / `RuleValidationError` (implementiert) | Gültigkeit und feldbezogene Fehlermeldungen |
+| `PortableNameValidator` (implementiert) | Gemeinsame Namensprüfung für Zielordner und erzeugte Dateinamen |
 | `IRuleEngine` / `RuleEngine` (Schnittstelle anpassen, Implementierung neu) | Aktive Regeln auswerten, Prioritäten behandeln und relative Zielkandidaten berechnen |
 | `RuleEvaluationResult` (neu) | Status `Ignored`, `Matched`, `Ambiguous`, `CategoryFallback` oder `Failed`; Kandidaten und Diagnosen |
 | `SortSuggestion` (bestehend, erweitern) | Quelle, endgültiges Ziel, auslösende Regel-IDs und Namen, Begründung, erforderliche Ordneranlage und Konfliktstatus |

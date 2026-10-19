@@ -1,16 +1,18 @@
 #awl
 
-SV --> Sozialversicherung
-NL --> Normallohn
-LSt --> Lohnsteuer
-AZB --> Auszahlungsbetrag
-UZ --> Urlaubszuschuss
-WR --> Weihnachtsremuneration
-BL --> Bruttolohn
-NAZ --> Normalarbeitszeit (Stunden/Woche)
-BMGL --> Bemessungsgrundlage
-ÜZ --> Überstundenzuschuss
-ÜG-L --> Überstundengrundlohn
-FB --> Freibetrag
-SVA-ANA --> Arbeitnehmeranteil SV
-SVA-AGA --> Arbeitgeberanteil SV
+| ==🟠Abkürzung== | ==🟠Bedeutung==                     |
+| ------------- | --------------------------------- |
+| AZB           | Auszahlungsbetrag                 |
+| BL            | Bruttolohn                        |
+| BMGL          | Bemessungsgrundlage               |
+| FB            | Freibetrag                        |
+| LSt           | Lohnsteuer                        |
+| NAZ           | Normalarbeitszeit (Stunden/Woche) |
+| NL            | Normallohn                        |
+| SV            | Sozialversicherung                |
+| SVA-AGA       | Arbeitgeberanteil SV              |
+| SVA-ANA       | Arbeitnehmeranteil SV             |
+| ÜG-L          | Überstundengrundlohn              |
+| ÜZ            | Überstundenzuschuss               |
+| UZ            | Urlaubszuschuss                   |
+| WR            | Weihnachtsremuneration            |

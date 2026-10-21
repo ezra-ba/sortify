@@ -115,7 +115,7 @@
 					<StackPanel Grid.Column="1" Spacing="5">
 						<TextBlock Classes="eyebrow" Text="ÜBERWACHUNGS-ORDNER"/>
 						<TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#25231F" Text="{Binding WatchedFolder}"/>
-						<TextBlock Classes="muted" Text="Neue Dateien in diesem Ordner werden überwacht."/>
+						<TextBlock Classes="muted" Text="{Binding SettingsStatus}" TextWrapping="Wrap"/>
 					</StackPanel>
 					<Button Grid.Column="2" Classes="secondary" Content="Ordner wechseln" Click="SelectWatchedFolder"/>
 				</Grid>

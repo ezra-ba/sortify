@@ -29,15 +29,33 @@ public partial class MainWindow : Window
             new FileSuggestionWindow(new FileSuggestionViewModel(viewModel.TargetFolders)).Show(this);
     }
 
-    private async void SelectWatchedFolder(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private async void SelectWatchedFolder(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
     {
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        var folders = await StorageProvider.OpenFolderPickerAsync(
+            new FolderPickerOpenOptions
+            {
+                AllowMultiple = false,
+                Title = "Überwachungs-Ordner auswählen"
+            });
+
+        if (folders.Count == 0 ||
+            DataContext is not MainViewModel viewModel)
         {
-            AllowMultiple = false,
-            Title = "Überwachungs-Ordner auswählen"
-        });
-        if (folders.Count > 0 && DataContext is MainViewModel viewModel)
-            viewModel.WatchedFolder = folders[0].Path.LocalPath;
+            return;
+        }
+
+        var path = folders[0].TryGetLocalPath();
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            viewModel.SettingsStatus =
+                "Bitte einen lokalen Ordner auswählen.";
+            return;
+        }
+
+        await viewModel.SaveWatchedFolderAsync(path);
     }
 
     private async void AddTargetFolder(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

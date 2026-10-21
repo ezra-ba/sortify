@@ -104,11 +104,7 @@ public partial class MainViewModel : ViewModelBase
         return result;
     }
     public ObservableCollection<TargetFolderViewModel> TargetFolders { get; } =
-    [
-        new("Dokumente", @"C:\Users\Manuel\Dokumente", true),
-        new("Bilder", @"D:\Archiv\Bilder"),
-        new("Archiv", @"D:\Archiv\Alt")
-    ];
+        [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedTargetFolder))]
@@ -123,7 +119,7 @@ public partial class MainViewModel : ViewModelBase
     public bool HasSelectedTargetFolder => SelectedTargetFolder is not null;
 
     [RelayCommand]
-    private void SelectTargetFolder(TargetFolderViewModel folder) => SetSelectedTargetFolder(folder);
+    public void SelectTargetFolder(TargetFolderViewModel folder) => SetSelectedTargetFolder(folder);
 
     private void SetSelectedTargetFolder(TargetFolderViewModel? folder)
     {
@@ -194,6 +190,7 @@ public partial class TargetFolderViewModel : ObservableObject
     [ObservableProperty] public partial bool IsDefault { get; set; }
     [ObservableProperty] public partial bool IsSelected { get; set; }
     [ObservableProperty] public partial bool IsEditingNickname { get; set; }
+    [ObservableProperty] public partial bool IsDragging { get; set; }
 
     [RelayCommand]
     private void SaveNickname()

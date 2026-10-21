@@ -126,6 +126,18 @@ Sortify soll vollständig lokal funktionieren. KI-Endpunkte, Cloud-Dienste und e
 | Tunahan Barak | Entwicklung und Logo |
 | Manuel Stromberger | Dokumentation und Qualitätssicherung |
 
+## Contributor-Rangliste
+
+Jeder gemergte Team-PR bringt **10 XP**. Beiträge zu Code, Tests, Dokumentation und Organisation zählen gleichermaßen. Wer die meisten XP sammelt, steht auf Platz 1.
+
+| Platz | Teammitglied | Gemergte PRs | XP |
+|---|---|---|---|
+| ![1. Platz: Gold](https://img.shields.io/badge/1._Platz-Gold-D4AF37?style=flat-square) | [Tunahan · @TuNi02](https://github.com/TuNi02) | [5](https://github.com/ezra-ba/sortify/pulls?q=is%3Apr+is%3Amerged+author%3ATuNi02) | **50 XP** |
+| ![2. Platz: Silber](https://img.shields.io/badge/2._Platz-Silber-A7ADB4?style=flat-square) | [Manuel · @smanuel89](https://github.com/smanuel89) | [4](https://github.com/ezra-ba/sortify/pulls?q=is%3Apr+is%3Amerged+author%3Asmanuel89) | **40 XP** |
+| ![3. Platz: Bronze](https://img.shields.io/badge/3._Platz-Bronze-CD7F32?style=flat-square) | [Ezra · @ezra-ba](https://github.com/ezra-ba) | [2](https://github.com/ezra-ba/sortify/pulls?q=is%3Apr+is%3Amerged+author%3Aezra-ba) | **20 XP** |
+
+**Stand: 21.10.2026.** Die Tabelle wird manuell aktualisiert. Bots, offene PRs und ohne Merge geschlossene PRs zählen nicht. Bei gleicher Punktzahl teilen sich die Teammitglieder den Platz. Die XP zeigen Projektaktivität, keine Qualitätsbewertung; zusammengehörige Änderungen bleiben in einem PR.
+
 ## Nächste Schritte
 
 - Verwaltung eines überwachten Ordners umsetzen,

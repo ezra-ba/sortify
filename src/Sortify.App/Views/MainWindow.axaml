@@ -56,13 +56,50 @@
 		<Style Selector="Button.target-folder">
 			<Setter Property="Background" Value="#FFFFFF"/>
 			<Setter Property="BorderBrush" Value="#E8E3DB"/>
+			<Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="1" ScaleY="1"/>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style Selector="Button.target-folder:pointerover">
+			<Setter Property="Background" Value="#FAF9F7"/>
+			<Setter Property="BorderBrush" Value="#DCD6CC"/>
+		</Style>
+		<Style Selector="Button.target-folder.press-feedback">
+			<Setter Property="Background" Value="#E5E1DA"/>
+			<Setter Property="BorderBrush" Value="#C8C0B5"/>
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+				</Setter.Value>
+			</Setter>
+			<Setter Property="Opacity" Value="0.88"/>
+		</Style>
+		<Style Selector="Button.target-folder.selected">
+			<Setter Property="Background" Value="#EDEAE5"/>
+			<Setter Property="BorderBrush" Value="#BDB5AA"/>
+		</Style>
+		<Style Selector="Button.target-folder.selected.press-feedback">
+			<Setter Property="Background" Value="#E5E1DA"/>
+			<Setter Property="BorderBrush" Value="#C8C0B5"/>
 		</Style>
 		<Style Selector="Border.target-folder-card.editing">
 			<Setter Property="Background" Value="#FFFFFF"/>
 			<Setter Property="BorderBrush" Value="#E8E3DB"/>
 			<Setter Property="BorderThickness" Value="1"/>
 		</Style>
+		<Style Selector="Border.target-folder-card.dragging">
+			<Setter Property="Opacity" Value="0"/>
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="0.96" ScaleY="0.96"/>
+				</Setter.Value>
+			</Setter>
+		</Style>
 	</Window.Styles>
+	<Grid>
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="44,34" Spacing="26">
 			<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
@@ -98,7 +135,13 @@
 						<ItemsControl ItemsSource="{Binding TargetFolders}">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
-									<Border Classes="target-folder-card" Classes.editing="{Binding IsEditingNickname}" Padding="0" Margin="0,0,0,8" Background="Transparent" BorderThickness="0" CornerRadius="6">
+									<Border Classes="target-folder-card" Classes.editing="{Binding IsEditingNickname}" Classes.dragging="{Binding IsDragging}" Padding="0" Margin="0,0,0,8" Background="Transparent" BorderThickness="0" CornerRadius="6">
+										<Border.Transitions>
+											<Transitions>
+												<DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+												<TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.16" />
+											</Transitions>
+										</Border.Transitions>
 										<Grid>
 						<Button Classes="target-folder" Classes.selected="{Binding IsSelected}" IsVisible="{Binding !IsEditingNickname}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="16" BorderThickness="1" CornerRadius="6" Command="{Binding $parent[Window].DataContext.SelectTargetFolderCommand}" CommandParameter="{Binding}">
 											<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
@@ -148,4 +191,19 @@
 			</Grid>
 		</StackPanel>
 	</ScrollViewer>
+		<Canvas IsHitTestVisible="False">
+			<Border x:Name="DragPreview" Width="420" Padding="16" Background="#FDFCFB" BorderBrush="#BDB5AA" BorderThickness="1" CornerRadius="6" Opacity="0.92" IsVisible="False">
+				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+					<Border Width="34" Height="34" Background="#E9E2D7" CornerRadius="17">
+						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" Foreground="#6D665B" FontWeight="SemiBold"/>
+					</Border>
+					<StackPanel Grid.Column="1" Spacing="4">
+						<TextBlock x:Name="DragPreviewNickname" FontWeight="SemiBold" Foreground="#302D28"/>
+						<TextBlock x:Name="DragPreviewPath" Classes="muted"/>
+					</StackPanel>
+					<TextBlock x:Name="DragPreviewDefault" Grid.Column="2" VerticalAlignment="Center" Foreground="#B0925D" Text="STANDARD" IsVisible="False" FontSize="10" FontWeight="SemiBold"/>
+				</Grid>
+			</Border>
+		</Canvas>
+	</Grid>
 </Window>

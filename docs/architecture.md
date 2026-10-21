@@ -46,3 +46,7 @@ Sortify.Core.Tests ───────> Sortify.Core
 - `syd-firmen-logo.png`: Firmenkennzeichnung in README und Projektdokumentation
 
 Die Originaldateien liegen nur unter `assets/branding`. Das Avalonia-Projekt bindet benötigte Dateien als verlinkte Ressourcen ein, damit keine doppelten Versionen entstehen.
+
+## Lokale Speicherung
+
+Der Arbeitsstand für Issue #28 speichert Konfiguration und Regeln gemeinsam in einer versionierten JSON-Datei. Komponenten, Speicherort, Fehlerverhalten und offene Integrationsnachweise beschreibt [settings-persistence.md](settings-persistence.md).

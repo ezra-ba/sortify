@@ -1,12 +1,108 @@
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Sortify.Core.Models;
+using Sortify.Core.Services;
+
 
 namespace Sortify.App.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    private readonly ISettingsService? settingsService;
+
+    public MainViewModel()
+    {
+        // Für die Vorschau im Avalonia-Designer.
+    }
+
+    public MainViewModel(ISettingsService settingsService)
+    {
+        ArgumentNullException.ThrowIfNull(settingsService);
+        this.settingsService = settingsService;
+    }
+
+    [ObservableProperty]
+    public partial string SettingsStatus { get; set; } =
+        "Einstellungen werden geladen.";
+
+    public async Task InitializeSettingsAsync()
+    {
+        if (settingsService is null)
+        {
+            return;
+        }
+
+        var result = await settingsService.InitializeAsync();
+
+        WatchedFolder = settingsService.Current?.WatchedFolderPath
+            ?? "Noch kein Ordner ausgewählt";
+
+        SettingsStatus = result.Status switch
+        {
+            SettingsLoadStatus.Loaded => "Einstellungen geladen.",
+            SettingsLoadStatus.NotFound => "Bitte den ersten Ordner einrichten.",
+            _ => result.ErrorMessage
+                ?? "Die Einstellungen konnten nicht geladen werden."
+        };
+    }
+    public async Task SaveWatchedFolderAsync(string path)
+    {
+        if (settingsService?.Current is not { } current)
+        {
+            SettingsStatus =
+                "Die Einstellungen sind nicht verfügbar. " +
+                "Bitte zuerst einen möglichen Ladefehler beheben.";
+            return;
+        }
+
+        var updated = current with
+        {
+            WatchedFolderPath = path
+        };
+
+        var result = await settingsService.SaveAsync(updated);
+
+        if (!result.IsSuccess)
+        {
+            SettingsStatus = result.ErrorMessage
+                ?? "Der Ordner konnte nicht gespeichert werden.";
+            return;
+        }
+
+        WatchedFolder = settingsService.Current!.WatchedFolderPath!;
+        SettingsStatus = "Überwachungsordner gespeichert.";
+    }
+    public async Task<SettingsSaveResult> SaveRulesAsync(
+        IReadOnlyList<SortRule> rules)
+    {
+        if (settingsService?.Current is not { } current)
+        {
+            var failure = new SettingsSaveResult(
+                false,
+                "Die Einstellungen sind nicht verfügbar. " +
+                "Bitte zuerst einen möglichen Ladefehler beheben.");
+
+            SettingsStatus = failure.ErrorMessage!;
+            return failure;
+        }
+
+        var updated = current with
+        {
+            Rules = rules
+        };
+
+        var result = await settingsService.SaveAsync(updated);
+
+        SettingsStatus = result.IsSuccess
+            ? "Sortierregeln gespeichert."
+            : result.ErrorMessage
+                ?? "Die Sortierregeln konnten nicht gespeichert werden.";
+
+        return result;
+    }
     public ObservableCollection<TargetFolderViewModel> TargetFolders { get; } =
     [
         new("Dokumente", @"C:\Users\Manuel\Dokumente", true),

@@ -1,0 +1,28 @@
+DELIMITER //
+
+CREATE PROCEDURE UpdateAverageRating(IN p_titel_id INT)
+BEGIN
+    IF p_titel_id IS NULL THEN
+        UPDATE titel t
+        LEFT JOIN (
+            SELECT titel_id, AVG(sterne) AS durchschnitt
+            FROM bewertung
+            GROUP BY titel_id
+        ) b ON b.titel_id = t.titel_id
+        SET t.durchschnittsbewertung = b.durchschnitt
+        WHERE p_titel_id IS NULL
+          AND t.titel_id IS NOT NULL;
+    ELSE
+        UPDATE titel t
+        LEFT JOIN (
+            SELECT titel_id, AVG(sterne) AS durchschnitt
+            FROM bewertung
+            WHERE titel_id = p_titel_id
+            GROUP BY titel_id
+        ) b ON b.titel_id = t.titel_id
+        SET t.durchschnittsbewertung = b.durchschnitt
+        WHERE t.titel_id = p_titel_id;
+    END IF;
+END //
+
+DELIMITER ;

@@ -100,7 +100,7 @@
 		</Style>
 	</Window.Styles>
 	<Grid>
-	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled" IsEnabled="{Binding !IsSavingSettings}">
 		<StackPanel Margin="44,34" Spacing="26">
 			<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
 				<Image Width="48" Height="48" Stretch="Uniform" Source="/Assets/Branding/sortify-icon.png"/>
@@ -160,8 +160,8 @@
 							</Border>
 							<StackPanel Grid.Column="1" Spacing="4">
 								<StackPanel Orientation="Horizontal" Spacing="4">
-									<TextBox Width="150" Text="{Binding Nickname, Mode=TwoWay}"/>
-									<Button Content="OK" Command="{Binding SaveNicknameCommand}"/>
+									<TextBox Width="150" Text="{Binding DraftNickname, Mode=TwoWay}"/>
+									<Button Content="OK" Command="{Binding $parent[Window].DataContext.SaveTargetNicknameCommand}" CommandParameter="{Binding}"/>
 									<Button Content="Abbrechen" Command="{Binding CancelRenameCommand}"/>
 								</StackPanel>
 								<TextBlock Classes="muted" Text="{Binding Path}"/>
@@ -182,7 +182,7 @@
 						<TextBlock Classes="muted" TextWrapping="Wrap" Text="Wähle einen Target-Ordner aus, um ihn zu bearbeiten."/>
 						<Border Margin="0,4,0,2" Height="1" Background="#ECE7DF"/>
 						<Button Classes="primary" HorizontalContentAlignment="Center" Content="＋  Target-Ordner hinzufügen" Click="AddTargetFolder"/>
-						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Als Standard festlegen" Command="{Binding SetDefaultTargetFolderCommand}"/>
+						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="{Binding DefaultTargetFolderButtonText}" Command="{Binding SetDefaultTargetFolderCommand}"/>
 						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Spitznamen ändern" Command="{Binding BeginRenameTargetFolderCommand}"/>
 						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Target-Ordner entfernen" Command="{Binding RemoveTargetFolderCommand}"/>
 						<TextBlock Margin="0,12,0,0" Classes="muted" TextWrapping="Wrap" Text="Tipp: Der Spitzname wird in der Liste angezeigt und kann jederzeit angepasst werden."/>

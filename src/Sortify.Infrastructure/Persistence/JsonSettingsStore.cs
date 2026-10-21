@@ -6,7 +6,7 @@ namespace Sortify.Infrastructure.Persistence;
 
 public sealed class JsonSettingsStore : ISettingsStore
 {
-    private const int CurrentVersion = 1;
+    private const int CurrentVersion = 2;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -54,7 +54,7 @@ public sealed class JsonSettingsStore : ISettingsStore
                 return Failed("Die Einstellungsdatei enthält keine Konfiguration.");
             }
 
-            if (document.Version != CurrentVersion)
+            if (document.Version is not (1 or CurrentVersion))
             {
                 return Failed(
                     $"Die Einstellungsdatei verwendet die nicht unterstützte " +

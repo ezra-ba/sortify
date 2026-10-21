@@ -130,4 +130,156 @@ public sealed class SettingsValidatorTests
 
         Assert.Equal(2, validator.Validate(settings).Count);
     }
+    private static TargetFolder CreateTarget() => new(
+    Guid.NewGuid(),
+    Path.Combine(Path.GetTempPath(), "Sortify-Target"),
+    "Dokumente");
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ValidateAcceptsTargetsWithOptionalDefault(bool useDefault)
+    {
+        var target = CreateTarget();
+        var settings = CreateSettings() with
+        {
+            TargetFolders = [target],
+            DefaultTargetFolderId = useDefault ? target.Id : null
+        };
+
+        Assert.Empty(validator.Validate(settings));
+    }
+
+    [Fact]
+    public void ValidateRejectsDuplicateTargetIds()
+    {
+        var target = CreateTarget();
+        var settings = CreateSettings() with
+        {
+            TargetFolders =
+            [
+                target,
+            target with
+            {
+                Path = Path.Combine(Path.GetTempPath(), "OtherTarget"),
+                Nickname = "Weiteres Ziel"
+            }
+            ]
+        };
+
+        var error = Assert.Single(validator.Validate(settings));
+
+        Assert.Contains("IDs", error);
+    }
+
+    [Fact]
+    public void ValidateRejectsEmptyTargetId()
+    {
+        var settings = CreateSettings() with
+        {
+            TargetFolders = [CreateTarget() with { Id = Guid.Empty }]
+        };
+
+        var error = Assert.Single(validator.Validate(settings));
+
+        Assert.Contains("IDs", error);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("relative/target")]
+    [InlineData("invalid\0path")]
+    public void ValidateRejectsInvalidTargetPath(string? path)
+    {
+        var settings = CreateSettings() with
+        {
+            TargetFolders = [CreateTarget() with { Path = path! }]
+        };
+
+        var error = Assert.Single(validator.Validate(settings));
+
+        Assert.Contains("Pfad", error);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ValidateRejectsBlankTargetNickname(string? nickname)
+    {
+        var settings = CreateSettings() with
+        {
+            TargetFolders = [CreateTarget() with { Nickname = nickname! }]
+        };
+
+        var error = Assert.Single(validator.Validate(settings));
+
+        Assert.Contains("Spitzname", error);
+    }
+
+    [Fact]
+    public void ValidateRejectsUnknownDefaultTarget()
+    {
+        var settings = CreateSettings() with
+        {
+            TargetFolders = [CreateTarget()],
+            DefaultTargetFolderId = Guid.NewGuid()
+        };
+
+        var error = Assert.Single(validator.Validate(settings));
+
+        Assert.Contains("Standardziel", error);
+    }
+
+    [Fact]
+    public void ValidateRejectsDefaultTargetWithoutTargets()
+    {
+        var settings = CreateSettings() with
+        {
+            DefaultTargetFolderId = Guid.NewGuid()
+        };
+
+        var error = Assert.Single(validator.Validate(settings));
+
+        Assert.Contains("Standardziel", error);
+    }
+
+    [Fact]
+    public void ValidateRejectsMissingTargetList()
+    {
+        var settings = CreateSettings() with { TargetFolders = null! };
+
+        var error = Assert.Single(validator.Validate(settings));
+
+        Assert.Contains("Target-Ordnerliste", error);
+    }
+
+    [Fact]
+    public void ValidateRejectsNullTargetEntry()
+    {
+        var settings = CreateSettings() with { TargetFolders = [null!] };
+
+        var error = Assert.Single(validator.Validate(settings));
+
+        Assert.Contains("leeren Eintrag", error);
+    }
+
+    [Fact]
+    public void ValidateAcceptsTargetWhoseDirectoryDoesNotExist()
+    {
+        var missingPath = Path.Combine(
+            Path.GetTempPath(),
+            "Sortify-Missing-" + Guid.NewGuid().ToString("N"));
+
+        Assert.False(Directory.Exists(missingPath));
+
+        var settings = CreateSettings() with
+        {
+            TargetFolders = [CreateTarget() with { Path = missingPath }]
+        };
+
+        Assert.Empty(validator.Validate(settings));
+    }
 }

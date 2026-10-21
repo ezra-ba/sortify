@@ -4,4 +4,10 @@ public sealed record AppSettings(
     string? WatchedFolderPath,
     string? ArchiveRootPath,
     bool IncludeSubdirectories,
-    IReadOnlyList<SortRule> Rules);
+    IReadOnlyList<SortRule> Rules)
+{
+    public IReadOnlyList<TargetFolder> TargetFolders { get; init; } =
+        Array.Empty<TargetFolder>();
+
+    public Guid? DefaultTargetFolderId { get; init; }
+}

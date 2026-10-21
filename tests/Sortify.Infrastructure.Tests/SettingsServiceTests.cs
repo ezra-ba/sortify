@@ -189,7 +189,132 @@ public sealed class SettingsServiceTests
         var result = await service.SaveAsync(CreateSettings());
         Assert.True(result.IsSuccess);
     }
+    [Fact]
+    public async Task UpdatePreservesBothOverlappingChanges()
+    {
+        var store = new BlockingSettingsStore();
+        var service = new SettingsService(store);
+        await service.InitializeAsync();
 
+        var target = new TargetFolder(
+            Guid.NewGuid(),
+            Path.Combine(Path.GetTempPath(), "Sortify-Target"),
+            "Dokumente");
+
+        var firstUpdate = service.UpdateAsync(current => current with
+        {
+            IncludeSubdirectories = true
+        });
+
+        await store.FirstSaveStarted.Task.WaitAsync(
+            TimeSpan.FromSeconds(5));
+
+        var secondUpdateExecuted = false;
+
+        var secondUpdate = service.UpdateAsync(current =>
+        {
+            secondUpdateExecuted = true;
+
+            return current with
+            {
+                TargetFolders = [target]
+            };
+        });
+
+        try
+        {
+            // Die zweite Änderung muss warten, bis die erste gespeichert ist.
+            Assert.False(secondUpdateExecuted);
+            Assert.False(secondUpdate.IsCompleted);
+        }
+        finally
+        {
+            store.AllowFirstSave.TrySetResult(true);
+        }
+
+        var results = await Task.WhenAll(firstUpdate, secondUpdate)
+            .WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.All(results, result => Assert.True(result.IsSuccess));
+
+        Assert.True(secondUpdateExecuted);
+        Assert.NotNull(service.Current);
+        Assert.True(service.Current.IncludeSubdirectories);
+        Assert.Equal(target, Assert.Single(service.Current.TargetFolders));
+
+        Assert.Equal(2, store.SaveCalls);
+        Assert.NotNull(store.LastSaved);
+        Assert.True(store.LastSaved.IncludeSubdirectories);
+        Assert.Equal(target, Assert.Single(store.LastSaved.TargetFolders));
+    }
+
+    [Fact]
+    public async Task FailedUpdateKeepsPreviousSettings()
+    {
+        var previous = CreateSettings();
+
+        var store = new TestSettingsStore
+        {
+            LoadResult = new(
+                SettingsLoadStatus.Loaded,
+                previous,
+                null),
+            SaveResult = new(false, "Speichern fehlgeschlagen.")
+        };
+
+        var service = new SettingsService(store);
+        await service.InitializeAsync();
+
+        var result = await service.UpdateAsync(current => current with
+        {
+            IncludeSubdirectories = true
+        });
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Speichern fehlgeschlagen.", result.ErrorMessage);
+        Assert.Same(previous, service.Current);
+    }
+    private sealed class BlockingSettingsStore : ISettingsStore
+    {
+        public TaskCompletionSource<bool> FirstSaveStarted { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public TaskCompletionSource<bool> AllowFirstSave { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public int SaveCalls { get; private set; }
+
+        public AppSettings? LastSaved { get; private set; }
+
+        public Task<SettingsLoadResult> LoadAsync(
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return Task.FromResult(new SettingsLoadResult(
+                SettingsLoadStatus.NotFound,
+                null,
+                null));
+        }
+
+        public async Task<SettingsSaveResult> SaveAsync(
+            AppSettings settings,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            SaveCalls++;
+
+            if (SaveCalls == 1)
+            {
+                FirstSaveStarted.TrySetResult(true);
+
+                await AllowFirstSave.Task.WaitAsync(cancellationToken);
+            }
+
+            LastSaved = settings;
+            return new SettingsSaveResult(true, null);
+        }
+    }
     private sealed class TestSettingsStore : ISettingsStore
     {
         public SettingsLoadResult LoadResult { get; init; } =

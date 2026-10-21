@@ -394,6 +394,96 @@ public sealed class JsonSettingsStoreTests : IDisposable
 
         AssertSettingsEqual(expected, secondService.Current);
     }
+    [Fact]
+    public async Task SaveAndLoadPreservesTargetsOrderAndDefault()
+    {
+        var first = new TargetFolder(
+            Guid.NewGuid(),
+            Path.Combine(directoryPath, "Documents"),
+            "Dokumente");
+
+        var second = new TargetFolder(
+            Guid.NewGuid(),
+            Path.Combine(directoryPath, "School"),
+            "Schule");
+
+        var expected = CreateSettings() with
+        {
+            TargetFolders = [second, first],
+            DefaultTargetFolderId = first.Id
+        };
+
+        var saved = await CreateStore().SaveAsync(expected);
+
+        Assert.True(saved.IsSuccess);
+        Assert.Null(saved.ErrorMessage);
+
+        using var document = JsonDocument.Parse(
+            await File.ReadAllTextAsync(filePath));
+
+        Assert.Equal(
+            2,
+            document.RootElement.GetProperty("Version").GetInt32());
+
+        var service = new SettingsService(CreateStore());
+        var loaded = await service.InitializeAsync();
+
+        Assert.Equal(SettingsLoadStatus.Loaded, loaded.Status);
+        Assert.Null(loaded.ErrorMessage);
+        Assert.NotNull(service.Current);
+
+        AssertSettingsEqual(expected, service.Current);
+    }
+    [Fact]
+    public async Task LoadSupportsVersionOneWithoutChangingFile()
+    {
+        var expected = CreateSettings();
+
+        // Tatsächliches altes Format ohne Target-Eigenschaften.
+        var json = JsonSerializer.Serialize(new
+        {
+            Version = 1,
+            Settings = new
+            {
+                expected.WatchedFolderPath,
+                expected.ArchiveRootPath,
+                expected.IncludeSubdirectories,
+                expected.Rules
+            }
+        });
+
+        await File.WriteAllTextAsync(filePath, json);
+
+        var result = await CreateStore().LoadAsync();
+
+        Assert.Equal(SettingsLoadStatus.Loaded, result.Status);
+        Assert.NotNull(result.Settings);
+        Assert.Null(result.ErrorMessage);
+
+        AssertSettingsEqual(expected, result.Settings);
+        Assert.Empty(result.Settings.TargetFolders);
+        Assert.Null(result.Settings.DefaultTargetFolderId);
+
+        // Laden allein migriert die Datei nicht auf der Festplatte.
+        Assert.Equal(json, await File.ReadAllTextAsync(filePath));
+
+        var saved = await CreateStore().SaveAsync(result.Settings);
+
+        Assert.True(saved.IsSuccess);
+
+        using var document = JsonDocument.Parse(
+            await File.ReadAllTextAsync(filePath));
+
+        Assert.Equal(
+            2,
+            document.RootElement.GetProperty("Version").GetInt32());
+
+        var reloaded = await CreateStore().LoadAsync();
+
+        Assert.Equal(SettingsLoadStatus.Loaded, reloaded.Status);
+        Assert.NotNull(reloaded.Settings);
+        AssertSettingsEqual(expected, reloaded.Settings);
+    }
     private static void AssertSettingsEqual(
         AppSettings expected,
         AppSettings actual)
@@ -405,6 +495,11 @@ public sealed class JsonSettingsStoreTests : IDisposable
             actual.IncludeSubdirectories);
 
         Assert.Equal(expected.Rules.Count, actual.Rules.Count);
+
+        Assert.Equal(expected.DefaultTargetFolderId, actual.DefaultTargetFolderId);
+
+        Assert.Equal(expected.TargetFolders.ToArray(),
+        actual.TargetFolders.ToArray());
 
         for (var index = 0; index < expected.Rules.Count; index++)
         {

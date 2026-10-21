@@ -25,7 +25,8 @@ public partial class MainWindow : Window
 
     private void OpenFileSuggestion(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        new FileSuggestionWindow(new FileSuggestionViewModel()).Show(this);
+        if (DataContext is MainViewModel viewModel)
+            new FileSuggestionWindow(new FileSuggestionViewModel(viewModel.TargetFolders)).Show(this);
     }
 
     private async void SelectWatchedFolder(

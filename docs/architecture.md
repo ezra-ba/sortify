@@ -15,7 +15,7 @@ Sortify.sln
 ├── tests/
 │   ├── Sortify.Core.Tests/      Tests der fachlichen Logik
 │   ├── Sortify.Infrastructure.Tests/ Speicherung und technische Dienste
-│   └── Sortify.App.Tests/       ViewModel-Verhalten ohne Fenster
+│   └── Sortify.App.Tests/       ViewModels und Headless-Popup-Integration
 ├── assets/branding/             Zentrale Logo- und Icon-Dateien
 └── docs/                        Architektur und technische Entscheidungen
 ```
@@ -54,3 +54,7 @@ Die Originaldateien liegen nur unter `assets/branding`. Das Avalonia-Projekt bin
 Die Speicherung aus Issue #28 speichert Konfiguration und Regeln gemeinsam in einer versionierten JSON-Datei. Der Arbeitsstand für Issue #37 ergänzt frei wählbare Target-Ordner, Listenreihenfolge und ein optionales Standardziel in Formatversion 2. Komponenten, Speicherort, Fehlerverhalten und offene Integrationsnachweise beschreibt [settings-persistence.md](settings-persistence.md).
 
 `TargetFolder` ist ein Core-Modell mit stabiler ID, Pfad und Spitznamen. `TargetFolderViewModel` enthält zusätzlich ausschließlich UI-Zustände. Die Regelzuordnung über Target-IDs ist eine separate Erweiterung; die bisherigen relativen Regelziele werden durch #37 noch nicht umgedeutet.
+
+## Dateierkennung und Popup
+
+Die erste Umsetzung zu Issue #29 verbindet einen `IFileMonitor` mit einem austauschbaren `IFileSuggestionProvider` und einem `IDownloadPresenter`. Der Ablauf und die Grenzen sind in [download-detection.md](download-detection.md) beschrieben. Dateisystemzugriffe und die Verarbeitung liegen in Infrastructure; der Avalonia-Presenter zeigt Vorschläge auf dem UI-Thread. Eine spätere Regelengine- oder KI-Anbindung ersetzt den Vorschlagsanbieter, ohne die Ordnerüberwachung ändern zu müssen.

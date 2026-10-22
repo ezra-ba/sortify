@@ -12,7 +12,7 @@ Das Projekt wird von **SYD – Sort Your Data GmbH** im Rahmen des Projektprakti
 
 ## Projektstatus
 
-Sortify befindet sich in der Startphase. Projektidee, Name und grundlegende Anforderungen wurden festgelegt. Als UI-Technologie wurde **Avalonia** ausgewählt und die erste Solution-Struktur wurde angelegt. Die Kernfunktionen werden als Nächstes entwickelt.
+Sortify befindet sich in der Entwicklung. Ordnerauswahl und lokale Speicherung sind vorhanden. Neue Dateien im ausgewählten Ordner werden nach einer Verfügbarkeitsprüfung erkannt und mit echten Dateidaten im Popup angezeigt. Dateioperationen und die Anbindung der fachlichen Regelauswertung sind noch offen; der Einsortieren-Button ist deaktiviert. Weitere Details und Testschritte stehen in [docs/download-detection.md](docs/download-detection.md).
 
 ## Problemstellung
 

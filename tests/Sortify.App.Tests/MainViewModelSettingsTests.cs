@@ -19,6 +19,28 @@ public sealed class MainViewModelSettingsTests
             DefaultTargetFolderId = target.Id
         };
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task MonitoringRestartsAfterEverySuccessfulFolderSelectionOnly(bool saveSucceeds)
+    {
+        var settings = CreateSettings(CreateTarget());
+        var successfulStore = new WaitingSettingsStore(settings);
+        successfulStore.CompleteSave.TrySetResult(new SettingsSaveResult(true, null));
+        ISettingsStore store = saveSucceeds ? successfulStore : new FailingSettingsStore(settings);
+        var viewModel = new MainViewModel(new SettingsService(store));
+        await viewModel.InitializeSettingsAsync();
+        var notifications = 0;
+        viewModel.MonitoringFolderConfigured += () => notifications++;
+        var path = Path.Combine(Path.GetTempPath(), "Sortify-Monitor");
+
+        await viewModel.SaveWatchedFolderAsync(path);
+        await viewModel.SaveWatchedFolderAsync(path);
+
+        Assert.Equal(saveSucceeds ? 2 : 0, notifications);
+        Assert.Equal(saveSucceeds ? path : null, viewModel.CurrentSettings!.WatchedFolderPath);
+    }
+
     [Fact]
     public async Task FailedAddDoesNotChangeCardsAndReleasesBusyState()
     {

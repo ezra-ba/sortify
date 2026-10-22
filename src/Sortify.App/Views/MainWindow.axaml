@@ -116,6 +116,7 @@
 						<TextBlock Classes="eyebrow" Text="ÜBERWACHUNGS-ORDNER"/>
 						<TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#25231F" Text="{Binding WatchedFolder}"/>
 						<TextBlock Classes="muted" Text="{Binding SettingsStatus}" TextWrapping="Wrap"/>
+						<TextBlock Classes="muted" Text="{Binding MonitoringStatus}" TextWrapping="Wrap"/>
 					</StackPanel>
 					<Button Grid.Column="2" Classes="secondary" Content="Ordner wechseln" Click="SelectWatchedFolder"/>
 				</Grid>

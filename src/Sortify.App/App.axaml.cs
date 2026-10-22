@@ -5,6 +5,8 @@ using Sortify.App.ViewModels;
 using Sortify.App.Views;
 using Sortify.Core.Rules;
 using Sortify.Infrastructure.Persistence;
+using Sortify.Infrastructure.Monitoring;
+using Sortify.App.Services;
 
 namespace Sortify.App;
 
@@ -46,9 +48,26 @@ public partial class App : Application
 
             desktop.MainWindow = window;
 
+            var workflow = new DownloadNotificationWorkflow(
+                new FolderMonitor(),
+                new LocalFileSuggestionProvider(),
+                new AvaloniaDownloadPresenter(window),
+                () => viewModel.CurrentSettings);
+            var controller = new DownloadMonitorController(
+                workflow, status => viewModel.MonitoringStatus = status);
+            var initialized = false;
+            viewModel.MonitoringFolderConfigured += () =>
+            {
+                if (initialized)
+                    controller.Restart(viewModel.CurrentSettings?.WatchedFolderPath);
+            };
+            window.Closed += async (_, _) => await controller.DisposeAsync();
+
             window.Opened += async (_, _) =>
             {
                 await viewModel.InitializeSettingsAsync();
+                initialized = true;
+                controller.Restart(viewModel.CurrentSettings?.WatchedFolderPath);
             };
         }
 

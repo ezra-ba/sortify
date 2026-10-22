@@ -59,7 +59,7 @@
                 </Border>
                 <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
                     <TextBlock FontSize="19" FontWeight="SemiBold" Foreground="#25231F" Text="Neues Dokument!"/>
-                    <TextBlock Classes="muted" Text="{Binding DetectedFileName}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Classes="muted" Text="{Binding DetectedFileName}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding SourcePath}"/>
                 </StackPanel>
             </Grid>
 
@@ -75,7 +75,7 @@
                     </ComboBox>
                     <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="18" Foreground="#A7A096" Text="/"/>
                     <Grid Grid.Column="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="0" RowSpacing="3">
-                        <TextBox x:Name="FileNameTextBox" Text="{Binding NewFileName, Mode=TwoWay}" MaxLength="255" Watermark="Dateiname" TextChanged="FileNameTextBox_TextChanged"/>
+                        <TextBox x:Name="FileNameTextBox" Text="{Binding NewFileName, Mode=TwoWay}" MaxLength="255" PlaceholderText="Dateiname" TextChanged="FileNameTextBox_TextChanged"/>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" Padding="0,0,10,0" Foreground="#756F66" Text="{Binding FileExtension}"/>
                         <TextBlock x:Name="ValidationHint"
                                    Grid.Row="1"
@@ -84,18 +84,18 @@
                                    Classes="validation-error"
                                    Text="Fehlerhafte Eingabe ⓘ"
                                    IsVisible="{Binding HasValidationError}"
-                                   ToolTip.Tip="Erlaubt sind maximal 255 Unicode-Buchstaben, Zahlen, Leerzeichen sowie _ und -. Führende oder abschließende Leerzeichen und Sonderzeichen sind nicht erlaubt."
+                                   ToolTip.Tip="{Binding ValidationMessage}"
                                    Cursor="Hand"/>
                     </Grid>
                 </Grid>
                 <TextBlock Classes="muted" Text="{Binding FilePathPreview}" TextTrimming="CharacterEllipsis"/>
-                <TextBlock Classes="muted" Text="Der Dateiname kann vor dem Verschieben angepasst werden."/>
+                <TextBlock Classes="muted" Text="{Binding SuggestionExplanation}" TextWrapping="Wrap"/>
             </StackPanel>
 
             <Border Height="1" Background="#ECE7DF" Margin="-20,0"/>
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                 <Button Classes="secondary" Content="Abbrechen" HorizontalAlignment="Left" Click="CancelButton_Click"/>
-                <Button Grid.Column="1" Classes="primary" Content="Datei einsortieren" IsEnabled="{Binding IsFileNameValid}"/>
+                <Button Grid.Column="1" Classes="primary" Content="Datei einsortieren" IsEnabled="False" ToolTip.Tip="Dateioperationen sind noch nicht angebunden."/>
             </Grid>
         </StackPanel>
     </Border>

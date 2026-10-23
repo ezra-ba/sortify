@@ -12,12 +12,15 @@ public sealed class DownloadMonitorController(MainViewModel viewModel) : IDispos
     private int session;
     private bool disposed;
 
+    public bool IsMonitoring { get; private set; }
+
     public void Restart(string? directory)
     {
         if (disposed)
             return;
 
         var currentSession = ++session;
+        IsMonitoring = false;
         monitor.Dispose();
         foreach (var popup in popups.ToArray())
             popup.Close();
@@ -47,10 +50,12 @@ public sealed class DownloadMonitorController(MainViewModel viewModel) : IDispos
                 if (!disposed && session == currentSession)
                 {
                     monitor.Dispose();
+                    IsMonitoring = false;
                     viewModel.MonitoringStatus = error;
                 }
             }));
             viewModel.MonitoringStatus = "Ordnerueberwachung aktiv.";
+            IsMonitoring = true;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
         {
@@ -62,6 +67,7 @@ public sealed class DownloadMonitorController(MainViewModel viewModel) : IDispos
     public void Dispose()
     {
         disposed = true;
+        IsMonitoring = false;
         session++;
         monitor.Dispose();
         foreach (var popup in popups.ToArray())

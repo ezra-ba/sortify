@@ -10,4 +10,6 @@ public sealed record AppSettings(
         Array.Empty<TargetFolder>();
 
     public Guid? DefaultTargetFolderId { get; init; }
+
+    public bool CloseToTray { get; init; } = true;
 }

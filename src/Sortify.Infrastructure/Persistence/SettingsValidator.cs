@@ -26,6 +26,56 @@ public sealed class SettingsValidator
             "Archivordner",
             errors);
 
+        if (settings.TargetFolders is null)
+        {
+            errors.Add("Die Target-Ordnerliste fehlt.");
+        }
+        else
+        {
+            var targetIds = new HashSet<Guid>();
+
+            foreach (var target in settings.TargetFolders)
+            {
+                if (target is null)
+                {
+                    errors.Add(
+                        "Die Target-Ordnerliste enthält einen leeren Eintrag.");
+                    continue;
+                }
+
+                if (target.Id == Guid.Empty || !targetIds.Add(target.Id))
+                {
+                    errors.Add(
+                        "Target-Ordner-IDs müssen eindeutig und dürfen nicht leer sein.");
+                }
+
+                if (target.Path is null)
+                {
+                    errors.Add("Der Pfad eines Target-Ordners fehlt.");
+                }
+                else
+                {
+                    ValidateFolderPath(
+                        target.Path,
+                        "Target-Ordner",
+                        errors);
+                }
+
+                if (string.IsNullOrWhiteSpace(target.Nickname))
+                {
+                    errors.Add(
+                        "Der Spitzname eines Target-Ordners darf nicht leer sein.");
+                }
+            }
+
+            if (settings.DefaultTargetFolderId is { } defaultId &&
+                !targetIds.Contains(defaultId))
+            {
+                errors.Add(
+                    "Das Standardziel muss auf einen vorhandenen Target-Ordner verweisen.");
+            }
+        }
+
         if (settings.Rules is null)
         {
             errors.Add("Die Regelliste fehlt.");

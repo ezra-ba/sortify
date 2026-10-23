@@ -127,7 +127,7 @@
 		</Style>
 	</Window.Styles>
 	<Grid Background="{DynamicResource Brush.Canvas}" RowDefinitions="44,*">
-	<ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+	<ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" IsEnabled="{Binding !IsSavingSettings}">
 		<StackPanel Margin="44,34" Spacing="26">
 			<Border Padding="24" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
 				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="22">
@@ -180,8 +180,8 @@
 							</Border>
 							<StackPanel Grid.Column="1" Spacing="4">
 								<StackPanel Orientation="Horizontal" Spacing="4">
-									<TextBox Width="150" Text="{Binding Nickname, Mode=TwoWay}"/>
-									<Button Content="OK" Command="{Binding SaveNicknameCommand}"/>
+									<TextBox Width="150" Text="{Binding DraftNickname, Mode=TwoWay}"/>
+									<Button Content="OK" Command="{Binding $parent[Window].DataContext.SaveTargetNicknameCommand}" CommandParameter="{Binding}"/>
 									<Button Content="Abbrechen" Command="{Binding CancelRenameCommand}"/>
 								</StackPanel>
 								<TextBlock Classes="muted" Text="{Binding Path}"/>

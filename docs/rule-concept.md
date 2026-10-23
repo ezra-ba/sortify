@@ -1,12 +1,18 @@
 # Technisches Konzept: Regelbasierte Sortiervorschläge
 
-Stand: 14. Oktober 2026. Status: Regelmodell, Kategoriezuordnung und Regelvalidierung implementiert; Regelauswertung und Dateiverarbeitung geplant.
+Stand: 21. Oktober 2026. Status: Regelmodell, Kategoriezuordnung, Regelvalidierung und Regelengine im Arbeitsstand für Issue #26 implementiert; Dateiverarbeitung und Anbindung an die Oberfläche geplant.
+
+## Ergänzung: frei wählbare Sortierziele (Issue #37)
+
+Die Teamentscheidung zu #37 sieht frei auswählbare Target-Ordner vor. Das bisherige Modell `<Archiv>/<Kategorie>/<TargetDirectory>` beschreibt den älteren Regelentwurf und ist keine Voraussetzung für die künftige Zielauswahl. Die nachfolgenden Beispiele bleiben bis zur separaten Engine-Anpassung Referenzen für diesen bisherigen Entwurf.
+
+Im Arbeitsstand für #37 werden Targets mit stabiler ID, absolutem Pfad und Spitznamen sowie Listenreihenfolge und optionalem Standardziel gespeichert. Die bestehende ArchiveRootPath-Einstellung bleibt erhalten. Regeln und Engine müssen anschließend separat auf Target-IDs umgestellt werden; es gibt noch keine automatische Zuordnung eines frei gewählten Targets anhand der Kategorie. Ein Standardziel allein löst noch keine Dateioperation aus. Details stehen in [settings-persistence.md](settings-persistence.md).
 
 ## 1. Ziel und Umfang
 
 Sortify soll neue Dateien in einem ausdrücklich ausgewählten Eingangsordner erkennen und nachvollziehbare Vorschläge zum Umbenennen und Archivieren erzeugen. Die Verarbeitung erfolgt vollständig lokal, ohne KI- oder Cloud-Dienste. Dateien und Zielordner werden erst nach ausdrücklicher Bestätigung verändert.
 
-Dieses Dokument beschreibt die fachlichen Entscheidungen, den implementierten Stand und die geplanten Schnittstellen. In Core sind Regelmodell, Dateibeschreibung, Kategoriezuordnung und Regelvalidierung vorhanden. Regelengine, lokale Speicherung, Ordnerüberwachung, Einrichtung und Dateioperationen sind noch nicht implementiert. Die Aufteilung folgt [architecture.md](architecture.md).
+Dieses Dokument beschreibt die fachlichen Entscheidungen, den implementierten Stand und die geplanten Schnittstellen. In Core sind Regelmodell, Dateibeschreibung, Kategoriezuordnung, Regelvalidierung und Regelengine vorhanden. Lokale Speicherung, Ordnerüberwachung, Einrichtung, Dateioperationen und die Anbindung der Engine an die Oberfläche sind noch nicht implementiert. Die Aufteilung folgt [architecture.md](architecture.md).
 
 Die erste Version unterstützt genau einen ausgewählten Überwachungsordner. Mehrere auswählbare Überwachungsordner sind eine mögliche spätere Erweiterung. Rekursive Überwachung von Unterordnern ist davon unabhängig.
 
@@ -102,7 +108,7 @@ Die erste Version unterstützt ausschließlich die Platzhalter `{name}` (Origina
 
 Bei einem gesetzten Schema ist `{ext}` genau einmal am Ende erforderlich; die Endung bleibt erhalten. Unbekannte Platzhalter, Pfadtrenner, leere Ergebnisse und ungültige beziehungsweise reservierte Dateinamen werden abgewiesen. Regex-Ersetzungszeichen wie `$1` werden nicht als Platzhalter interpretiert. Datumsvariablen und benannte Regex-Gruppen können später mit eigener Spezifikation ergänzt werden.
 
-Die implementierte Schema-Validierung akzeptiert `null` oder einen leeren String als „Originalname behalten“. Sie prüft Platzhalter und die grundsätzliche Namensform mit `{name} = "Beispiel"` und `{ext} = ".pdf"`. Das Schema `{ext}` allein wird abgelehnt. Die spätere Regelengine muss den tatsächlich erzeugten Dateinamen nach dem Einsetzen der Originalwerte erneut mit der portablen Namensprüfung prüfen. `$1` bleibt gewöhnlicher Text.
+Die implementierte Schema-Validierung akzeptiert `null` oder einen leeren String als „Originalname behalten“. Sie prüft Platzhalter und die grundsätzliche Namensform mit `{name} = "Beispiel"` und `{ext} = ".pdf"`. Das Schema `{ext}` allein wird abgelehnt. Die Regelengine prüft den tatsächlich erzeugten Dateinamen nach dem Einsetzen der Originalwerte erneut mit der portablen Namensprüfung. Die Ersetzung verarbeitet das Schema einmalig ohne Regex; Platzhalter innerhalb eingesetzter Originalwerte werden nicht erneut ausgewertet. Auch der ursprüngliche Dateiname eines Kategorie-Fallbacks wird geprüft. Ein ungültiger Zielname ergibt `Failed` ohne Kandidaten; eine Regel kann einen nicht portablen Originalnamen durch einen gültigen Namen ersetzen. `$1` bleibt gewöhnlicher Text.
 
 ### 4.2 Vollständiges Regelbeispiel
 
@@ -110,7 +116,7 @@ Die implementierte Schema-Validierung akzeptiert `null` oder einen leeren String
 {
   "Id": "97334013-2177-4dc5-baf4-8d9f9139b60d",
   "Name": "PDF-Rechnungen",
-  "FileNamePattern": "^rechnungen?(?:[-_ ]|$)",
+  "FileNamePattern": "^rechnung(?:en)?(?:[-_ ]|$)",
   "AllowedExtensions": [".pdf"],
   "RelativePathPattern": null,
   "TargetDirectory": "Rechnungen",
@@ -128,7 +134,7 @@ Alle Muster beziehen sich auf den Dateinamen ohne Endung. Alle Regeln sind aktiv
 
 | Regel / Priorität | Endungen | Dateinamen-Regex | Passendes Beispiel → Ziel |
 |---|---|---|---|
-| Rechnungen / 200 | `.pdf` | `^rechnungen?(?:[-_ ]|$)` | `rechnung_2026.pdf` → `Dokumente/Rechnungen/` |
+| Rechnungen / 200 | `.pdf` | `^rechnung(?:en)?(?:[-_ ]|$)` | `rechnung_2026.pdf` → `Dokumente/Rechnungen/` |
 | Mathematik / 150 | `.pdf`, `.docx` | `^(?:mathe|mathematik)(?:[-_ ]|$)` | `mathe_aufgaben.docx` → `Dokumente/Schule/Mathematik/` |
 | Stundenpläne / 180 | `.pdf`, `.docx` | `^stundenplan(?:[-_ ]|$)` | `stundenplan_2026.pdf` → `Dokumente/Schule/Stundenpläne/` |
 | Schulpräsentationen / 150 | `.pptx` | `^(?:referat|präsentation)(?:[-_ ]|$)` | `referat_biologie.pptx` → `Präsentationen/Schule/` |
@@ -151,7 +157,7 @@ Beispiel für einen optionalen Pfadfilter: `^Schule/` beschränkt die Mathematik
 
 `IRuleValidator.Validate` liefert ein `RuleValidationResult` mit einer Liste von `RuleValidationError` (`FieldName`, `Message`). `IsValid` ist genau dann wahr, wenn keine Fehler vorliegen. Fehler verschiedener Felder werden gemeinsam gesammelt; die Validierung führt keine Dateisystemzugriffe aus. `FileNamePattern` darf nicht leer sein. `RelativePathPattern = null` wird übersprungen; ein leerer optionaler Pfadfilter ist eine gültige Regex ohne zusätzliche Einschränkung. Leerzeichen werden als Regex-Inhalt behandelt.
 
-Bei der Syntaxprüfung werden Regex-Instanzen mit `IgnoreCase`, `CultureInvariant` und 100 ms Abgleich-Zeitlimit erstellt. Die Syntaxprüfung führt keinen Abgleich aus. Die spätere Regelengine muss dieselben Optionen und das Zeitlimit bei ihren tatsächlichen Abgleichen verwenden. Speicherung und Oberfläche müssen die Validierung noch anbinden; die oben beschriebenen Abläufe für Speichern, Aktivieren und Laden sind geplant.
+Bei der Syntaxprüfung werden Regex-Instanzen mit `IgnoreCase`, `CultureInvariant` und 100 ms Abgleich-Zeitlimit erstellt. Die Syntaxprüfung führt keinen Abgleich aus. Die Regelengine verwendet dieselben Optionen und das Zeitlimit bei ihren tatsächlichen Abgleichen. Ein abbrechbarer Hintergrundablauf ist noch nicht implementiert. Speicherung und Oberfläche müssen die Validierung noch anbinden; die oben beschriebenen Abläufe für Speichern, Aktivieren und Laden sind geplant.
 
 Feste Infrastrukturfehler werden von Nichttreffern getrennt. Die Oberfläche darf einen Fehler nicht als „keine passende Regel“ ausgeben.
 
@@ -168,7 +174,7 @@ Feste Infrastrukturfehler werden von Nichttreffern getrennt. Die Oberfläche dar
 | Passender Zielordner existiert | Vorhandenen Ordner verwenden |
 | Zielordner fehlt | Erstellung dieses konkreten Ordners zusammen mit dem Verschieben bestätigen lassen |
 | Ähnlich benannter Ordner vorhanden | Keine automatische Gleichsetzung; `Rechnungen alt` ist nicht `Rechnungen` |
-| Zieldatei existiert | Alternativen Namen mit Suffix vorschlagen, etwa `rechnung_2026 (1).pdf`; niemals überschreiben |
+| Zieldatei existiert | Gemäß Lastenheft den Vorgang abbrechen und den Benutzer informieren; niemals überschreiben. Alternative Namen mit Suffix sind eine mögliche spätere Erweiterung. |
 | Ziel ist mit Quelle identisch | Keine Dateioperation anbieten |
 | Datei wurde nach Vorschlag verändert oder entfernt | Vorschlag als veraltet markieren und erneut prüfen beziehungsweise entfernen |
 | Fehlende Rechte, nicht erreichbares Archiv oder gesperrte Datei | Verständliche Fehlermeldung; keine Erfolgsmeldung und keine absichtliche Löschung der Quelle |
@@ -177,7 +183,7 @@ Ordnernamen werden nach den Regeln des tatsächlichen Dateisystems verglichen. E
 
 Infrastructure löst den vollständigen Zielpfad auf und prüft, dass er innerhalb der Kategorie und des Archivs liegt. Absolute Ziele, `..`-Segmente und Ausbrüche über symbolische Links oder Windows-Junctions sind auszuschließen. In der ersten Version werden solche Verknüpfungen in Quell- und Zielpfaden nicht verfolgt.
 
-Zielkonflikte werden unmittelbar vor der Ausführung erneut geprüft. Entsteht inzwischen eine Kollision, wird der Vorschlag aktualisiert und erneut bestätigt. Die Dateioperation selbst muss Überschreiben ebenfalls ausschließen. Bei laufwerksübergreifenden Vorgängen wird die Quelle erst nach erfolgreich abgeschlossenem und geprüftem Kopieren entfernt; ein Teilfehler muss offen gemeldet werden.
+Zielkonflikte werden unmittelbar vor der Ausführung erneut geprüft. Entsteht inzwischen eine Kollision, wird der Vorgang gemäß Lastenheft abgebrochen und der Benutzer informiert. Die Dateioperation selbst muss Überschreiben ebenfalls ausschließen. Bei laufwerksübergreifenden Vorgängen wird die Quelle erst nach erfolgreich abgeschlossenem und geprüftem Kopieren entfernt; ein Teilfehler muss offen gemeldet werden.
 
 ## 8. Klassen und Schnittstellen
 
@@ -193,11 +199,15 @@ Core enthält keine Avalonia-Abhängigkeit und führt keine Dateisystemzugriffe 
 | `IRuleValidator` / `RuleValidator` (implementiert) | Regelkonfiguration prüfen und feldbezogene Fehler liefern |
 | `RuleValidationResult` / `RuleValidationError` (implementiert) | Gültigkeit und feldbezogene Fehlermeldungen |
 | `PortableNameValidator` (implementiert) | Gemeinsame Namensprüfung für Zielordner und erzeugte Dateinamen |
-| `IRuleEngine` / `RuleEngine` (Schnittstelle anpassen, Implementierung neu) | Aktive Regeln auswerten, Prioritäten behandeln und relative Zielkandidaten berechnen |
-| `RuleEvaluationResult` (neu) | Status `Ignored`, `Matched`, `Ambiguous`, `CategoryFallback` oder `Failed`; Kandidaten und Diagnosen |
+| `IRuleEngine` / `RuleEngine` (implementiert) | Aktive Regeln auswerten, Prioritäten behandeln und relative Zielkandidaten berechnen |
+| `RuleEvaluationResult` (implementiert) | Status `Ignored`, `Matched`, `Ambiguous`, `CategoryFallback` oder `Failed`; Kandidaten und Diagnosen |
 | `SortSuggestion` (bestehend, erweitern) | Quelle, endgültiges Ziel, auslösende Regel-IDs und Namen, Begründung, erforderliche Ordneranlage und Konfliktstatus |
 
-Die bisherige Rückgabe `SortSuggestion?` von `IRuleEngine.CreateSuggestion` reicht nicht aus, um Mehrdeutigkeit, ignorierte Dateien und Fehler auseinanderzuhalten. Vorgeschlagen wird stattdessen eine Auswertung von `FileDescriptor` und Regeln mit Rückgabe eines `RuleEvaluationResult`. Die Ergebnisse enthalten zunächst relative Zielkandidaten; eine nachgelagerte Koordination ergänzt den tatsächlichen Dateisystemzustand zur Vorschau.
+`IRuleEngine.Evaluate(FileDescriptor file, IReadOnlyCollection<SortRule> rules)` liefert ein `RuleEvaluationResult` mit Status, Kandidaten und Diagnosen. `RuleEngine` erhält einen `IRuleValidator` über den Konstruktor. Nicht zugelassene Endungen liefern unmittelbar `Ignored`. Deaktivierte Regeln werden übersprungen; ungültige aktive Regeln werden ausgeschlossen und mit `InvalidRule` sowie Regel-ID und Feldname gemeldet. Gültige Regeln werden unabhängig davon weiter ausgewertet.
+
+Nur passende Regeln mit höchster Priorität erzeugen Kandidaten. `RuleTargetCandidate` enthält Kategorie, relativen Zielunterordner, endgültigen Dateinamen und eine Liste von `RuleReference` mit Regel-ID und Name. Identische Paare aus Zielunterordner und Dateiname werden mit einem ordinalen, groß-/kleinschreibungssensitiven Vergleich zusammengefasst. Ein Kandidat ergibt `Matched`, mehrere ergeben `Ambiguous`. Ohne Treffer entsteht `CategoryFallback` mit leerem Zielunterordner und ohne Regelreferenzen. Eine nachgelagerte Infrastructure-Koordination muss noch den tatsächlichen Dateisystemzustand zur Vorschau ergänzen.
+
+`RuleEvaluationDiagnostic` enthält optionale Regel-ID, Fehlercode, optionalen Feldnamen und Meldung. Ein Timeout in einem Dateinamen- oder Pfadabgleich ergibt `RegexTimeout` und insgesamt `Failed` ohne Kandidaten, auch wenn eine andere Regel passt. Ein ungültiger erzeugter Dateiname ergibt `InvalidFileName` und ebenfalls `Failed`. Vorhandene Validierungsdiagnosen bleiben auch bei Treffern und Fallbacks erhalten. Die Engine führt keine Dateioperationen aus.
 
 Eine optionale Schnittstelle `IDocumentTextExtractor` kann später in Core definiert werden. Ihre formatspezifischen Implementierungen gehören in Infrastructure; Parserbibliotheken gehören nicht in Core. Für das MVP wird diese Schnittstelle noch nicht benötigt.
 
@@ -217,8 +227,8 @@ Die Erkennung einer Datei und die Anzeige eines Popups sind damit von der fachli
 
 ## 9. Empfehlung für die Implementierung und Prüfung
 
-1. Regelmodell, Kategoriezuordnung und Ergebniszustände festlegen; `RuleValidator` und `RuleEngine` mit Metadaten implementieren.
-2. Die Beispiele einschließlich Gegenbeispielen als automatisierte Tests verwenden. Zusätzlich Groß-/Kleinschreibung, doppelte Endungen, deaktivierte Regeln, Pfadfilter, Prioritätsgleichstand, Kategorie-Fallback, ungültige Muster und Timeout-Verhalten prüfen.
+1. Implementiert im Arbeitsstand für Issue #26: Regelmodell, Kategoriezuordnung, Ergebniszustände, `RuleValidator` und `RuleEngine` mit Metadaten.
+2. Automatisierte Core-Tests decken Konzeptbeispiele und Gegenbeispiele, Groß-/Kleinschreibung, doppelte Endungen, deaktivierte Regeln, Pfadfilter, Prioritätsgleichstand, Kategorie-Fallback, ungültige Muster, Umbenennung und Timeout-Verhalten ab. Der vollständige Ablauf mit echten Dateien bleibt noch nachzuweisen.
 3. Lokale Speicherung, Archiv-Einrichtung und Ordnerüberwachung ergänzen. Wiederholte Ereignisse sowie noch laufende Downloads gezielt prüfen.
 4. Vorschau und Bestätigung anbinden; sichere Dateioperationen mit temporären Testordnern prüfen. Wesentliche Fälle: vorhandene Zieldatei, zwischenzeitliche Kollision, verschwundene Quelle, ungültiges Ziel, fehlende Rechte und Teilfehler.
 5. Erst nach einem zuverlässigen vollständigen Ablauf entscheiden, ob Inhaltsprüfung, dynamische Regex-Gruppen im Ziel oder unscharfe Ordnersuche tatsächlich benötigt werden.

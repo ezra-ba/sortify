@@ -78,11 +78,22 @@ public sealed class SettingsService : ISettingsService
         }
     }
 
-    public async Task<SettingsSaveResult> SaveAsync(
+    public Task<SettingsSaveResult> SaveAsync(
         AppSettings settings,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(settings);
+
+        return UpdateAsync(
+            _ => settings,
+            cancellationToken);
+    }
+
+    public async Task<SettingsSaveResult> UpdateAsync(
+        Func<AppSettings, AppSettings> update,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(update);
 
         await gate.WaitAsync(cancellationToken);
 
@@ -103,13 +114,17 @@ public sealed class SettingsService : ISettingsService
                     "Bitte zuerst die Einstellungsdatei prüfen.");
             }
 
+            // Erst innerhalb der Sperre aus dem aktuellen Stand berechnen.
+            var updated = update(Current);
+            ArgumentNullException.ThrowIfNull(updated);
+
             var result = await store.SaveAsync(
-                settings,
+                updated,
                 cancellationToken);
 
             if (result.IsSuccess)
             {
-                Current = settings;
+                Current = updated;
             }
 
             return result;

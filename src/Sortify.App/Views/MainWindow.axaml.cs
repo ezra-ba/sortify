@@ -206,19 +206,43 @@ public partial class MainWindow : Window
         await viewModel.SaveWatchedFolderAsync(path);
     }
 
-    private async void AddTargetFolder(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private async void AddTargetFolder(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
     {
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        var folders = await StorageProvider.OpenFolderPickerAsync(
+            new FolderPickerOpenOptions
+            {
+                AllowMultiple = false,
+                Title = "Target-Ordner auswählen"
+            });
+
+        if (folders.Count == 0 ||
+            DataContext is not MainViewModel viewModel)
         {
-            AllowMultiple = false,
-            Title = "Target-Ordner auswählen"
-        });
-        if (folders.Count > 0 && DataContext is MainViewModel viewModel)
-            viewModel.AddTargetFolder(folders[0].Path.LocalPath);
+            return;
+        }
+
+        var path = folders[0].TryGetLocalPath();
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            viewModel.SettingsStatus =
+                "Bitte einen lokalen Target-Ordner auswählen.";
+            return;
+        }
+
+        await viewModel.AddTargetFolderAsync(path);
     }
 
     private void TargetFolderPointerPressed(object? sender, PointerPressedEventArgs e)
     {
+
+        if (DataContext is MainViewModel { IsSavingSettings: true })
+        {
+            return;
+        }
+
         if (e.Source is Button button && button.Classes.Contains("nickname-action"))
             return;
 
@@ -247,6 +271,12 @@ public partial class MainWindow : Window
 
     private void TargetFolderPointerMoved(object? sender, PointerEventArgs e)
     {
+
+        if (DataContext is MainViewModel { IsSavingSettings: true })
+        {
+            return;
+        }
+
         if (e.Source is Button button && button.Classes.Contains("nickname-action"))
             return;
 
@@ -306,14 +336,29 @@ public partial class MainWindow : Window
         return null;
     }
 
-    private void TargetFolderPointerReleased(object? sender, PointerReleasedEventArgs e)
+    private async void TargetFolderPointerReleased(
+        object? sender,
+        PointerReleasedEventArgs e)
     {
-        if (e.Source is Button button && button.Classes.Contains("nickname-action"))
+
+        if (e.Source is Button button &&
+            button.Classes.Contains("nickname-action"))
+        {
             return;
+        }
+
+        var shouldSaveOrder =
+            _hasDragged && _draggedTargetFolder is not null;
 
         e.Pointer.Capture(null);
         ClearPressedButton();
         ResetDrag();
+
+        if (shouldSaveOrder && DataContext is MainViewModel viewModel)
+        {
+            await viewModel.SaveTargetFolderOrderAsync();
+        }
+
         Dispatcher.UIThread.Post(ResetTargetFolderVisualStates);
     }
 

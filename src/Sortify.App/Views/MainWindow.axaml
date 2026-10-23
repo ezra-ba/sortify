@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:Sortify.App.ViewModels" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:platform="using:Avalonia.Controls" mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="760" x:Class="Sortify.App.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/Branding/sortify-icon.png" Title="Sortify · Ordnerverwaltung" Width="1180" Height="760" MinWidth="900" MinHeight="620" Background="#F5F5F7" SystemDecorations="None" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="44">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:Sortify.App.ViewModels" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:platform="using:Avalonia.Controls" mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="760" x:Class="Sortify.App.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/Branding/sortify-icon.png" Title="Sortify · Ordnerverwaltung" Width="1180" Height="760" MinWidth="900" MinHeight="620" Background="#F5F5F7" WindowDecorations="None" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="44">
 	<Design.DataContext>
 		<vm:MainViewModel />
 	</Design.DataContext>
@@ -138,6 +138,7 @@
 						<TextBlock Classes="eyebrow" Text="ÜBERWACHUNGS-ORDNER"/>
 						<TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#1C1C1E" Text="{Binding WatchedFolder}"/>
 						<TextBlock Classes="muted" Text="{Binding SettingsStatus}" TextWrapping="Wrap"/>
+						<TextBlock Classes="muted" Text="{Binding MonitoringStatus}" TextWrapping="Wrap"/>
 					</StackPanel>
 					<Button Grid.Column="2" Classes="secondary motion" Content="Ordner wechseln" Click="SelectWatchedFolder"/>
 				</Grid>

@@ -5,6 +5,7 @@ using Sortify.App.ViewModels;
 using Sortify.App.Views;
 using Sortify.Core.Rules;
 using Sortify.Infrastructure.Persistence;
+using Sortify.App.Services;
 
 namespace Sortify.App;
 
@@ -46,9 +47,20 @@ public partial class App : Application
 
             desktop.MainWindow = window;
 
+            var controller = new DownloadMonitorController(viewModel);
+            var initialized = false;
+            viewModel.MonitoringFolderConfigured += () =>
+            {
+                if (initialized)
+                    controller.Restart(viewModel.CurrentSettings?.WatchedFolderPath);
+            };
+            window.Closed += (_, _) => controller.Dispose();
+
             window.Opened += async (_, _) =>
             {
                 await viewModel.InitializeSettingsAsync();
+                initialized = true;
+                controller.Restart(viewModel.CurrentSettings?.WatchedFolderPath);
             };
         }
 

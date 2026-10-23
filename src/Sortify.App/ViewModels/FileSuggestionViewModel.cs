@@ -1,14 +1,12 @@
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Sortify.Core.Rules;
 
 namespace Sortify.App.ViewModels;
 
 public partial class FileSuggestionViewModel : ViewModelBase
 {
-    private static readonly Regex ValidFileNamePattern = new("^[\\p{L}\\p{N}_-](?:[\\p{L}\\p{N}_- ]{0,253}[\\p{L}\\p{N}_-])?$", RegexOptions.CultureInvariant);
-
     public ObservableCollection<TargetFolderViewModel> TargetFolders { get; }
 
     public FileSuggestionViewModel()
@@ -22,6 +20,21 @@ public partial class FileSuggestionViewModel : ViewModelBase
         SelectedTargetFolder = TargetFolders.FirstOrDefault(folder => folder.IsDefault)
             ?? TargetFolders.FirstOrDefault();
     }
+
+    public FileSuggestionViewModel(
+        ObservableCollection<TargetFolderViewModel> targetFolders,
+        string path) : this(targetFolders)
+    {
+        SourcePath = path;
+        DetectedFileName = Path.GetFileName(path);
+        FileExtension = Path.GetExtension(path);
+        NewFileName = Path.GetFileNameWithoutExtension(path);
+        SuggestionExplanation = "Neue Datei erkannt.";
+    }
+
+    public string? SourcePath { get; }
+
+    public string SuggestionExplanation { get; } = "Manuelle Popup-Vorschau";
 
     [ObservableProperty]
     public partial string DetectedFileName { get; set; } = "rechnung_2026-10-07.pdf";
@@ -42,13 +55,14 @@ public partial class FileSuggestionViewModel : ViewModelBase
     [ObservableProperty]
     public partial bool HasValidationError { get; set; }
 
-    public bool IsFileNameValid => ValidFileNamePattern.IsMatch(NewFileName.Normalize());
+    public bool IsFileNameValid => PortableNameValidator.IsValid(NewFileName + FileExtension)
+        && NewFileName.Length > 0 && NewFileName.Length + FileExtension.Length <= 255;
 
     public bool IsValidationVisible => !IsFileNameValid;
 
     public string ValidationMessage => IsFileNameValid
         ? string.Empty
-        : "Erlaubt sind maximal 255 Unicode-Buchstaben, Zahlen, Leerzeichen sowie _ und -. Führende oder abschließende Leerzeichen und Sonderzeichen sind nicht erlaubt.";
+        : "Bitte einen gueltigen Dateinamen mit maximal 255 Zeichen inklusive Endung eingeben.";
 
     public string FilePathPreview => SelectedTargetFolder is null || string.IsNullOrWhiteSpace(NewFileName)
         ? string.Empty

@@ -68,6 +68,13 @@ public partial class MainViewModel : ViewModelBase
         : "Als Standard festlegen";
     private readonly ISettingsService? settingsService;
 
+    public AppSettings? CurrentSettings => settingsService?.Current;
+
+    public event Action? MonitoringFolderConfigured;
+
+    [ObservableProperty]
+    public partial string MonitoringStatus { get; set; } = "";
+
     public MainViewModel()
     {
         // Für die Vorschau im Avalonia-Designer.
@@ -151,6 +158,7 @@ public partial class MainViewModel : ViewModelBase
 
         WatchedFolder = settingsService.Current!.WatchedFolderPath!;
         SettingsStatus = "Überwachungsordner gespeichert.";
+        MonitoringFolderConfigured?.Invoke();
     }
     private async Task<SettingsSaveResult> SaveRulesCoreAsync(
         IReadOnlyList<SortRule> rules)

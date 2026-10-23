@@ -1,141 +1,44 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Sortify.Core.Models;
-using Sortify.Core.Services;
 
 namespace Sortify.Infrastructure.Monitoring;
 
-public sealed class FolderMonitor : IFileMonitor
+public sealed class FolderMonitor : IDisposable
 {
-    private readonly TimeSpan pollInterval;
-    private readonly TimeSpan stabilityPeriod;
+    private FileSystemWatcher? watcher;
 
-    public FolderMonitor(TimeSpan? pollInterval = null, TimeSpan? stabilityPeriod = null)
+    public void Start(string directory, Action<string> onFile, Action<string> onError)
     {
-        this.pollInterval = pollInterval ?? TimeSpan.FromMilliseconds(250);
-        this.stabilityPeriod = stabilityPeriod ?? TimeSpan.FromSeconds(1);
-        if (this.pollInterval <= TimeSpan.Zero || this.stabilityPeriod <= TimeSpan.Zero)
-            throw new ArgumentOutOfRangeException(nameof(pollInterval));
-    }
+        Dispose();
+        var current = new FileSystemWatcher(directory) { NotifyFilter = NotifyFilters.FileName };
+        var seen = new ConcurrentDictionary<string, byte>(
+            OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
 
-    public async IAsyncEnumerable<FileDescriptor> WatchAsync(
-        string directory,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        var root = Path.GetFullPath(directory);
-        var comparer = OperatingSystem.IsWindows()
-            ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-        var known = new ConcurrentDictionary<string, byte>(comparer);
-        var pending = new ConcurrentDictionary<string, Candidate>(comparer);
-        foreach (var path in Directory.EnumerateFiles(root))
-            known.TryAdd(path, 0);
-
-        void Enqueue(string path)
+        void Report(string path)
         {
-            if (!known.ContainsKey(path) && !IsTemporary(path))
-                pending.TryAdd(path, new Candidate());
+            var extension = Path.GetExtension(path).ToLowerInvariant();
+            if (ReferenceEquals(watcher, current) && File.Exists(path)
+                && extension is not (".crdownload" or ".part" or ".partial" or ".tmp")
+                && !Path.GetFileName(path).StartsWith("~$", StringComparison.Ordinal)
+                && seen.TryAdd(path, 0))
+                onFile(path);
         }
 
-        using var watcher = new FileSystemWatcher(root)
+        current.Created += (_, args) => Report(args.FullPath);
+        current.Renamed += (_, args) => Report(args.FullPath);
+        current.Deleted += (sender, args) => seen.TryRemove(args.FullPath, out _);
+        current.Error += (_, _) =>
         {
-            IncludeSubdirectories = false,
-            NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName
+            if (ReferenceEquals(watcher, current))
+                onError("Ordnerueberwachung unterbrochen. Bitte den Ordner erneut auswaehlen.");
         };
-        var errors = new ConcurrentQueue<Exception>();
-        watcher.Created += (_, args) => Enqueue(args.FullPath);
-        watcher.Renamed += (sender, args) =>
-        {
-            known.TryRemove(args.OldFullPath, out _);
-            pending.TryRemove(args.OldFullPath, out _);
-            Enqueue(args.FullPath);
-        };
-        watcher.Deleted += (sender, args) =>
-        {
-            known.TryRemove(args.FullPath, out _);
-            pending.TryRemove(args.FullPath, out _);
-        };
-        watcher.Error += (_, args) => errors.Enqueue(args.GetException());
-        watcher.EnableRaisingEvents = true;
-
-        // Catch files created between the initial inventory and enabling events.
-        foreach (var path in Directory.EnumerateFiles(root))
-            Enqueue(path);
-
-        using var timer = new PeriodicTimer(pollInterval);
-        while (await timer.WaitForNextTickAsync(cancellationToken))
-        {
-            if (errors.TryDequeue(out var error))
-                throw new IOException("Die Ordnerueberwachung wurde unterbrochen. Bitte den Ordner erneut auswaehlen.", error);
-
-            foreach (var (path, candidate) in pending.ToArray())
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                FileDescriptor? file = null;
-                try
-                {
-                    if (!File.Exists(path))
-                    {
-                        pending.TryRemove(path, out _);
-                        continue;
-                    }
-
-                    // Do not follow links out of the selected directory.
-                    if ((File.GetAttributes(path) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
-                    {
-                        pending.TryRemove(path, out _);
-                        continue;
-                    }
-
-                    using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None);
-                    var length = stream.Length;
-                    var modified = File.GetLastWriteTimeUtc(path);
-                    if (candidate.Size != length || candidate.Modified != modified)
-                    {
-                        candidate.Size = length;
-                        candidate.Modified = modified;
-                        candidate.StableSince = Stopwatch.GetTimestamp();
-                    }
-                    else if (Stopwatch.GetElapsedTime(candidate.StableSince) >= stabilityPeriod)
-                    {
-                        file = new FileDescriptor(path, Path.GetFileNameWithoutExtension(path),
-                            Path.GetExtension(path), Path.GetRelativePath(root, path).Replace('\\', '/'),
-                            length, new DateTimeOffset(modified));
-                    }
-                }
-                catch (IOException)
-                {
-                    candidate.StableSince = Stopwatch.GetTimestamp();
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    candidate.StableSince = Stopwatch.GetTimestamp();
-                }
-
-                if (file is not null &&
-                    pending.TryRemove(new KeyValuePair<string, Candidate>(path, candidate)))
-                {
-                    known.TryAdd(path, 0);
-                    yield return file;
-                }
-            }
-        }
+        watcher = current;
+        current.EnableRaisingEvents = true;
     }
 
-    private static bool IsTemporary(string path)
+    public void Dispose()
     {
-        var extension = Path.GetExtension(path);
-        return extension.Equals(".crdownload", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".part", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".partial", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".tmp", StringComparison.OrdinalIgnoreCase)
-            || Path.GetFileName(path).StartsWith("~$", StringComparison.Ordinal);
-    }
-
-    private sealed class Candidate
-    {
-        public long Size { get; set; } = -1;
-        public DateTime Modified { get; set; }
-        public long StableSince { get; set; } = Stopwatch.GetTimestamp();
+        var previous = watcher;
+        watcher = null;
+        previous?.Dispose();
     }
 }

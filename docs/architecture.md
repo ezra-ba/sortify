@@ -57,4 +57,4 @@ Die Speicherung aus Issue #28 speichert Konfiguration und Regeln gemeinsam in ei
 
 ## Dateierkennung und Popup
 
-Die erste Umsetzung zu Issue #29 verbindet einen `IFileMonitor` mit einem austauschbaren `IFileSuggestionProvider` und einem `IDownloadPresenter`. Der Ablauf und die Grenzen sind in [download-detection.md](download-detection.md) beschrieben. Dateisystemzugriffe und die Verarbeitung liegen in Infrastructure; der Avalonia-Presenter zeigt Vorschläge auf dem UI-Thread. Eine spätere Regelengine- oder KI-Anbindung ersetzt den Vorschlagsanbieter, ohne die Ordnerüberwachung ändern zu müssen.
+Die rudimentaere Umsetzung zu Issue #29 verwendet einen `FolderMonitor` in Infrastructure. Er meldet neue oder umbenannte Dateien an den `DownloadMonitorController`, der das Popup auf dem UI-Thread mit dem echten Dateinamen oeffnet. Ordnerwechsel und Programmende beenden die bisherige Ueberwachung. Es gibt keine Warteschlange, Vorschlagsanbieter oder Pruefung auf vollstaendige Downloads. Details stehen in [download-detection.md](download-detection.md).

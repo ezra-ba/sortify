@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Sortify.Core.Models;
 using Sortify.Core.Rules;
 
 namespace Sortify.App.ViewModels;
@@ -24,15 +23,13 @@ public partial class FileSuggestionViewModel : ViewModelBase
 
     public FileSuggestionViewModel(
         ObservableCollection<TargetFolderViewModel> targetFolders,
-        FileDescriptor file,
-        FileSuggestionProposal proposal) : this(targetFolders)
+        string path) : this(targetFolders)
     {
-        SourcePath = file.SourcePath;
-        DetectedFileName = Path.GetFileName(file.SourcePath);
-        FileExtension = file.Extension;
-        NewFileName = Path.GetFileNameWithoutExtension(proposal.FileName);
-        SelectedTargetFolder = TargetFolders.FirstOrDefault(t => t.Id == proposal.TargetFolderId);
-        SuggestionExplanation = proposal.Explanation;
+        SourcePath = path;
+        DetectedFileName = Path.GetFileName(path);
+        FileExtension = Path.GetExtension(path);
+        NewFileName = Path.GetFileNameWithoutExtension(path);
+        SuggestionExplanation = "Neue Datei erkannt.";
     }
 
     public string? SourcePath { get; }

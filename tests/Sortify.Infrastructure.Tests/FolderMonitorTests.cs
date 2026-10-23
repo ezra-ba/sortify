@@ -1,4 +1,4 @@
-using Sortify.Core.Models;
+using System.Threading.Channels;
 using Sortify.Infrastructure.Monitoring;
 
 namespace Sortify.Infrastructure.Tests;
@@ -6,29 +6,21 @@ namespace Sortify.Infrastructure.Tests;
 public sealed class FolderMonitorTests : IDisposable
 {
     private readonly string directory = Path.Combine(Path.GetTempPath(), "sortify-monitor-" + Guid.NewGuid());
-    private readonly FolderMonitor monitor = new(
-        TimeSpan.FromMilliseconds(25), TimeSpan.FromMilliseconds(150));
+    private readonly FolderMonitor monitor = new();
 
     public FolderMonitorTests() => Directory.CreateDirectory(directory);
 
     [Fact]
-    public async Task DetectsNewFileButNotExistingFilesAndPreservesBytes()
+    public async Task ReportsNewFileInsteadOfExistingFile()
     {
         await File.WriteAllTextAsync(Path.Combine(directory, "existing.pdf"), "old");
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var reader = monitor.WatchAsync(directory, timeout.Token).GetAsyncEnumerator();
-        var next = reader.MoveNextAsync().AsTask();
-        var path = Path.Combine(directory, "new.file.DOCX");
-        await File.WriteAllTextAsync(path, "content");
+        var detected = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        monitor.Start(directory, path => detected.TrySetResult(path), _ => { });
+        var expected = Path.Combine(directory, "new.DOCX");
+        await File.WriteAllTextAsync(expected, "unchanged");
 
-        Assert.True(await next);
-        var file = reader.Current;
-        Assert.Equal(path, file.SourcePath);
-        Assert.Equal("new.file", file.FileNameWithoutExtension);
-        Assert.Equal(".DOCX", file.Extension);
-        Assert.Equal("new.file.DOCX", file.RelativePath);
-        Assert.Equal(7, file.Size);
-        Assert.Equal("content", await File.ReadAllTextAsync(path));
+        Assert.Equal(expected, await detected.Task.WaitAsync(TimeSpan.FromSeconds(5)));
+        Assert.Equal("unchanged", await File.ReadAllTextAsync(expected));
     }
 
     [Theory]
@@ -36,82 +28,37 @@ public sealed class FolderMonitorTests : IDisposable
     [InlineData(".part")]
     [InlineData(".partial")]
     [InlineData(".tmp")]
-    public async Task WaitsForTemporaryDownloadToBeRenamed(string suffix)
+    public async Task IgnoresTemporaryNameAndReportsFinalRename(string suffix)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var reader = monitor.WatchAsync(directory, timeout.Token).GetAsyncEnumerator();
-        var next = reader.MoveNextAsync().AsTask();
+        var detected = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        monitor.Start(directory, path => detected.TrySetResult(path), _ => { });
         var temporary = Path.Combine(directory, "download.pdf" + suffix);
-        await File.WriteAllTextAsync(temporary, "download");
-        await Task.Delay(400, timeout.Token);
-        Assert.False(next.IsCompleted);
+        await File.WriteAllTextAsync(temporary, "content");
+        await Task.Delay(150);
+        Assert.False(detected.Task.IsCompleted);
+
         var final = Path.Combine(directory, "download.pdf");
         File.Move(temporary, final);
-        Assert.True(await next);
-        Assert.Equal(final, reader.Current.SourcePath);
+        Assert.Equal(final, await detected.Task.WaitAsync(TimeSpan.FromSeconds(5)));
     }
 
     [Fact]
-    public async Task WaitsForExclusiveWriterAndStableMetadata()
+    public async Task RestartReplacesOldFolder()
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var reader = monitor.WatchAsync(directory, timeout.Token).GetAsyncEnumerator();
-        var next = reader.MoveNextAsync().AsTask();
-        var path = Path.Combine(directory, "stream.txt");
-        await using (var writer = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
-        {
-            await writer.WriteAsync(new byte[] { 1, 2 }, timeout.Token);
-            await writer.FlushAsync(timeout.Token);
-            await Task.Delay(400, timeout.Token);
-            Assert.False(next.IsCompleted);
-            await writer.WriteAsync(new byte[] { 3 }, timeout.Token);
-        }
-
-        Assert.True(await next);
-        Assert.Equal(3, reader.Current.Size);
-    }
-
-    [Fact]
-    public async Task DoesNotNotifyAgainForSameFileOrItsChanges()
-    {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var reader = monitor.WatchAsync(directory, timeout.Token).GetAsyncEnumerator();
-        var next = reader.MoveNextAsync().AsTask();
-        var first = Path.Combine(directory, "first.txt");
-        await File.WriteAllTextAsync(first, "a");
-        Assert.True(await next);
-        Assert.Equal(first, reader.Current.SourcePath);
-
-        var second = reader.MoveNextAsync().AsTask();
-        await File.AppendAllTextAsync(first, "b");
-        var other = Path.Combine(directory, "other.txt");
-        await File.WriteAllTextAsync(other, "other");
-        Assert.True(await second);
-        Assert.Equal(other, reader.Current.SourcePath);
-    }
-
-    [Fact]
-    public async Task CancellationStopsOldFolderBeforeStartingAnother()
-    {
-        using var firstSession = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using (var reader = monitor.WatchAsync(directory, firstSession.Token).GetAsyncEnumerator())
-        {
-            var next = reader.MoveNextAsync().AsTask();
-            firstSession.Cancel();
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => next);
-        }
-
+        var paths = Channel.CreateUnbounded<string>();
+        monitor.Start(directory, path => paths.Writer.TryWrite(path), _ => { });
         var other = Path.Combine(directory, "other");
         Directory.CreateDirectory(other);
-        using var secondSession = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var secondReader = monitor.WatchAsync(other, secondSession.Token).GetAsyncEnumerator();
-        var detected = secondReader.MoveNextAsync().AsTask();
-        await File.WriteAllTextAsync(Path.Combine(directory, "old-folder.txt"), "old");
-        var expected = Path.Combine(other, "new-folder.txt");
+        monitor.Start(other, path => paths.Writer.TryWrite(path), _ => { });
+        await File.WriteAllTextAsync(Path.Combine(directory, "old.txt"), "old");
+        var expected = Path.Combine(other, "new.txt");
         await File.WriteAllTextAsync(expected, "new");
-        Assert.True(await detected);
-        Assert.Equal(expected, secondReader.Current.SourcePath);
+        Assert.Equal(expected, await paths.Reader.ReadAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5)));
     }
 
-    public void Dispose() => Directory.Delete(directory, true);
+    public void Dispose()
+    {
+        monitor.Dispose();
+        Directory.Delete(directory, true);
+    }
 }

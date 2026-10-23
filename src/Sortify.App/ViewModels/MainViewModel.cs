@@ -107,6 +107,16 @@ public partial class MainViewModel : ViewModelBase
             _ => result.ErrorMessage
                 ?? "Die Einstellungen konnten nicht geladen werden."
         };
+        if (result.Warnings.Count > 0)
+        {
+            SettingsStatus += Environment.NewLine +
+                "Zielzuordnung prüfen:" +
+                Environment.NewLine +
+                string.Join(
+                    Environment.NewLine,
+                    result.Warnings.Select(warning =>
+                        $"{warning.RuleName}: {warning.Message}"));
+        }
     }
     private void RestoreTargetFolders(AppSettings settings)
     {

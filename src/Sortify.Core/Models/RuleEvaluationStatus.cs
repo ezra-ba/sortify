@@ -5,6 +5,6 @@ public enum RuleEvaluationStatus
     Ignored,
     Matched,
     Ambiguous,
-    CategoryFallback,
+    NoMatch,
     Failed
 }

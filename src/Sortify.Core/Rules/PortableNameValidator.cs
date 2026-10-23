@@ -21,6 +21,7 @@ public static class PortableNameValidator
     {
         if (string.IsNullOrWhiteSpace(name) ||
             name is "." or ".." ||
+            name.StartsWith(' ') ||
             name.EndsWith('.') ||
             name.EndsWith(' '))
         {

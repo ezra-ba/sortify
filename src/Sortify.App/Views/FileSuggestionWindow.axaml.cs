@@ -82,6 +82,30 @@ public partial class FileSuggestionWindow : Window
         Close();
     }
 
+    private void FilePathPreviewTextBlock_ToolTipOpening(object? sender, CancelRoutedEventArgs e)
+    {
+        if (sender is not TextBlock textBlock)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        var untrimmedTextBlock = new TextBlock
+        {
+            Text = textBlock.Text,
+            FontFamily = textBlock.FontFamily,
+            FontSize = textBlock.FontSize,
+            FontWeight = textBlock.FontWeight,
+            FontStyle = textBlock.FontStyle,
+            TextWrapping = TextWrapping.NoWrap,
+            TextTrimming = TextTrimming.None
+        };
+        untrimmedTextBlock.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+        if (untrimmedTextBlock.DesiredSize.Width <= textBlock.Bounds.Width)
+            e.Cancel = true;
+    }
+
     private void FileNameTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
         if (sender is not TextBox textBox)
@@ -91,6 +115,9 @@ public partial class FileSuggestionWindow : Window
         {
             if (DataContext is FileSuggestionViewModel viewModel)
                 viewModel.HasValidationError = false;
+            ToolTip.SetTip(textBox, null);
+            textBox.Classes.Remove("invalid");
+            textBox.BorderBrush = new SolidColorBrush(Color.Parse(textBox.IsFocused ? "#B7A5F2" : "#D9D9E0"));
             return;
         }
 
@@ -99,20 +126,31 @@ public partial class FileSuggestionWindow : Window
 
     private static void FileNameTextBox_GotFocus(object? sender, RoutedEventArgs e)
     {
-        if (sender is TextBox textBox)
-            textBox.BorderBrush = new SolidColorBrush(Color.Parse("#B7A5F2"));
+        if (sender is not TextBox textBox)
+            return;
+
+        var hasValidationError = (textBox.DataContext as FileSuggestionViewModel)?.HasValidationError == true;
+        textBox.BorderBrush = new SolidColorBrush(Color.Parse(hasValidationError ? "#B42318" : "#B7A5F2"));
     }
 
     private static void FileNameTextBox_LostFocus(object? sender, RoutedEventArgs e)
     {
-        if (sender is TextBox textBox)
-            textBox.BorderBrush = new SolidColorBrush(Color.Parse("#D9D9E0"));
+        if (sender is not TextBox textBox)
+            return;
+
+        var hasValidationError = (textBox.DataContext as FileSuggestionViewModel)?.HasValidationError == true;
+        textBox.BorderBrush = new SolidColorBrush(Color.Parse(hasValidationError ? "#B42318" : "#D9D9E0"));
     }
 
     private void ShowValidationError()
     {
         if (DataContext is FileSuggestionViewModel viewModel)
+        {
             viewModel.HasValidationError = true;
+            ToolTip.SetTip(FileNameTextBox, viewModel.ValidationMessage);
+        }
+        FileNameTextBox.Classes.Add("invalid");
+        FileNameTextBox.BorderBrush = new SolidColorBrush(Color.Parse("#B42318"));
         ShakeFileNameTextBox();
     }
 

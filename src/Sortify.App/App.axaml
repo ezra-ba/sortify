@@ -9,7 +9,36 @@
         <local:ViewLocator />
     </Application.DataTemplates>
 
+    <!-- Fluent's template reads these brushes for the native button states. -->
+    <Application.Resources>
+        <SolidColorBrush x:Key="ButtonBackground" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#F7F3FF" />
+        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#EEE8FF" />
+        <SolidColorBrush x:Key="ButtonForeground" Color="#1C1C1E" />
+        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#1C1C1E" />
+        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#1C1C1E" />
+        <SolidColorBrush x:Key="ButtonBorderBrush" Color="#D9D9E0" />
+        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#D2C6F7" />
+        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#B7A5F2" />
+        <SolidColorBrush x:Key="ComboBoxBackground" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#F7F3FF" />
+        <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#EEE8FF" />
+        <SolidColorBrush x:Key="ComboBoxForeground" Color="#1C1C1E" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#D9D9E0" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#D2C6F7" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="#B7A5F2" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="#F7F3FF" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundPressed" Color="#EEE8FF" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="#EEE8FF" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="#E5DCFF" />
+        <SolidColorBrush x:Key="ComboBoxItemForeground" Color="#1C1C1E" />
+        <SolidColorBrush x:Key="TextControlBorderBrush" Color="#D9D9E0" />
+        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#D2C6F7" />
+        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#B7A5F2" />
+    </Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://Sortify.App/Themes/DesignSystem.axaml" />
     </Application.Styles>
 </Application>

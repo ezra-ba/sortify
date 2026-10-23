@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using Sortify.App.ViewModels;
@@ -14,19 +16,165 @@ public partial class MainWindow : Window
     private Avalonia.Point _dragStart;
     private bool _hasDragged;
     private Button? _pressedTargetButton;
+    private Avalonia.Point _dragOffset;
 
     public MainWindow()
     {
         InitializeComponent();
+        if (OperatingSystem.IsWindows())
+        {
+            Win32Properties.AddWindowStylesCallback(this, static (style, exStyle) =>
+                (style | 0x00010000u | 0x00020000u | 0x00040000u, exStyle));
+        }
         AddHandler(InputElement.PointerPressedEvent, TargetFolderPointerPressed, RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(InputElement.PointerMovedEvent, TargetFolderPointerMoved, RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(InputElement.PointerReleasedEvent, TargetFolderPointerReleased, RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(InputElement.PointerEnteredEvent, ButtonPointerEntered, RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(InputElement.PointerExitedEvent, ButtonPointerExited, RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(InputElement.PointerPressedEvent, ButtonPointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
+        AddHandler(InputElement.PointerReleasedEvent, ButtonPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
+    }
+
+    private static readonly IBrush Accent = Brushes.White;
+    private static readonly IBrush AccentHover = new SolidColorBrush(Color.Parse("#F7F3FF"));
+    private static readonly IBrush AccentPressed = new SolidColorBrush(Color.Parse("#EEE8FF"));
+    private static readonly IBrush SoftAccent = new SolidColorBrush(Color.Parse("#F7F3FF"));
+    private static readonly IBrush SoftAccentPressed = new SolidColorBrush(Color.Parse("#EEE8FF"));
+    private static readonly IBrush Surface = new SolidColorBrush(Color.Parse("#FFFFFF"));
+
+    private static Button? GetButton(object? source)
+    {
+        var visual = source as Visual;
+        while (visual is not null)
+        {
+            if (visual is Button button) return button;
+            visual = visual.GetVisualParent();
+        }
+
+        return null;
+    }
+
+    private static void ButtonPointerEntered(object? sender, PointerEventArgs e)
+    {
+        if (GetButton(e.Source) is not { } button) return;
+        if (button.Classes.Contains("window-button"))
+        {
+            button.Background = button.Classes.Contains("close")
+                ? SoftAccent
+                : SoftAccent;
+            return;
+        }
+        button.Background = button.Classes.Contains("primary") ? AccentHover : SoftAccent;
+    }
+
+    private static void ButtonPointerExited(object? sender, PointerEventArgs e)
+    {
+        if (GetButton(e.Source) is not { } button) return;
+        button.RenderTransform = new ScaleTransform(1, 1);
+        if (button.Classes.Contains("window-button"))
+        {
+            button.Background = Brushes.Transparent;
+            return;
+        }
+        button.Background = button.Classes.Contains("primary")
+            ? Accent
+            : button.Classes.Contains("target-folder") && button.Classes.Contains("selected")
+                ? SoftAccent
+                : Surface;
+    }
+
+    private static void ButtonPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (GetButton(e.Source) is not { } button) return;
+        button.RenderTransform = new ScaleTransform(0.97, 0.97);
+        if (button.Classes.Contains("window-button"))
+        {
+            button.Background = button.Classes.Contains("close")
+                ? new SolidColorBrush(Color.Parse("#F9D8D8"))
+                : SoftAccentPressed;
+            return;
+        }
+        button.Background = button.Classes.Contains("primary") ? AccentPressed : SoftAccentPressed;
+    }
+
+    private static void ButtonPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        var button = GetButton(e.Source) ?? e.Pointer.Captured as Button;
+        if (button is null) return;
+        button.RenderTransform = new ScaleTransform(1, 1);
+        if (button.Classes.Contains("window-button"))
+        {
+            button.Background = Brushes.Transparent;
+            return;
+        }
+        button.Background = button.Classes.Contains("target-folder") && button.Classes.Contains("selected")
+            ? SoftAccent
+            : Brushes.White;
     }
 
     private void OpenFileSuggestion(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         if (DataContext is MainViewModel viewModel)
             new FileSuggestionWindow(new FileSuggestionViewModel(viewModel.TargetFolders)).Show(this);
+    }
+
+    private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            BeginMoveDrag(e);
+    }
+
+    private void WindowButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string action })
+            return;
+
+        switch (action)
+        {
+            case "minimize":
+                WindowState = WindowState.Minimized;
+                break;
+            case "maximize":
+                WindowState = WindowState == WindowState.Maximized
+                    ? WindowState.Normal
+                    : WindowState.Maximized;
+                break;
+            case "close":
+                Close();
+                break;
+        }
+    }
+
+    private static void CloseButton_PointerEntered(object? sender, PointerEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background = new SolidColorBrush(Color.Parse("#FDECEC"));
+            button.Foreground = new SolidColorBrush(Color.Parse("#1C1C1E"));
+        }
+    }
+
+    private static void CloseButton_PointerExited(object? sender, PointerEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background = Brushes.Transparent;
+            button.Foreground = new SolidColorBrush(Color.Parse("#6E6E73"));
+        }
+    }
+
+    private static void CloseButton_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background = SoftAccentPressed;
+            button.Foreground = new SolidColorBrush(Color.Parse("#1C1C1E"));
+        }
+    }
+
+    private static void CloseButton_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        CloseButton_PointerExited(sender, e);
     }
 
     private async void SelectWatchedFolder(
@@ -82,6 +230,8 @@ public partial class MainWindow : Window
                 viewModel.SelectTargetFolder(folder);
 
             _pressedTargetButton = FindTargetButtonAt(position);
+            if (_pressedTargetButton?.TranslatePoint(new Point(), this) is Point buttonTopLeft)
+                _dragOffset = position - buttonTopLeft;
             _pressedTargetButton?.Classes.Add("press-feedback");
             e.Pointer.Capture(this);
             _draggedTargetFolder = folder;
@@ -164,6 +314,19 @@ public partial class MainWindow : Window
         e.Pointer.Capture(null);
         ClearPressedButton();
         ResetDrag();
+        Dispatcher.UIThread.Post(ResetTargetFolderVisualStates);
+    }
+
+    private void ResetTargetFolderVisualStates()
+    {
+        foreach (var button in this.GetVisualDescendants().OfType<Button>()
+                     .Where(button => button.Classes.Contains("target-folder")))
+        {
+            button.RenderTransform = new ScaleTransform(1, 1);
+            button.Background = button.Classes.Contains("selected")
+                ? new SolidColorBrush(Color.Parse("#F7F3FF"))
+                : Brushes.White;
+        }
     }
 
     private Button? FindTargetButtonAt(Avalonia.Point position)
@@ -181,18 +344,36 @@ public partial class MainWindow : Window
 
     private void ClearPressedButton()
     {
+        if (_pressedTargetButton is { } button)
+        {
+            button.RenderTransform = new ScaleTransform(1, 1);
+            button.Background = button.Classes.Contains("selected")
+                ? new SolidColorBrush(Color.Parse("#F7F3FF"))
+                : Brushes.White;
+        }
+
         _pressedTargetButton?.Classes.Remove("press-feedback");
         _pressedTargetButton = null;
     }
 
     private void ShowDragPreview(TargetFolderViewModel folder, Avalonia.Point position)
     {
+        if (_pressedTargetButton is { Bounds.Width: > 0 } sourceButton)
+            DragPreview.Width = sourceButton.Bounds.Width;
+
+        var canvasPosition = position;
+        if (DragPreview.Parent is Visual canvas &&
+            this.TranslatePoint(position, canvas) is Point translatedPosition)
+        {
+            canvasPosition = translatedPosition;
+        }
+
         DragPreviewNickname.Text = folder.Nickname;
         DragPreviewPath.Text = folder.Path;
         DragPreviewDefault.IsVisible = folder.IsDefault;
         DragPreview.IsVisible = true;
-        Canvas.SetLeft(DragPreview, position.X + 12);
-        Canvas.SetTop(DragPreview, position.Y + 12);
+        Canvas.SetLeft(DragPreview, canvasPosition.X - _dragOffset.X);
+        Canvas.SetTop(DragPreview, canvasPosition.Y - _dragOffset.Y);
     }
 
     private void ResetDrag()
@@ -202,6 +383,7 @@ public partial class MainWindow : Window
 
         ClearPressedButton();
         _draggedTargetFolder = null;
+        _dragOffset = new Point();
         _hasDragged = false;
         DragPreview.IsVisible = false;
     }

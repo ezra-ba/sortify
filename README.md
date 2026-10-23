@@ -94,6 +94,21 @@ dotnet run --project .\src\Sortify.App
 dotnet test
 ```
 
+## Hintergrundbetrieb
+
+Sortify zeigt unter Windows ein Symbol im Infobereich und unter macOS in der Menueleiste. Das Menue bietet Oeffnen, Ueberwachung pausieren/fortsetzen und Beenden. Beim Schliessen bleibt die Anwendung standardmaessig im Tray aktiv; diese Option kann im Tray-Menue deaktiviert werden und wird in der lokalen Einstellungsdatei gespeichert. Beenden stoppt die Ueberwachung und schliesst offene Datei-Popups.
+
+Unter Windows kann im Tray-Menue optional der Start bei der Benutzeranmeldung aktiviert werden. Standardmaessig ist kein Autostart eingetragen. Der Eintrag liegt ausschliesslich unter `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Sortify` und wird beim Deaktivieren entfernt. Hierfuer Sortify zuerst in einen stabilen Ordner veroeffentlichen; den Build-Ordner danach nicht verschieben:
+
+```powershell
+dotnet publish .\src\Sortify.App -c Release -r win-x64 --self-contained true -o .\publish
+.\publish\Sortify.App.exe
+```
+
+Der Autostart startet die App mit `--background`. Einstellungen und Ordnerueberwachung werden ohne sichtbares Hauptfenster geladen. Ohne konfigurierten Ordner oder bei einem Einstellungsfehler wird stattdessen das Hauptfenster angezeigt. Ein erneuter normaler Programmstart aktiviert die bereits laufende Instanz; ein zweiter Hintergrundstart bleibt still. Es wird kein Windows-Dienst eingerichtet, und vor der Anmeldung laeuft Sortify nicht.
+
+Linux verwendet vorerst den normalen Fensterbetrieb, da die Verfuegbarkeit eines Tray-Bereichs von der Desktop-Umgebung abhaengt. Die Autostart-Option ist ausserhalb von Windows deaktiviert. Native Tray-Anzeige und Betriebssystem-Autostart muessen auf dem Zielsystem geprueft werden; Headless-Tests decken Lebenszyklus und Dateierkennung ab.
+
 ## Mitarbeit
 
 Jede Änderung beginnt mit einem GitHub-Issue und wird über einen eigenen Branch und Pull Request eingebracht. Feature-Branches verwenden:

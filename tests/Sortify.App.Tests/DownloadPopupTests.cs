@@ -14,6 +14,7 @@ public static class TestApplication
         .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
 }
 
+[Collection("Avalonia")]
 public sealed class DownloadPopupTests
 {
     [Fact]

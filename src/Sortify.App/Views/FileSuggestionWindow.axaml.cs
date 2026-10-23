@@ -97,6 +97,18 @@ public partial class FileSuggestionWindow : Window
         ShowValidationError();
     }
 
+    private static void FileNameTextBox_GotFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox textBox)
+            textBox.BorderBrush = new SolidColorBrush(Color.Parse("#B7A5F2"));
+    }
+
+    private static void FileNameTextBox_LostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox textBox)
+            textBox.BorderBrush = new SolidColorBrush(Color.Parse("#D9D9E0"));
+    }
+
     private void ShowValidationError()
     {
         if (DataContext is FileSuggestionViewModel viewModel)

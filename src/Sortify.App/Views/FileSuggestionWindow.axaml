@@ -10,35 +10,92 @@
         MinWidth="400"
         CanResize="False"
         Background="Transparent"
-        TransparencyLevelHint="Transparent">
+        TransparencyLevelHint="Transparent"
+        WindowDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0">
     <Design.DataContext>
         <vm:FileSuggestionViewModel />
     </Design.DataContext>
 
     <Window.Styles>
         <Style Selector="TextBlock.muted">
-            <Setter Property="Foreground" Value="#756F66"/>
+            <Setter Property="Foreground" Value="#6E6E73"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
         <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#6D665B"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
             <Setter Property="Padding" Value="16,10"/>
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
         <Style Selector="Button.primary:pointerover">
-            <Setter Property="Background" Value="#5A534A"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#F7F3FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="Button.primary:pressed">
+            <Setter Property="Background" Value="#EEE8FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
         </Style>
         <Style Selector="Button.secondary">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#4D4942"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+            <Setter Property="BorderBrush" Value="#D9D9E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="10,8"/>
         </Style>
         <Style Selector="Button.secondary:pointerover">
-            <Setter Property="Background" Value="#D8D1C7"/>
-            <Setter Property="Foreground" Value="#25231F"/>
+            <Setter Property="Background" Value="#F7F3FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="Button.secondary:pressed">
+            <Setter Property="Background" Value="#EEE8FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+            <Setter Property="BorderBrush" Value="#D9D9E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <Style Selector="ComboBox:pointerover">
+            <Setter Property="Background" Value="#F7F3FF"/>
+            <Setter Property="BorderBrush" Value="#D2C6F7"/>
+        </Style>
+        <Style Selector="ComboBox:focus">
+            <Setter Property="BorderBrush" Value="#B7A5F2"/>
+        </Style>
+        <Style Selector="ComboBox /template/ Popup#PART_Popup Border">
+            <Setter Property="Background" Value="#FFFFFF"/>
+        </Style>
+        <Style Selector="ComboBoxItem">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="ComboBoxItem:pointerover">
+            <Setter Property="Background" Value="#F7F3FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="ComboBoxItem:selected">
+            <Setter Property="Background" Value="#EEE8FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="ComboBoxItem:selected:pointerover">
+            <Setter Property="Background" Value="#E5DCFF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="ComboBoxItem:pressed">
+            <Setter Property="Background" Value="#EEE8FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="ComboBoxItem:selected:pressed">
+            <Setter Property="Background" Value="#DCD0FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
+        </Style>
+        <Style Selector="ComboBoxItem:pointerover:pressed">
+            <Setter Property="Background" Value="#EEE8FF"/>
+            <Setter Property="Foreground" Value="#1C1C1E"/>
         </Style>
         <Style Selector="TextBlock.validation-error">
             <Setter Property="Foreground" Value="#B42318"/>
@@ -47,55 +104,48 @@
     </Window.Styles>
 
     <Border Margin="0"
-            Padding="20"
+            Padding="16"
             Background="#FFFFFF"
-            BorderBrush="#D8D1C7"
+            BorderBrush="#E1E1E6"
             BorderThickness="1"
-            CornerRadius="16">
-        <StackPanel Spacing="16">
-            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                <Border Width="42" Height="42" Background="#EEE9E1" CornerRadius="21">
-                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Text="＋" Foreground="#6D665B"/>
+            CornerRadius="16"
+            ClipToBounds="True">
+        <StackPanel Spacing="12">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="10">
+                <Border Width="28" Height="28" Background="#F3EEFF" CornerRadius="14">
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" Text="＋" Foreground="#8B72E6"/>
                 </Border>
-                <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                    <TextBlock FontSize="19" FontWeight="SemiBold" Foreground="#25231F" Text="Neues Dokument!"/>
-                    <TextBlock Classes="muted" Text="{Binding DetectedFileName}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding SourcePath}"/>
-                </StackPanel>
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="19" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Neue Datei"/>
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="18" Foreground="#A7A7AF" Text="›"/>
+                <TextBlock Grid.Column="3" VerticalAlignment="Center" Classes="muted" Text="{Binding DetectedFileName}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding SourcePath}"/>
             </Grid>
 
             <StackPanel Spacing="8">
-                <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#867E73" Text="ZIEL UND DATEINAME"/>
-                <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="8">
-                    <ComboBox ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTargetFolder}" MinWidth="145">
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto,*" ColumnSpacing="8" RowSpacing="5">
+                    <TextBlock FontSize="12" Foreground="#6E6E73" Text="Zielordner"/>
+                    <TextBlock Grid.Column="2" FontSize="12" Foreground="#6E6E73" Text="Dateiname"/>
+                    <ComboBox Grid.Row="1" ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTargetFolder}" MinWidth="145">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="vm:TargetFolderViewModel">
                                 <TextBlock Text="{Binding Nickname}"/>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="18" Foreground="#A7A096" Text="/"/>
-                    <Grid Grid.Column="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="0" RowSpacing="3">
-                        <TextBox x:Name="FileNameTextBox" Text="{Binding NewFileName, Mode=TwoWay}" MaxLength="255" PlaceholderText="Dateiname" TextChanged="FileNameTextBox_TextChanged"/>
-                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Padding="0,0,10,0" Foreground="#756F66" Text="{Binding FileExtension}"/>
-                        <TextBlock x:Name="ValidationHint"
-                                   Grid.Row="1"
-                                   Grid.Column="0"
-                                   Grid.ColumnSpan="2"
-                                   Classes="validation-error"
-                                   Text="Fehlerhafte Eingabe ⓘ"
-                                   IsVisible="{Binding HasValidationError}"
-                                   ToolTip.Tip="{Binding ValidationMessage}"
-                                   Cursor="Hand"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" FontSize="18" Foreground="#A7A7AF" Text="/"/>
+                    <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="0" RowSpacing="3">
+                        <TextBox Classes="motion" x:Name="FileNameTextBox" Text="{Binding NewFileName, Mode=TwoWay}" MaxLength="255" PlaceholderText="Dateiname" TextChanged="FileNameTextBox_TextChanged" GotFocus="FileNameTextBox_GotFocus" LostFocus="FileNameTextBox_LostFocus"
+                                 ToolTip.Tip="{Binding ValidationMessage}"
+                                 ToolTip.IsOpen="{Binding HasValidationError}"/>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Padding="0,0,10,0" Foreground="#6E6E73" Text="{Binding FileExtension}"/>
                     </Grid>
                 </Grid>
                 <TextBlock Classes="muted" Text="{Binding FilePathPreview}" TextTrimming="CharacterEllipsis"/>
-                <TextBlock Classes="muted" Text="{Binding SuggestionExplanation}" TextWrapping="Wrap"/>
             </StackPanel>
 
-            <Border Height="1" Background="#ECE7DF" Margin="-20,0"/>
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                <Button Classes="secondary" Content="Abbrechen" HorizontalAlignment="Left" Click="CancelButton_Click"/>
-                <Button Grid.Column="1" Classes="primary" Content="Datei einsortieren" IsEnabled="False" ToolTip.Tip="Dateioperationen sind noch nicht angebunden."/>
+            <Border Height="1" Background="#E6E6EB" Margin="-16,0"/>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Button Classes="secondary motion" Content="Abbrechen" HorizontalAlignment="Left" Click="CancelButton_Click"/>
+                <Button Grid.Column="1" Classes="primary motion" Content="Datei einsortieren" IsEnabled="False" ToolTip.Tip="Dateioperationen sind noch nicht angebunden."/>
             </Grid>
         </StackPanel>
     </Border>

@@ -1,0 +1,71 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+    <!-- Sortify design tokens: solid surfaces, restrained contrast, no glass effects. -->
+    <Color x:Key="Color.Canvas">#F5F5F7</Color>
+    <Color x:Key="Color.Surface">#FFFFFF</Color>
+    <Color x:Key="Color.SurfaceSubtle">#F0F1F4</Color>
+    <Color x:Key="Color.Text">#1C1C1E</Color>
+    <Color x:Key="Color.TextSecondary">#6E6E73</Color>
+    <Color x:Key="Color.TextDisabled">#98A2B3</Color>
+    <Color x:Key="Color.Border">#E1E5EA</Color>
+    <Color x:Key="Color.Accent">#8B72E6</Color>
+    <Color x:Key="Color.AccentHover">#7A61D8</Color>
+    <Color x:Key="Color.AccentPressed">#694FC5</Color>
+    <Color x:Key="Color.Focus">#B7A5F2</Color>
+    <Color x:Key="Color.Success">#198754</Color>
+    <Color x:Key="Color.Warning">#B7791F</Color>
+    <Color x:Key="Color.Error">#C2413B</Color>
+
+    <SolidColorBrush x:Key="Brush.Canvas" Color="#F5F5F7" />
+    <SolidColorBrush x:Key="Brush.Surface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Brush.SurfaceSubtle" Color="#F0F1F4" />
+    <SolidColorBrush x:Key="Brush.Text" Color="#1C1C1E" />
+    <SolidColorBrush x:Key="Brush.TextSecondary" Color="#6E6E73" />
+    <SolidColorBrush x:Key="Brush.Border" Color="#E1E5EA" />
+    <SolidColorBrush x:Key="Brush.Accent" Color="#8B72E6" />
+    <SolidColorBrush x:Key="Brush.Focus" Color="#B7A5F2" />
+
+    <CornerRadius x:Key="Radius.Control">8</CornerRadius>
+    <CornerRadius x:Key="Radius.Card">14</CornerRadius>
+    <CornerRadius x:Key="Radius.Pill">999</CornerRadius>
+    </Styles.Resources>
+
+    <Style Selector="TextBlock.heading">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Button.motion">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Setter Property="RenderTransform">
+            <Setter.Value><ScaleTransform ScaleX="1" ScaleY="1" /></Setter.Value>
+        </Setter>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.16" />
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.motion:pressed">
+        <Setter Property="RenderTransform">
+            <Setter.Value><ScaleTransform ScaleX="0.98" ScaleY="0.98" /></Setter.Value>
+        </Setter>
+    </Style>
+    <Style Selector="TextBox.motion">
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.Control}" />
+        <Setter Property="Transitions">
+            <Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.16" /></Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="TextBox.motion:focus">
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Focus}" />
+    </Style>
+</Styles>

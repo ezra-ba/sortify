@@ -56,13 +56,16 @@ public partial class FileSuggestionViewModel : ViewModelBase
     public partial bool HasValidationError { get; set; }
 
     public bool IsFileNameValid => PortableNameValidator.IsValid(NewFileName + FileExtension)
-        && NewFileName.Length > 0 && NewFileName.Length + FileExtension.Length <= 255;
+        && NewFileName.Length > 0
+        && !NewFileName.StartsWith(' ')
+        && !NewFileName.EndsWith(' ')
+        && NewFileName.Length + FileExtension.Length <= 255;
 
     public bool IsValidationVisible => !IsFileNameValid;
 
     public string ValidationMessage => IsFileNameValid
         ? string.Empty
-        : "Bitte einen gueltigen Dateinamen mit maximal 255 Zeichen inklusive Endung eingeben.";
+        : "Ungültiger Dateiname";
 
     public string FilePathPreview => SelectedTargetFolder is null || string.IsNullOrWhiteSpace(NewFileName)
         ? string.Empty

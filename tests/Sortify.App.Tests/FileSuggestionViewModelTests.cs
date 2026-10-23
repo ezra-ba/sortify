@@ -33,4 +33,17 @@ public sealed class FileSuggestionViewModelTests
         model.NewFileName = "../escape";
         Assert.False(model.IsFileNameValid);
     }
+
+    [Theory]
+    [InlineData(" name")]
+    [InlineData("name ")]
+    public void FileNameWithLeadingOrTrailingSpaceIsInvalid(string name)
+    {
+        var model = new FileSuggestionViewModel([], Path.Combine(Path.GetTempPath(), "test.pdf"))
+        {
+            NewFileName = name
+        };
+
+        Assert.False(model.IsFileNameValid);
+    }
 }

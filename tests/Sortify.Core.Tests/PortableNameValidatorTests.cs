@@ -19,6 +19,7 @@ public sealed class PortableNameValidatorTests
 
     [Theory]
     [InlineData("")]
+    [InlineData(" invalid")]
     [InlineData("   ")]
     [InlineData(".")]
     [InlineData("..")]

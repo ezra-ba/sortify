@@ -13,7 +13,9 @@ Sortify.sln
 │   ├── Sortify.Core/            Modelle, Regeln und Schnittstellen
 │   └── Sortify.Infrastructure/  Dateisystem, Überwachung und Speicherung
 ├── tests/
-│   └── Sortify.Core.Tests/      Tests der fachlichen Logik
+│   ├── Sortify.Core.Tests/      Tests der fachlichen Logik
+│   ├── Sortify.Infrastructure.Tests/ Speicherung und technische Dienste
+│   └── Sortify.App.Tests/       ViewModel-Verhalten ohne Fenster
 ├── assets/branding/             Zentrale Logo- und Icon-Dateien
 └── docs/                        Architektur und technische Entscheidungen
 ```
@@ -46,3 +48,9 @@ Sortify.Core.Tests ───────> Sortify.Core
 - `syd-firmen-logo.png`: Firmenkennzeichnung in README und Projektdokumentation
 
 Die Originaldateien liegen nur unter `assets/branding`. Das Avalonia-Projekt bindet benötigte Dateien als verlinkte Ressourcen ein, damit keine doppelten Versionen entstehen.
+
+## Lokale Speicherung
+
+Die Speicherung aus Issue #28 speichert Konfiguration und Regeln gemeinsam in einer versionierten JSON-Datei. Der Arbeitsstand für Issue #37 ergänzt frei wählbare Target-Ordner, Listenreihenfolge und ein optionales Standardziel in Formatversion 2. Komponenten, Speicherort, Fehlerverhalten und offene Integrationsnachweise beschreibt [settings-persistence.md](settings-persistence.md).
+
+`TargetFolder` ist ein Core-Modell mit stabiler ID, Pfad und Spitznamen. `TargetFolderViewModel` enthält zusätzlich ausschließlich UI-Zustände. Die Regelzuordnung über Target-IDs ist eine separate Erweiterung; die bisherigen relativen Regelziele werden durch #37 noch nicht umgedeutet.

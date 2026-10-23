@@ -2,6 +2,12 @@
 
 Stand: 21. Oktober 2026. Status: Regelmodell, Kategoriezuordnung, Regelvalidierung und Regelengine im Arbeitsstand für Issue #26 implementiert; Dateiverarbeitung und Anbindung an die Oberfläche geplant.
 
+## Ergänzung: frei wählbare Sortierziele (Issue #37)
+
+Die Teamentscheidung zu #37 sieht frei auswählbare Target-Ordner vor. Das bisherige Modell `<Archiv>/<Kategorie>/<TargetDirectory>` beschreibt den älteren Regelentwurf und ist keine Voraussetzung für die künftige Zielauswahl. Die nachfolgenden Beispiele bleiben bis zur separaten Engine-Anpassung Referenzen für diesen bisherigen Entwurf.
+
+Im Arbeitsstand für #37 werden Targets mit stabiler ID, absolutem Pfad und Spitznamen sowie Listenreihenfolge und optionalem Standardziel gespeichert. Die bestehende ArchiveRootPath-Einstellung bleibt erhalten. Regeln und Engine müssen anschließend separat auf Target-IDs umgestellt werden; es gibt noch keine automatische Zuordnung eines frei gewählten Targets anhand der Kategorie. Ein Standardziel allein löst noch keine Dateioperation aus. Details stehen in [settings-persistence.md](settings-persistence.md).
+
 ## 1. Ziel und Umfang
 
 Sortify soll neue Dateien in einem ausdrücklich ausgewählten Eingangsordner erkennen und nachvollziehbare Vorschläge zum Umbenennen und Archivieren erzeugen. Die Verarbeitung erfolgt vollständig lokal, ohne KI- oder Cloud-Dienste. Dateien und Zielordner werden erst nach ausdrücklicher Bestätigung verändert.

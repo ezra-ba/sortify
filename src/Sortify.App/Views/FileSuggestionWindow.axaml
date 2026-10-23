@@ -5,12 +5,12 @@
         x:DataType="vm:FileSuggestionViewModel"
         Icon="/Assets/Branding/sortify-icon.png"
         Title="Neues Dokument · Sortify"
-        Width="540"
-        Height="390"
-        MinWidth="480"
-        MinHeight="350"
+        Width="440"
+        SizeToContent="Height"
+        MinWidth="400"
         CanResize="False"
-        Background="#F4F1EC">
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
     <Design.DataContext>
         <vm:FileSuggestionViewModel />
     </Design.DataContext>
@@ -31,22 +31,28 @@
             <Setter Property="Foreground" Value="#FFFFFF"/>
         </Style>
         <Style Selector="Button.secondary">
-            <Setter Property="Background" Value="#F4F1EC"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#4D4942"/>
-            <Setter Property="BorderBrush" Value="#D8D1C7"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="14,9"/>
-            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,8"/>
         </Style>
         <Style Selector="Button.secondary:pointerover">
             <Setter Property="Background" Value="#D8D1C7"/>
             <Setter Property="Foreground" Value="#25231F"/>
-            <Setter Property="BorderBrush" Value="#AFA597"/>
+        </Style>
+        <Style Selector="TextBlock.validation-error">
+            <Setter Property="Foreground" Value="#B42318"/>
+            <Setter Property="FontSize" Value="12"/>
         </Style>
     </Window.Styles>
 
-    <Border Margin="18" Padding="24" Background="#FFFFFF" BorderBrush="#DED8CE" BorderThickness="1" CornerRadius="8">
-        <StackPanel Spacing="20">
+    <Border Margin="0"
+            Padding="20"
+            Background="#FFFFFF"
+            BorderBrush="#D8D1C7"
+            BorderThickness="1"
+            CornerRadius="16">
+        <StackPanel Spacing="16">
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
                 <Border Width="42" Height="42" Background="#EEE9E1" CornerRadius="21">
                     <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Text="＋" Foreground="#6D665B"/>
@@ -60,17 +66,36 @@
             <StackPanel Spacing="8">
                 <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#867E73" Text="ZIEL UND DATEINAME"/>
                 <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="8">
-                    <ComboBox ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTargetFolder}" MinWidth="145"/>
+                    <ComboBox ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTargetFolder}" MinWidth="145">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TargetFolderViewModel">
+                                <TextBlock Text="{Binding Nickname}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                     <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="18" Foreground="#A7A096" Text="/"/>
-                    <TextBox Grid.Column="2" Text="{Binding NewFileName, Mode=TwoWay}" Watermark="Dateiname" MinWidth="210"/>
+                    <Grid Grid.Column="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="0" RowSpacing="3">
+                        <TextBox x:Name="FileNameTextBox" Text="{Binding NewFileName, Mode=TwoWay}" MaxLength="255" Watermark="Dateiname" TextChanged="FileNameTextBox_TextChanged"/>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Padding="0,0,10,0" Foreground="#756F66" Text="{Binding FileExtension}"/>
+                        <TextBlock x:Name="ValidationHint"
+                                   Grid.Row="1"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="2"
+                                   Classes="validation-error"
+                                   Text="Fehlerhafte Eingabe ⓘ"
+                                   IsVisible="{Binding HasValidationError}"
+                                   ToolTip.Tip="Erlaubt sind maximal 255 Unicode-Buchstaben, Zahlen, Leerzeichen sowie _ und -. Führende oder abschließende Leerzeichen und Sonderzeichen sind nicht erlaubt."
+                                   Cursor="Hand"/>
+                    </Grid>
                 </Grid>
+                <TextBlock Classes="muted" Text="{Binding FilePathPreview}" TextTrimming="CharacterEllipsis"/>
                 <TextBlock Classes="muted" Text="Der Dateiname kann vor dem Verschieben angepasst werden."/>
             </StackPanel>
 
-            <Border Height="1" Background="#ECE7DF"/>
+            <Border Height="1" Background="#ECE7DF" Margin="-20,0"/>
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                <Button Classes="secondary" Content="Abbrechen" HorizontalAlignment="Left"/>
-                <Button Grid.Column="1" Classes="primary" Content="Datei einsortieren"/>
+                <Button Classes="secondary" Content="Abbrechen" HorizontalAlignment="Left" Click="CancelButton_Click"/>
+                <Button Grid.Column="1" Classes="primary" Content="Datei einsortieren" IsEnabled="{Binding IsFileNameValid}"/>
             </Grid>
         </StackPanel>
     </Border>

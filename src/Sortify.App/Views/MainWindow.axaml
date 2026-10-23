@@ -56,14 +56,51 @@
 		<Style Selector="Button.target-folder">
 			<Setter Property="Background" Value="#FFFFFF"/>
 			<Setter Property="BorderBrush" Value="#E8E3DB"/>
+			<Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="1" ScaleY="1"/>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style Selector="Button.target-folder:pointerover">
+			<Setter Property="Background" Value="#FAF9F7"/>
+			<Setter Property="BorderBrush" Value="#DCD6CC"/>
+		</Style>
+		<Style Selector="Button.target-folder.press-feedback">
+			<Setter Property="Background" Value="#E5E1DA"/>
+			<Setter Property="BorderBrush" Value="#C8C0B5"/>
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+				</Setter.Value>
+			</Setter>
+			<Setter Property="Opacity" Value="0.88"/>
+		</Style>
+		<Style Selector="Button.target-folder.selected">
+			<Setter Property="Background" Value="#EDEAE5"/>
+			<Setter Property="BorderBrush" Value="#BDB5AA"/>
+		</Style>
+		<Style Selector="Button.target-folder.selected.press-feedback">
+			<Setter Property="Background" Value="#E5E1DA"/>
+			<Setter Property="BorderBrush" Value="#C8C0B5"/>
 		</Style>
 		<Style Selector="Border.target-folder-card.editing">
 			<Setter Property="Background" Value="#FFFFFF"/>
 			<Setter Property="BorderBrush" Value="#E8E3DB"/>
 			<Setter Property="BorderThickness" Value="1"/>
 		</Style>
+		<Style Selector="Border.target-folder-card.dragging">
+			<Setter Property="Opacity" Value="0"/>
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="0.96" ScaleY="0.96"/>
+				</Setter.Value>
+			</Setter>
+		</Style>
 	</Window.Styles>
-	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+	<Grid>
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled" IsEnabled="{Binding !IsSavingSettings}">
 		<StackPanel Margin="44,34" Spacing="26">
 			<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
 				<Image Width="48" Height="48" Stretch="Uniform" Source="/Assets/Branding/sortify-icon.png"/>
@@ -78,7 +115,7 @@
 					<StackPanel Grid.Column="1" Spacing="5">
 						<TextBlock Classes="eyebrow" Text="ÜBERWACHUNGS-ORDNER"/>
 						<TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#25231F" Text="{Binding WatchedFolder}"/>
-						<TextBlock Classes="muted" Text="Neue Dateien in diesem Ordner werden überwacht."/>
+						<TextBlock Classes="muted" Text="{Binding SettingsStatus}" TextWrapping="Wrap"/>
 					</StackPanel>
 					<Button Grid.Column="2" Classes="secondary" Content="Ordner wechseln" Click="SelectWatchedFolder"/>
 				</Grid>
@@ -98,7 +135,13 @@
 						<ItemsControl ItemsSource="{Binding TargetFolders}">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
-									<Border Classes="target-folder-card" Classes.editing="{Binding IsEditingNickname}" Padding="0" Margin="0,0,0,8" Background="Transparent" BorderThickness="0" CornerRadius="6">
+									<Border Classes="target-folder-card" Classes.editing="{Binding IsEditingNickname}" Classes.dragging="{Binding IsDragging}" Padding="0" Margin="0,0,0,8" Background="Transparent" BorderThickness="0" CornerRadius="6">
+										<Border.Transitions>
+											<Transitions>
+												<DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+												<TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.16" />
+											</Transitions>
+										</Border.Transitions>
 										<Grid>
 						<Button Classes="target-folder" Classes.selected="{Binding IsSelected}" IsVisible="{Binding !IsEditingNickname}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="16" BorderThickness="1" CornerRadius="6" Command="{Binding $parent[Window].DataContext.SelectTargetFolderCommand}" CommandParameter="{Binding}">
 											<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
@@ -117,8 +160,8 @@
 							</Border>
 							<StackPanel Grid.Column="1" Spacing="4">
 								<StackPanel Orientation="Horizontal" Spacing="4">
-									<TextBox Width="150" Text="{Binding Nickname, Mode=TwoWay}"/>
-									<Button Content="OK" Command="{Binding SaveNicknameCommand}"/>
+									<TextBox Width="150" Text="{Binding DraftNickname, Mode=TwoWay}"/>
+									<Button Content="OK" Command="{Binding $parent[Window].DataContext.SaveTargetNicknameCommand}" CommandParameter="{Binding}"/>
 									<Button Content="Abbrechen" Command="{Binding CancelRenameCommand}"/>
 								</StackPanel>
 								<TextBlock Classes="muted" Text="{Binding Path}"/>
@@ -139,7 +182,7 @@
 						<TextBlock Classes="muted" TextWrapping="Wrap" Text="Wähle einen Target-Ordner aus, um ihn zu bearbeiten."/>
 						<Border Margin="0,4,0,2" Height="1" Background="#ECE7DF"/>
 						<Button Classes="primary" HorizontalContentAlignment="Center" Content="＋  Target-Ordner hinzufügen" Click="AddTargetFolder"/>
-						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Als Standard festlegen" Command="{Binding SetDefaultTargetFolderCommand}"/>
+						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="{Binding DefaultTargetFolderButtonText}" Command="{Binding SetDefaultTargetFolderCommand}"/>
 						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Spitznamen ändern" Command="{Binding BeginRenameTargetFolderCommand}"/>
 						<Button Classes="secondary" HorizontalContentAlignment="Center" Content="Target-Ordner entfernen" Command="{Binding RemoveTargetFolderCommand}"/>
 						<TextBlock Margin="0,12,0,0" Classes="muted" TextWrapping="Wrap" Text="Tipp: Der Spitzname wird in der Liste angezeigt und kann jederzeit angepasst werden."/>
@@ -148,4 +191,19 @@
 			</Grid>
 		</StackPanel>
 	</ScrollViewer>
+		<Canvas IsHitTestVisible="False">
+			<Border x:Name="DragPreview" Width="420" Padding="16" Background="#FDFCFB" BorderBrush="#BDB5AA" BorderThickness="1" CornerRadius="6" Opacity="0.92" IsVisible="False">
+				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+					<Border Width="34" Height="34" Background="#E9E2D7" CornerRadius="17">
+						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" Foreground="#6D665B" FontWeight="SemiBold"/>
+					</Border>
+					<StackPanel Grid.Column="1" Spacing="4">
+						<TextBlock x:Name="DragPreviewNickname" FontWeight="SemiBold" Foreground="#302D28"/>
+						<TextBlock x:Name="DragPreviewPath" Classes="muted"/>
+					</StackPanel>
+					<TextBlock x:Name="DragPreviewDefault" Grid.Column="2" VerticalAlignment="Center" Foreground="#B0925D" Text="STANDARD" IsVisible="False" FontSize="10" FontWeight="SemiBold"/>
+				</Grid>
+			</Border>
+		</Canvas>
+	</Grid>
 </Window>

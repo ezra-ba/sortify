@@ -54,3 +54,7 @@ Die Originaldateien liegen nur unter `assets/branding`. Das Avalonia-Projekt bin
 Die Speicherung aus Issue #28 speichert Konfiguration und Regeln gemeinsam in einer versionierten JSON-Datei. Der Arbeitsstand für Issue #37 ergänzt frei wählbare Target-Ordner, Listenreihenfolge und ein optionales Standardziel in Formatversion 2. Komponenten, Speicherort, Fehlerverhalten und offene Integrationsnachweise beschreibt [settings-persistence.md](settings-persistence.md).
 
 `TargetFolder` ist ein Core-Modell mit stabiler ID, Pfad und Spitznamen. `TargetFolderViewModel` enthält zusätzlich ausschließlich UI-Zustände. Die Regelzuordnung über Target-IDs ist eine separate Erweiterung; die bisherigen relativen Regelziele werden durch #37 noch nicht umgedeutet.
+
+## Regelziele über Target-IDs
+
+Der Arbeitsstand für #46 verbindet Regeln und Engine-Kandidaten mit stabilen Target-IDs. Migration, Warnungen, Zuordnungsaufruf und noch offene Integrationen beschreibt [target-rule-references.md](target-rule-references.md).

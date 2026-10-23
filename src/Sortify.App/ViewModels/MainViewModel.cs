@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Sortify.Core.Models;
 using Sortify.Core.Services;
+using Sortify.Core.Rules;
 
 
 namespace Sortify.App.ViewModels;
@@ -30,6 +31,7 @@ public partial class MainViewModel : ViewModelBase
         finally
         {
             IsSavingSettings = false;
+            RefreshRuleTargetWarnings();
         }
     }
 
@@ -90,6 +92,30 @@ public partial class MainViewModel : ViewModelBase
     public partial string SettingsStatus { get; set; } =
         "Einstellungen werden geladen.";
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRuleTargetWarnings))]
+    public partial string RuleTargetWarnings { get; set; } = "";
+
+    public bool HasRuleTargetWarnings =>
+        !string.IsNullOrWhiteSpace(RuleTargetWarnings);
+
+    private void RefreshRuleTargetWarnings()
+    {
+        if (settingsService?.Current is not { } settings)
+        {
+            RuleTargetWarnings = "";
+            return;
+        }
+
+        var validator = new RuleTargetValidator();
+
+        var messages = settings.Rules.SelectMany(rule =>
+            validator.Validate(rule, settings.TargetFolders)
+                .Errors.Select(error => $"{rule.Name}: {error.Message}"));
+
+        RuleTargetWarnings = string.Join(Environment.NewLine, messages);
+    }
+
     public async Task InitializeSettingsAsync()
     {
         if (settingsService is null)
@@ -114,16 +140,7 @@ public partial class MainViewModel : ViewModelBase
             _ => result.ErrorMessage
                 ?? "Die Einstellungen konnten nicht geladen werden."
         };
-        if (result.Warnings.Count > 0)
-        {
-            SettingsStatus += Environment.NewLine +
-                "Zielzuordnung prüfen:" +
-                Environment.NewLine +
-                string.Join(
-                    Environment.NewLine,
-                    result.Warnings.Select(warning =>
-                        $"{warning.RuleName}: {warning.Message}"));
-        }
+        RefreshRuleTargetWarnings();
     }
     private void RestoreTargetFolders(AppSettings settings)
     {
@@ -584,6 +601,81 @@ public partial class MainViewModel : ViewModelBase
         if (SelectedTargetFolder is not null) SelectedTargetFolder.IsEditingNickname = true;
     }
 
+    public async Task<SettingsSaveResult> AssignRuleTargetAsync(
+        Guid ruleId,
+        Guid targetId)
+    {
+        if (IsSavingSettings)
+        {
+            return new SettingsSaveResult(
+                false,
+                "Eine andere Änderung wird gerade gespeichert. " +
+                "Bitte anschließend erneut versuchen.");
+        }
+
+        IsSavingSettings = true;
+
+        try
+        {
+            if (settingsService?.Current is not { } current)
+            {
+                return Reject("Die Einstellungen sind nicht verfügbar.");
+            }
+
+            var rule = current.Rules.FirstOrDefault(
+                candidate => candidate.Id == ruleId);
+
+            if (rule is null)
+            {
+                return Reject("Die ausgewählte Regel ist nicht vorhanden.");
+            }
+
+            var assignedRule = rule with
+            {
+                TargetFolderId = targetId
+            };
+
+            var validation = new RuleTargetValidator().Validate(
+                assignedRule,
+                current.TargetFolders);
+
+            if (!validation.IsValid)
+            {
+                return Reject(string.Join(
+                    Environment.NewLine,
+                    validation.Errors.Select(error => error.Message)));
+            }
+
+            var result = await settingsService.UpdateAsync(settings =>
+                settings with
+                {
+                    Rules = settings.Rules
+                        .Select(candidate => candidate.Id == ruleId
+                            ? candidate with { TargetFolderId = targetId }
+                            : candidate)
+                        .ToArray()
+                });
+
+            SettingsStatus = result.IsSuccess
+                ? "Zielzuordnung gespeichert."
+                : result.ErrorMessage
+                    ?? "Die Zielzuordnung konnte nicht gespeichert werden.";
+
+            return result;
+        }
+        finally
+        {
+            IsSavingSettings = false;
+            RefreshRuleTargetWarnings();
+        }
+
+        SettingsSaveResult Reject(string message)
+        {
+            SettingsStatus = message;
+            return new SettingsSaveResult(false, message);
+        }
+    }
+
     public async Task<SettingsSaveResult> SaveRulesAsync(
         IReadOnlyList<SortRule> rules)
     {
@@ -604,6 +696,7 @@ public partial class MainViewModel : ViewModelBase
         finally
         {
             IsSavingSettings = false;
+            RefreshRuleTargetWarnings();
         }
     }
 

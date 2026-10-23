@@ -343,4 +343,25 @@ public sealed class RuleValidatorTests
             Assert.Contains(result.Errors, error => error.FieldName == field);
         }
     }
+    [Theory]
+    [InlineData("../AltesZiel")]
+    [InlineData("/AltesArchiv/Rechnungen")]
+    [InlineData(@"C:\AltesArchiv\Rechnungen")]
+    public void ValidateIgnoresLegacyDirectoryWhenTargetReferenceIsSet(
+        string legacyDirectory)
+    {
+        var rule = CreateValidRule() with
+        {
+            TargetFolderId = Guid.NewGuid(),
+            TargetDirectory = legacyDirectory
+        };
+
+        var result = validator.Validate(rule);
+
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Errors);
+
+        // Der alte Wert wird erhalten, aber nicht als Ziel verwendet.
+        Assert.Equal(legacyDirectory, rule.TargetDirectory);
+    }
 }

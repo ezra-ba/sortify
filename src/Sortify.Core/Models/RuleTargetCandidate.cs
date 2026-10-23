@@ -4,4 +4,7 @@ public sealed record RuleTargetCandidate(
     string Category,
     string TargetDirectory,
     string FileName,
-    IReadOnlyList<RuleReference> Rules);
+    IReadOnlyList<RuleReference> Rules)
+{
+    public Guid? TargetFolderId { get; init; }
+}

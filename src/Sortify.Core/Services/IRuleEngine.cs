@@ -6,5 +6,6 @@ public interface IRuleEngine
 {
     RuleEvaluationResult Evaluate(
         FileDescriptor file,
-        IReadOnlyCollection<SortRule> rules);
+        IReadOnlyCollection<SortRule> rules,
+        IReadOnlyCollection<TargetFolder> targets);
 }

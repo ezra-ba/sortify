@@ -1,12 +1,15 @@
 using System.Text.Json;
 using Sortify.Core.Models;
 using Sortify.Core.Services;
+using Sortify.Core.Rules;
 
 namespace Sortify.Infrastructure.Persistence;
 
 public sealed class JsonSettingsStore : ISettingsStore
 {
-    private const int CurrentVersion = 2;
+    private readonly IRuleTargetValidator targetValidator =
+    new RuleTargetValidator();
+    private const int CurrentVersion = 3;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -54,7 +57,7 @@ public sealed class JsonSettingsStore : ISettingsStore
                 return Failed("Die Einstellungsdatei enthält keine Konfiguration.");
             }
 
-            if (document.Version is not (1 or CurrentVersion))
+            if (document.Version is < 1 or > CurrentVersion)
             {
                 return Failed(
                     $"Die Einstellungsdatei verwendet die nicht unterstützte " +
@@ -76,10 +79,24 @@ public sealed class JsonSettingsStore : ISettingsStore
                     string.Join(Environment.NewLine, errors));
             }
 
+            var warnings = document.Settings.Rules
+                .SelectMany(rule =>
+                    targetValidator.Validate(
+                        rule,
+                        document.Settings.TargetFolders)
+                    .Errors.Select(error => new RuleTargetWarning(
+                        rule.Id,
+                        rule.Name,
+                        error.Message)))
+                .ToArray();
+
             return new SettingsLoadResult(
                 SettingsLoadStatus.Loaded,
                 document.Settings,
-                null);
+                null)
+            {
+                Warnings = warnings
+            };
         }
         catch (FileNotFoundException)
         {

@@ -12,7 +12,7 @@ Das Projekt wird von **SYD – Sort Your Data GmbH** im Rahmen des Projektprakti
 
 ## Projektstatus
 
-Sortify befindet sich in der Entwicklung. Ordnerauswahl und lokale Speicherung sind vorhanden. Neue Dateien im ausgewählten Ordner werden erkannt und mit echten Dateidaten im Popup angezeigt. Eine Prüfung auf vollständig abgeschlossene Downloads, Dateioperationen und die Anbindung der fachlichen Regelauswertung sind noch offen; der Einsortieren-Button ist deaktiviert. Weitere Details und Testschritte stehen in [docs/download-detection.md](docs/download-detection.md).
+Sortify befindet sich in der Entwicklung. Ordnerauswahl und lokale Speicherung sind vorhanden. Neue Dateien im ausgewählten Ordner werden erkannt und mit echten Dateidaten im Popup angezeigt. Eine Prüfung auf vollständig abgeschlossene Downloads, Dateioperationen und die Anbindung der fachlichen Regelauswertung sind noch offen; der Einsortieren-Button ist deaktiviert.
 
 ## Problemstellung
 
@@ -77,11 +77,8 @@ Sortify.sln
 │   ├── Sortify.Core/            Modelle, Regeln und Schnittstellen
 │   └── Sortify.Infrastructure/  Dateisystem und lokale Speicherung
 ├── tests/Sortify.Core.Tests/    Tests der fachlichen Logik
-├── assets/branding/             Logos und App-Icon
-└── docs/architecture.md         Architekturentscheidungen
+└── assets/branding/             Logos und App-Icon
 ```
-
-Weitere Details stehen in [`docs/architecture.md`](docs/architecture.md).
 
 ## Entwicklung
 

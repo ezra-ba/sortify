@@ -27,7 +27,7 @@ public sealed class WindowsLoginStartup(string? executablePath) : ILoginStartup
     public void SetEnabled(bool enabled)
     {
         if (!OperatingSystem.IsWindows() || !IsSupported)
-            throw new PlatformNotSupportedException("Autostart ist nur mit einer Windows-App ausfuehrbar.");
+            throw new PlatformNotSupportedException("Autostart ist nur mit einer Windows-App ausführbar.");
 
         using var key = Registry.CurrentUser.CreateSubKey(RunKey, writable: true);
         if (enabled)
@@ -40,7 +40,7 @@ public sealed class WindowsLoginStartup(string? executablePath) : ILoginStartup
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(executablePath);
         if (!Path.IsPathFullyQualified(executablePath) || executablePath.Contains('"'))
-            throw new ArgumentException("Ein absoluter Programmpfad ohne Anfuehrungszeichen ist erforderlich.", nameof(executablePath));
+            throw new ArgumentException("Ein absoluter Programmpfad ohne Anführungszeichen ist erforderlich.", nameof(executablePath));
         var command = $"\"{executablePath}\" --background";
         if (command.Length > 260)
             throw new ArgumentException("Der Autostart-Befehl darf maximal 260 Zeichen enthalten.", nameof(executablePath));

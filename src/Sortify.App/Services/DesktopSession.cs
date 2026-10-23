@@ -87,7 +87,7 @@ public sealed class DesktopSession : IDisposable
             return;
         monitor.Restart(IsPaused ? null : settings?.Current?.WatchedFolderPath);
         if (IsPaused)
-            viewModel.MonitoringStatus = "Ordnerueberwachung pausiert.";
+            viewModel.MonitoringStatus = "Ordnerüberwachung pausiert.";
     }
 
     public async Task ToggleCloseToTrayAsync()
@@ -98,7 +98,7 @@ public sealed class DesktopSession : IDisposable
         if (disposed)
             return;
         viewModel.SettingsStatus = result.IsSuccess
-            ? "Verhalten beim Schliessen gespeichert."
+            ? "Verhalten beim Schließen gespeichert."
             : result.ErrorMessage ?? "Einstellungen konnten nicht gespeichert werden.";
         StateChanged?.Invoke();
         if (!result.IsSuccess)
@@ -117,7 +117,7 @@ public sealed class DesktopSession : IDisposable
         }
         catch (Exception error) when (IsPreferenceError(error))
         {
-            viewModel.SettingsStatus = "Autostart konnte nicht geaendert werden: " + error.Message;
+            viewModel.SettingsStatus = "Autostart konnte nicht geändert werden: " + error.Message;
             ShowMainWindow();
         }
         StateChanged?.Invoke();

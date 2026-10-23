@@ -6,8 +6,8 @@ public sealed class TrayMenu : IDisposable
 {
     private readonly TrayIcon icon;
     private readonly DesktopSession session;
-    private readonly NativeMenuItem pause = new("Ueberwachung pausieren");
-    private readonly NativeMenuItem closeToTray = new("Beim Schliessen im Tray weiterlaufen")
+    private readonly NativeMenuItem pause = new("Überwachung pausieren");
+    private readonly NativeMenuItem closeToTray = new("Beim Schließen im Tray weiterlaufen")
         { ToggleType = MenuItemToggleType.CheckBox, IsEnabled = false };
     private readonly NativeMenuItem login = new("Bei Windows-Anmeldung starten")
         { ToggleType = MenuItemToggleType.CheckBox, IsEnabled = false };
@@ -16,7 +16,7 @@ public sealed class TrayMenu : IDisposable
     {
         this.icon = icon;
         this.session = session;
-        var open = new NativeMenuItem("Sortify oeffnen");
+        var open = new NativeMenuItem("Sortify öffnen");
         open.Click += (_, _) => session.ShowMainWindow();
         pause.Click += (_, _) => session.TogglePause();
         closeToTray.Click += async (_, _) => await session.ToggleCloseToTrayAsync();
@@ -37,7 +37,7 @@ public sealed class TrayMenu : IDisposable
 
     private void Refresh()
     {
-        pause.Header = session.IsPaused ? "Ueberwachung fortsetzen" : "Ueberwachung pausieren";
+        pause.Header = session.IsPaused ? "Überwachung fortsetzen" : "Überwachung pausieren";
         closeToTray.IsChecked = session.CloseToTray;
         closeToTray.IsEnabled = session.CanSavePreferences && session.TrayAvailable;
         login.IsEnabled = session.LoginStartupSupported && session.IsReady;

@@ -24,7 +24,7 @@ sealed class Program
             }
             catch (Exception error) when (error is System.IO.IOException or OperationCanceledException)
             {
-                Console.Error.WriteLine("Sortify laeuft bereits, konnte aber nicht aktiviert werden: " + error.Message);
+                Console.Error.WriteLine("Sortify läuft bereits, konnte aber nicht aktiviert werden: " + error.Message);
                 return 1;
             }
         }

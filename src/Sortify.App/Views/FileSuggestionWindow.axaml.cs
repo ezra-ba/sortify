@@ -87,9 +87,7 @@ public partial class FileSuggestionWindow : Window
         if (sender is not TextBox textBox)
             return;
 
-        var currentText = textBox.Text ?? string.Empty;
-
-        if (IsValidFileName(currentText))
+        if (DataContext is FileSuggestionViewModel current && current.IsFileNameValid)
         {
             if (DataContext is FileSuggestionViewModel viewModel)
                 viewModel.HasValidationError = false;
@@ -99,24 +97,24 @@ public partial class FileSuggestionWindow : Window
         ShowValidationError();
     }
 
+    private static void FileNameTextBox_GotFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox textBox)
+            textBox.BorderBrush = new SolidColorBrush(Color.Parse("#B7A5F2"));
+    }
+
+    private static void FileNameTextBox_LostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox textBox)
+            textBox.BorderBrush = new SolidColorBrush(Color.Parse("#D9D9E0"));
+    }
+
     private void ShowValidationError()
     {
         if (DataContext is FileSuggestionViewModel viewModel)
             viewModel.HasValidationError = true;
         ShakeFileNameTextBox();
     }
-
-    private static bool IsValidFileName(string fileName)
-    {
-        var normalizedFileName = fileName.Normalize();
-        return normalizedFileName.Length is >= 1 and <= 255
-            && !char.IsWhiteSpace(normalizedFileName[0])
-            && !char.IsWhiteSpace(normalizedFileName[^1])
-            && normalizedFileName.All(IsAllowedFileNameCharacter);
-    }
-
-    private static bool IsAllowedFileNameCharacter(char character) =>
-        char.IsLetterOrDigit(character) || character is '_' or '-' or ' ';
 
     private async void ShakeFileNameTextBox()
     {

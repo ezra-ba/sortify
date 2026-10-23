@@ -12,7 +12,7 @@ Das Projekt wird von **SYD – Sort Your Data GmbH** im Rahmen des Projektprakti
 
 ## Projektstatus
 
-Sortify befindet sich in der Startphase. Projektidee, Name und grundlegende Anforderungen wurden festgelegt. Als UI-Technologie wurde **Avalonia** ausgewählt und die erste Solution-Struktur wurde angelegt. Die Kernfunktionen werden als Nächstes entwickelt.
+Sortify befindet sich in der Entwicklung. Ordnerauswahl und lokale Speicherung sind vorhanden. Neue Dateien im ausgewählten Ordner werden erkannt und mit echten Dateidaten im Popup angezeigt. Eine Prüfung auf vollständig abgeschlossene Downloads, Dateioperationen und die Anbindung der fachlichen Regelauswertung sind noch offen; der Einsortieren-Button ist deaktiviert.
 
 ## Problemstellung
 
@@ -93,6 +93,21 @@ dotnet build
 dotnet run --project .\src\Sortify.App
 dotnet test
 ```
+
+## Hintergrundbetrieb
+
+Sortify zeigt unter Windows ein Symbol im Infobereich und unter macOS in der Menüleiste. Das Menü bietet Öffnen, Überwachung pausieren/fortsetzen und Beenden. Beim Schließen bleibt die Anwendung standardmäßig im Tray aktiv; diese Option kann im Tray-Menü deaktiviert werden und wird in der lokalen Einstellungsdatei gespeichert. Beenden stoppt die Überwachung und schließt offene Datei-Popups.
+
+Unter Windows kann im Tray-Menü optional der Start bei der Benutzeranmeldung aktiviert werden. Standardmäßig ist kein Autostart eingetragen. Der Eintrag liegt ausschließlich unter `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Sortify` und wird beim Deaktivieren entfernt. Hierfür Sortify zuerst in einen stabilen Ordner veröffentlichen; den Build-Ordner danach nicht verschieben:
+
+```powershell
+dotnet publish .\src\Sortify.App -c Release -r win-x64 --self-contained true -o .\publish
+.\publish\Sortify.App.exe
+```
+
+Der Autostart startet die App mit `--background`. Einstellungen und Ordnerüberwachung werden ohne sichtbares Hauptfenster geladen. Ohne konfigurierten Ordner oder bei einem Einstellungsfehler wird stattdessen das Hauptfenster angezeigt. Ein erneuter normaler Programmstart aktiviert die bereits laufende Instanz; ein zweiter Hintergrundstart bleibt still. Es wird kein Windows-Dienst eingerichtet, und vor der Anmeldung läuft Sortify nicht.
+
+Linux verwendet vorerst den normalen Fensterbetrieb, da die Verfügbarkeit eines Tray-Bereichs von der Desktop-Umgebung abhängt. Die Autostart-Option ist außerhalb von Windows deaktiviert. Native Tray-Anzeige und Betriebssystem-Autostart müssen auf dem Zielsystem geprüft werden; Headless-Tests decken Lebenszyklus und Dateierkennung ab.
 
 ## Mitarbeit
 

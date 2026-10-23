@@ -29,17 +29,28 @@ public sealed class DownloadPopupTests
             var model = new MainViewModel();
             model.TargetFolders.Add(new TargetFolderViewModel("School",
                 Path.Combine(Path.GetPathRoot(root)!, "Sortify", "School"), true));
-            using var controller = new DownloadMonitorController(owner, model);
+            using var controller = new DownloadMonitorController(model);
+            FileSuggestionWindow? openedPopup = null;
+            using var subscription = Window.WindowOpenedEvent.AddClassHandler<Window>((window, _) =>
+            {
+                if (window is FileSuggestionWindow popup)
+                    openedPopup = popup;
+            });
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             try
             {
                 controller.Restart(root);
+                owner.WindowState = WindowState.Minimized;
                 var file = Path.Combine(root, "questions.final.DOCX");
                 await File.WriteAllTextAsync(file, "unchanged");
-                while (!owner.OwnedWindows.OfType<FileSuggestionWindow>().Any())
+                while (openedPopup is null)
                     await Task.Delay(25, timeout.Token);
 
-                var popup = Assert.Single(owner.OwnedWindows.OfType<FileSuggestionWindow>());
+                var popup = openedPopup;
+                Assert.Null(popup.Owner);
+                Assert.True(popup.IsVisible);
+                Assert.True(popup.Topmost);
+                Assert.Empty(owner.OwnedWindows);
                 var popupModel = Assert.IsType<FileSuggestionViewModel>(popup.DataContext);
                 Assert.Equal("questions.final.DOCX", popupModel.DetectedFileName);
                 Assert.Equal(".DOCX", popupModel.FileExtension);
@@ -52,6 +63,7 @@ public sealed class DownloadPopupTests
                 }
 
                 controller.Restart(null);
+                Assert.False(popup.IsVisible);
                 Assert.Empty(owner.OwnedWindows);
                 Assert.Equal("unchanged", await File.ReadAllTextAsync(file));
             }

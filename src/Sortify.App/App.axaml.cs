@@ -47,7 +47,7 @@ public partial class App : Application
 
             desktop.MainWindow = window;
 
-            var controller = new DownloadMonitorController(window, viewModel);
+            var controller = new DownloadMonitorController(viewModel);
             var initialized = false;
             viewModel.MonitoringFolderConfigured += () =>
             {

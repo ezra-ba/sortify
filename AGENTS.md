@@ -13,6 +13,7 @@ The application uses C# on .NET 10, Avalonia UI, and the MVVM pattern. AI endpoi
 - `src/Sortify.Infrastructure`: folder monitoring, file operations, and local persistence implementations.
 - `tests/Sortify.Core.Tests`: automated tests for rule evaluation and other domain behavior.
 - `assets/branding`: canonical Sortify and SYD branding assets.
+- `docs`: architecture and technical decision documents.
 
 Dependencies flow toward `Sortify.Core`. Keep file-system access out of views and view models.
 

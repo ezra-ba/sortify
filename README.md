@@ -77,8 +77,11 @@ Sortify.sln
 │   ├── Sortify.Core/            Modelle, Regeln und Schnittstellen
 │   └── Sortify.Infrastructure/  Dateisystem und lokale Speicherung
 ├── tests/Sortify.Core.Tests/    Tests der fachlichen Logik
-└── assets/branding/             Logos und App-Icon
+├── assets/branding/             Logos und App-Icon
+└── docs/architecture.md         Architekturentscheidungen
 ```
+
+Weitere Details stehen in [`docs/architecture.md`](docs/architecture.md).
 
 ## Entwicklung
 

@@ -4,7 +4,7 @@ namespace Sortify.Core.Services;
 
 public interface IRuleEngine
 {
-    SortSuggestion? CreateSuggestion(
-        string filePath,
+    RuleEvaluationResult Evaluate(
+        FileDescriptor file,
         IReadOnlyCollection<SortRule> rules);
 }

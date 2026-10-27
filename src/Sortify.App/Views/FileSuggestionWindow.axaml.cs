@@ -9,12 +9,59 @@ namespace Sortify.App.Views;
 
 public partial class FileSuggestionWindow : Window
 {
+    private async void ConfirmButton_Click(
+    object? sender,
+    RoutedEventArgs e)
+    {
+        if (DataContext is not FileSuggestionViewModel viewModel)
+        {
+            return;
+        }
+
+        var succeeded = await viewModel.ConfirmMoveAsync();
+
+        if (succeeded)
+        {
+            Close();
+        }
+    }
+
+    private async void RefreshSourceButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is FileSuggestionViewModel viewModel)
+            await viewModel.InitializeFileOperationAsync();
+    }
+
+    private void FileSuggestionWindow_Closing(
+        object? sender,
+        WindowClosingEventArgs e)
+    {
+        if (DataContext is not FileSuggestionViewModel viewModel)
+            return;
+
+        if (viewModel.IsBusy && !viewModel.IsPreparingSource)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        viewModel.CancelSourceInspection();
+    }
+
     private CancellationTokenSource? _shakeCancellation;
 
     public FileSuggestionWindow()
     {
         InitializeComponent();
         Opened += RemoveWindowsChrome;
+        Opened += async (_, _) =>
+            {
+                if (DataContext is FileSuggestionViewModel viewModel)
+                {
+                    await viewModel.InitializeFileOperationAsync();
+                }
+            };
+        Closing += FileSuggestionWindow_Closing;
     }
 
     private void RemoveWindowsChrome(object? sender, EventArgs e)

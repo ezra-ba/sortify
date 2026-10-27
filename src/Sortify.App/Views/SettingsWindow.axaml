@@ -65,13 +65,14 @@
     <ScrollViewer Padding="38,32">
       <StackPanel Spacing="12">
         <TextBlock x:Name="SectionTitle" FontSize="26" FontWeight="SemiBold" Text="Allgemein"/>
+        <views:RuleEditorView x:Name="RulesEditor" IsVisible="False"/>
         <Border x:Name="AppearanceCard" IsVisible="False" Margin="0,18,0,0" Padding="12,10" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
           <Grid ColumnDefinitions="*,Auto">
             <TextBlock x:Name="AppearanceTitle" VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold" Text="Darkmode"/>
             <ToggleButton x:Name="DarkModeToggle" Classes="darkmode-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="False" IsCheckedChanged="DarkModeChanged"/>
           </Grid>
         </Border>
-        <Border x:Name="PlaceholderCard" Margin="0,18,0,0" Padding="22" BorderThickness="1" CornerRadius="8">
+        <Border x:Name="PlaceholderPanel" Margin="0,18,0,0" Padding="22" BorderThickness="1" CornerRadius="8">
           <StackPanel Spacing="10">
             <TextBlock x:Name="PlaceholderTitle" FontSize="16" FontWeight="SemiBold" Text="Bereich wird vorbereitet"/>
             <TextBlock Classes="muted" Text="Weitere Optionen können hier ergänzt werden. Die Navigation bleibt dabei bestehen und zeigt die Details des ausgewählten Themas an." TextWrapping="Wrap"/>

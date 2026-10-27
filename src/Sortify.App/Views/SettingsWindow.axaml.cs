@@ -75,7 +75,7 @@ public partial class SettingsWindow : Window
         SectionTitle.Text = section;
         var appearanceSelected = section == "Darstellung";
         AppearanceCard.IsVisible = appearanceSelected;
-        PlaceholderCard.IsVisible = !appearanceSelected;
+        PlaceholderPanel.IsVisible = !appearanceSelected;
     }
 
     private void DarkModeChanged(object? sender, RoutedEventArgs e)

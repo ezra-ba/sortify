@@ -10,6 +10,9 @@ namespace Sortify.App.ViewModels;
 public partial class FileSuggestionViewModel : ViewModelBase
 {
     private readonly IFileMoveService? fileMoveService;
+    private readonly IRuleEngine? ruleEngine;
+    private readonly Func<AppSettings?>? settingsProvider;
+    private bool suggestionEvaluated;
     private FileSourceSnapshot? sourceSnapshot;
     private CancellationTokenSource? inspectionCancellation;
 
@@ -66,9 +69,13 @@ public partial class FileSuggestionViewModel : ViewModelBase
     public FileSuggestionViewModel(
         ObservableCollection<TargetFolderViewModel> targetFolders,
         string path,
-        IFileMoveService? fileMoveService = null) : this(targetFolders)
+        IFileMoveService? fileMoveService = null,
+        IRuleEngine? ruleEngine = null,
+        Func<AppSettings?>? settingsProvider = null) : this(targetFolders)
     {
         this.fileMoveService = fileMoveService;
+        this.ruleEngine = ruleEngine;
+        this.settingsProvider = settingsProvider;
         SourcePath = path;
         DetectedFileName = Path.GetFileName(path);
         FileExtension = Path.GetExtension(path);
@@ -78,7 +85,8 @@ public partial class FileSuggestionViewModel : ViewModelBase
 
     public string? SourcePath { get; }
 
-    public string SuggestionExplanation { get; } = "Manuelle Popup-Vorschau";
+    [ObservableProperty]
+    public partial string SuggestionExplanation { get; set; } = "Manuelle Popup-Vorschau";
 
     [ObservableProperty]
     public partial string DetectedFileName { get; set; } = "rechnung_2026-10-07.pdf";
@@ -140,6 +148,11 @@ public partial class FileSuggestionViewModel : ViewModelBase
                 SourcePath, cancellation.Token);
 
             sourceSnapshot = result.Snapshot;
+            if (sourceSnapshot is not null && !suggestionEvaluated && ruleEngine is not null)
+            {
+                ApplyRuleSuggestion(sourceSnapshot);
+                suggestionEvaluated = true;
+            }
             OperationMessage = result.ErrorMessage ?? "Datei bereit zum Einsortieren.";
             OperationMessageColor = result.Snapshot is not null
                 ? "#15803D"
@@ -158,6 +171,60 @@ public partial class FileSuggestionViewModel : ViewModelBase
             OnPropertyChanged(nameof(CanConfirmMove));
             OnPropertyChanged(nameof(CanRefreshSource));
         }
+    }
+
+    private void ApplyRuleSuggestion(FileSourceSnapshot snapshot)
+    {
+        var settings = settingsProvider?.Invoke();
+        SelectedTargetFolder = null;
+        if (settings is null)
+        {
+            SuggestionExplanation = "Keine Regeln verfügbar. Bitte einen Zielordner auswählen.";
+            return;
+        }
+
+        var relativePath = string.IsNullOrWhiteSpace(settings.WatchedFolderPath)
+            ? Path.GetFileName(snapshot.SourcePath)
+            : Path.GetRelativePath(settings.WatchedFolderPath, snapshot.SourcePath);
+        var file = new FileDescriptor(
+            snapshot.SourcePath,
+            Path.GetFileNameWithoutExtension(snapshot.SourcePath),
+            Path.GetExtension(snapshot.SourcePath),
+            relativePath,
+            snapshot.Length,
+            snapshot.LastWriteTimeUtc);
+        var result = ruleEngine!.Evaluate(file, settings.Rules, settings.TargetFolders);
+        if (result.Status == RuleEvaluationStatus.Matched && result.Candidates.Count == 1)
+        {
+            var candidate = result.Candidates[0];
+            var target = TargetFolders.FirstOrDefault(folder => folder.Id == candidate.TargetFolderId);
+            // The popup currently keeps the source extension fixed.
+            if (target is not null && PortableNameValidator.IsValid(candidate.FileName) &&
+                string.Equals(Path.GetExtension(candidate.FileName), FileExtension, StringComparison.Ordinal))
+            {
+                SelectedTargetFolder = target;
+                NewFileName = Path.GetFileNameWithoutExtension(candidate.FileName);
+                SuggestionExplanation = "Passende Regel: " +
+                    string.Join(", ", candidate.Rules.Select(rule => rule.Name));
+                return;
+            }
+        }
+
+        if (result.Diagnostics.Count > 0 ||
+            result.Status is RuleEvaluationStatus.Ignored or RuleEvaluationStatus.Failed)
+        {
+            SuggestionExplanation = "Kein automatischer Vorschlag möglich. Bitte Ziel und Dateinamen manuell prüfen.";
+            return;
+        }
+
+        SelectedTargetFolder = TargetFolders.FirstOrDefault(folder =>
+            folder.Id == settings.DefaultTargetFolderId);
+        var reason = result.Status == RuleEvaluationStatus.Ambiguous
+            ? "Mehrere Regelvorschläge möglich."
+            : "Keine eindeutige passende Regel gefunden.";
+        SuggestionExplanation = reason + (SelectedTargetFolder is null
+            ? " Bitte einen Zielordner auswählen."
+            : " Der Standardordner wird vorgeschlagen.");
     }
 
     public void CancelSourceInspection()

@@ -3,6 +3,7 @@ using Sortify.App.ViewModels;
 using Sortify.App.Views;
 using Sortify.Infrastructure.Monitoring;
 using Sortify.Core.Services;
+using Sortify.Core.Rules;
 using Sortify.Infrastructure.FileSystem;
 
 namespace Sortify.App.Services;
@@ -11,6 +12,7 @@ public sealed class DownloadMonitorController(MainViewModel viewModel) : IDispos
 {
     private readonly IFileMoveService fileMoveService =
     new FileMoveService();
+    private readonly IRuleEngine ruleEngine = new RuleEngine(new RuleValidator(), new RuleTargetValidator());
     private readonly FolderMonitor monitor = new();
     private readonly List<FileSuggestionWindow> popups = [];
     private int session;
@@ -45,7 +47,9 @@ public sealed class DownloadMonitorController(MainViewModel viewModel) : IDispos
                     new FileSuggestionViewModel(
                         viewModel.TargetFolders,
                             path,
-                            fileMoveService))
+                            fileMoveService,
+                            ruleEngine,
+                            () => viewModel.CurrentSettings))
                 {
                     Topmost = true
                 };

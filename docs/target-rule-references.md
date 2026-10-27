@@ -1,6 +1,6 @@
 # Regelziele über Target-IDs
 
-Stand: 23. Oktober 2026. Arbeitsstand für Issue #46.
+Stand: 27. Oktober 2026. Arbeitsstand für Issue #46.
 
 ## Implementiertes Verhalten
 
@@ -32,12 +32,12 @@ Der Aufruf ist noch nicht an eine tatsächliche Regel-/Target-Auswahlmaske angeb
 
 Vereinbartes Zielverhalten: Für eine neue Datei wird der Target-Ordner mit der höchsten ausreichend eindeutigen Regelübereinstimmung vorgeschlagen. Bei unsicherer Zuordnung wird ein Standardordner vorgeschlagen. Verschoben wird weiterhin erst nach ausdrücklicher Bestätigung.
 
-Gewichtung, Eindeutigkeit und Verhalten ohne Standardziel sind noch festzulegen. Die Berechnung einer Übereinstimmung und der Standardziel-Fallback sind separate Folgearbeiten und nicht als implementiert zu verstehen. Ein technischer Auswertungsfehler darf nicht unbemerkt in einen erfolgreichen Fallback umgedeutet werden.
+Eine berechnete Gewichtung der Übereinstimmung bleibt offen. Die Popup-Integration nutzt derzeit die explizite Regelpriorität: Ein eindeutiger Kandidat belegt Ziel und Dateinamen vor; bei NoMatch oder Ambiguous wird das konfigurierte Standardziel vorgeschlagen. Ohne Standardziel bleibt die Zielauswahl leer. Ein technischer Auswertungsfehler darf nicht unbemerkt in einen erfolgreichen Fallback umgedeutet werden.
 
-Die integrierte Dateierkennung öffnet derzeit ein Popup über `DownloadMonitorController`, ruft aber noch nicht diese Engine auf. Die Verbindung von Dateibeschreibung, gespeicherten Regeln, Engine-Ergebnis und tatsächlichem Target-Pfad bleibt als Integration offen. Zielerreichbarkeit, Pfadgrenzen und bestätigte Dateioperationen gehören in Infrastructure und die entsprechenden Folge-Issues.
+Das Popup wertet nach erfolgreicher Bereitschaftsprüfung die aktuellen gespeicherten Regeln über die Engine aus. Der Kandidat wird ausschließlich über seine Target-ID einer vorhandenen Target-Karte zugeordnet. Die Begründung wird angezeigt. Bei Ignored, Failed oder diagnostizierten Problemen ohne verwendbaren Treffer wird kein Standardziel vorbelegt. Derzeit werden nur Vorschläge mit unveränderter Dateiendung übernommen. Nach der ersten Auswertung überschreiben Wiederholungsprüfungen keine manuellen Eingaben. Keine Auswertung führt selbst eine Dateioperation aus. Zielerreichbarkeit, Pfadgrenzen und bestätigte Dateioperationen gehören in Infrastructure und die entsprechenden Folge-Issues.
 
 ## Verifikation und offene Abnahme
 
 Core-Tests prüfen Zielreferenzen, entfernte Targets ohne Umleitung, Prioritäten, Mehrdeutigkeiten und das Zusammenfassen anhand der Target-ID. Infrastructure-Tests prüfen vollständige Speicherung, Altformate, Warnungen, explizite Reparatur und Engine-Auswertung nach erneutem Laden. App-Tests prüfen Zuordnung, ungültige Auswahl ohne Schreiben, Speicherfehler und aktuelle Warnungen nach Target-Entfernung.
 
-Offen für die bedienbare Gesamtabnahme: Regel-/Target-Auswahlmaske, Verbindung der laufenden Dateierkennung mit der Target-ID-basierten Engine sowie der Ablauf mit echten Benutzerentscheidungen. Vor einem Abschluss von #46 ist insbesondere zu klären, ob die Auswahlmaske als Abhängigkeit von #27 oder als Bestandteil dieses Issues nachgewiesen werden soll.
+Offen für die bedienbare Gesamtabnahme: Regel-/Target-Auswahlmaske sowie der manuell geprüfte Ablauf mit echten gespeicherten Regeln und Benutzerentscheidungen. Vor einem Abschluss von #46 ist insbesondere zu klären, ob die Auswahlmaske als Abhängigkeit von #27 oder als Bestandteil dieses Issues nachgewiesen werden soll.

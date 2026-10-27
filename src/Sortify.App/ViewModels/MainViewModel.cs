@@ -72,6 +72,7 @@ public partial class MainViewModel : ViewModelBase
 
     public AppSettings? CurrentSettings => settingsService?.Current;
 
+
     public event Action? MonitoringFolderConfigured;
 
     [ObservableProperty]

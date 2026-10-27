@@ -1,47 +1,134 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Styles.Resources>
+    <ResourceDictionary>
     <!-- Sortify design tokens: solid surfaces, restrained contrast, no glass effects. -->
-    <Color x:Key="Color.Canvas">#F5F5F7</Color>
-    <Color x:Key="Color.Surface">#FFFFFF</Color>
-    <Color x:Key="Color.SurfaceSubtle">#F0F1F4</Color>
-    <Color x:Key="Color.Text">#1C1C1E</Color>
-    <Color x:Key="Color.TextSecondary">#6E6E73</Color>
-    <Color x:Key="Color.TextDisabled">#98A2B3</Color>
-    <Color x:Key="Color.Border">#E1E5EA</Color>
-    <Color x:Key="Color.Accent">#8B72E6</Color>
-    <Color x:Key="Color.AccentHover">#7A61D8</Color>
-    <Color x:Key="Color.AccentPressed">#694FC5</Color>
-    <Color x:Key="Color.Focus">#B7A5F2</Color>
-    <Color x:Key="Color.Success">#198754</Color>
-    <Color x:Key="Color.Warning">#B7791F</Color>
-    <Color x:Key="Color.Error">#C2413B</Color>
+    <ResourceDictionary.ThemeDictionaries>
+      <ResourceDictionary x:Key="Light">
+        <Color x:Key="ThemeAccentColor">#7657D9</Color>
+        <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush" Color="#7657D9" />
+        <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush3" Color="#6545C5" />
+        <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush4" Color="#5536AE" />
+        <SolidColorBrush x:Key="BrushCanvas" Color="#F5F5F7" />
+        <SolidColorBrush x:Key="BrushSurface" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="BrushControlSurface" Color="#FAFAFC" />
+        <SolidColorBrush x:Key="BrushSurfaceSubtle" Color="#F0ECFF" />
+        <SolidColorBrush x:Key="BrushSelectedHover" Color="#E5DEFF" />
+        <SolidColorBrush x:Key="BrushText" Color="#1C1C1E" />
+        <SolidColorBrush x:Key="BrushTextSecondary" Color="#6E6E73" />
+        <SolidColorBrush x:Key="BrushBorder" Color="#E1E1E6" />
+        <SolidColorBrush x:Key="BrushBorderHover" Color="#C8C8D0" />
+        <SolidColorBrush x:Key="BrushAccent" Color="#7657D9" />
+        <SolidColorBrush x:Key="BrushAccentHover" Color="#6545C5" />
+        <SolidColorBrush x:Key="BrushAccentPressed" Color="#5536AE" />
+        <SolidColorBrush x:Key="BrushPrimary" Color="#9685E8" />
+        <SolidColorBrush x:Key="BrushPrimaryHover" Color="#765FD2" />
+        <SolidColorBrush x:Key="BrushPrimaryPressed" Color="#6953C0" />
+        <SolidColorBrush x:Key="BrushFocus" Color="#7657D9" />
+        <SolidColorBrush x:Key="BrushSuccess" Color="#15803D" />
+        <SolidColorBrush x:Key="BrushError" Color="#B42318" />
+        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#F0ECFF" />
+        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#E5DEFF" />
+        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#C8C8D0" />
+        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#7657D9" />
+        <SolidColorBrush x:Key="ToggleSwitchOnBackground" Color="#7657D9" />
+        <SolidColorBrush x:Key="ToggleSwitchOnBackgroundPointerOver" Color="#6545C5" />
+        <SolidColorBrush x:Key="ToggleSwitchOnBackgroundPressed" Color="#5536AE" />
+        <SolidColorBrush x:Key="ToggleSwitchBackgroundChecked" Color="#7657D9" />
+        <SolidColorBrush x:Key="ToggleSwitchBackgroundCheckedPointerOver" Color="#6545C5" />
+        <SolidColorBrush x:Key="TextControlBorderBrush" Color="#E1E1E6" />
+        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#C8C8D0" />
+        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#7657D9" />
+        <SolidColorBrush x:Key="TextControlBorderBrushError" Color="#B42318" />
+        <Thickness x:Key="TextControlBorderThemeThicknessFocused">1</Thickness>
+        <SolidColorBrush x:Key="ComboBoxBackground" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#E1E1E6" />
+        <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#F0ECFF" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#C8C8D0" />
+        <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#E5DEFF" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="#7657D9" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="#F0ECFF" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="#F0ECFF" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="#E5DEFF" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundPressed" Color="#E5DEFF" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="#DCD0FF" />
+      </ResourceDictionary>
+      <ResourceDictionary x:Key="Dark">
+        <Color x:Key="ThemeAccentColor">#9B82F3</Color>
+        <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush" Color="#9B82F3" />
+        <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush3" Color="#B09DF8" />
+        <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush4" Color="#7657D9" />
+        <SolidColorBrush x:Key="BrushCanvas" Color="#171719" />
+        <SolidColorBrush x:Key="BrushSurface" Color="#222225" />
+        <SolidColorBrush x:Key="BrushControlSurface" Color="#2B2B30" />
+        <SolidColorBrush x:Key="BrushSurfaceSubtle" Color="#302747" />
+        <SolidColorBrush x:Key="BrushSelectedHover" Color="#40345B" />
+        <SolidColorBrush x:Key="BrushText" Color="#F5F5F7" />
+        <SolidColorBrush x:Key="BrushTextSecondary" Color="#A1A1AA" />
+        <SolidColorBrush x:Key="BrushBorder" Color="#3A3A40" />
+        <SolidColorBrush x:Key="BrushBorderHover" Color="#52525B" />
+        <SolidColorBrush x:Key="BrushAccent" Color="#9B82F3" />
+        <SolidColorBrush x:Key="BrushAccentHover" Color="#B09DF8" />
+        <SolidColorBrush x:Key="BrushAccentPressed" Color="#7657D9" />
+        <SolidColorBrush x:Key="BrushPrimary" Color="#A18DEC" />
+        <SolidColorBrush x:Key="BrushPrimaryHover" Color="#9A86E8" />
+        <SolidColorBrush x:Key="BrushPrimaryPressed" Color="#8F7BE4" />
+        <SolidColorBrush x:Key="BrushFocus" Color="#B09DF8" />
+        <SolidColorBrush x:Key="BrushSuccess" Color="#22C55E" />
+        <SolidColorBrush x:Key="BrushError" Color="#F04438" />
+        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#40345B" />
+        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#45454D" />
+        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#52525B" />
+        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#9B82F3" />
+        <SolidColorBrush x:Key="ToggleSwitchOnBackground" Color="#9B82F3" />
+        <SolidColorBrush x:Key="ToggleSwitchOnBackgroundPointerOver" Color="#B09DF8" />
+        <SolidColorBrush x:Key="ToggleSwitchOnBackgroundPressed" Color="#7657D9" />
+        <SolidColorBrush x:Key="ToggleSwitchBackgroundChecked" Color="#9B82F3" />
+        <SolidColorBrush x:Key="ToggleSwitchBackgroundCheckedPointerOver" Color="#B09DF8" />
+        <SolidColorBrush x:Key="TextControlBorderBrush" Color="#3A3A40" />
+        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#52525B" />
+        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#9B82F3" />
+        <SolidColorBrush x:Key="TextControlBorderBrushError" Color="#F04438" />
+        <Thickness x:Key="TextControlBorderThemeThicknessFocused">1</Thickness>
+        <SolidColorBrush x:Key="ComboBoxBackground" Color="#222225" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#3A3A40" />
+        <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#302747" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#52525B" />
+        <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#40345B" />
+        <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="#9B82F3" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="#40345B" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="#302747" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="#40345B" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundPressed" Color="#40345B" />
+        <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="#4A3D68" />
+      </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
 
-    <SolidColorBrush x:Key="Brush.Canvas" Color="#F5F5F7" />
-    <SolidColorBrush x:Key="Brush.Surface" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="Brush.SurfaceSubtle" Color="#F0F1F4" />
-    <SolidColorBrush x:Key="Brush.Text" Color="#1C1C1E" />
-    <SolidColorBrush x:Key="Brush.TextSecondary" Color="#6E6E73" />
-    <SolidColorBrush x:Key="Brush.Border" Color="#E1E5EA" />
-    <SolidColorBrush x:Key="Brush.Accent" Color="#8B72E6" />
-    <SolidColorBrush x:Key="Brush.Focus" Color="#B7A5F2" />
-
-    <CornerRadius x:Key="Radius.Control">8</CornerRadius>
-    <CornerRadius x:Key="Radius.Card">14</CornerRadius>
-    <CornerRadius x:Key="Radius.Pill">999</CornerRadius>
+    <CornerRadius x:Key="RadiusButton">6</CornerRadius>
+    <CornerRadius x:Key="RadiusInput">7</CornerRadius>
+    <CornerRadius x:Key="RadiusTab">8</CornerRadius>
+    <CornerRadius x:Key="RadiusCard">12</CornerRadius>
+    <CornerRadius x:Key="RadiusDialog">14</CornerRadius>
+    <CornerRadius x:Key="RadiusPopover">10</CornerRadius>
+    <CornerRadius x:Key="RadiusBadge">5</CornerRadius>
+    <CornerRadius x:Key="Radius.Control">6</CornerRadius>
+    <CornerRadius x:Key="Radius.Card">12</CornerRadius>
+    </ResourceDictionary>
     </Styles.Resources>
 
     <Style Selector="TextBlock.heading">
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
         <Setter Property="FontFamily" Value="Inter" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="TextBlock.muted">
-        <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
         <Setter Property="FontFamily" Value="Inter" />
         <Setter Property="FontSize" Value="13" />
     </Style>
     <Style Selector="Button.motion">
+        <Setter Property="CornerRadius" Value="{DynamicResource RadiusButton}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
         <Setter Property="RenderTransformOrigin" Value="50%,50%" />
         <Setter Property="RenderTransform">
             <Setter.Value><ScaleTransform ScaleX="1" ScaleY="1" /></Setter.Value>
@@ -59,13 +146,103 @@
         </Setter>
     </Style>
     <Style Selector="TextBox.motion">
-        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
-        <Setter Property="CornerRadius" Value="{DynamicResource Radius.Control}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource RadiusInput}" />
         <Setter Property="Transitions">
             <Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.16" /></Transitions>
         </Setter>
     </Style>
     <Style Selector="TextBox.motion:focus">
-        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Focus}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushFocus}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox:focus">
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushFocus}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox:focus-visible">
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushFocus}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox.invalid">
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushError}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox.invalid:focus">
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushError}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox.invalid:focus-visible">
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushError}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="ComboBox">
+        <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="ComboBox:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderHover}" />
+    </Style>
+    <Style Selector="ComboBox:focus">
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushFocus}" />
+    </Style>
+    <Style Selector="ComboBox:pressed">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPressed}" />
+    </Style>
+    <Style Selector="ComboBoxItem">
+        <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+    </Style>
+    <Style Selector="ComboBoxItem:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+    </Style>
+    <Style Selector="ComboBoxItem:selected">
+        <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+    </Style>
+    <Style Selector="ComboBoxItem:selected:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BrushSelectedHover}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+    </Style>
+    <Style Selector="ComboBoxItem:pressed">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxItemBackgroundPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+    </Style>
+    <Style Selector="ComboBoxItem:selected:pressed">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxItemBackgroundSelectedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+    </Style>
+    <Style Selector="Button.primary">
+        <Setter Property="Background" Value="{DynamicResource BrushPrimary}" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+        <Setter Property="CornerRadius" Value="{DynamicResource RadiusButton}" />
+    </Style>
+    <Style Selector="Button.primary:pointerover:not(:disabled)">
+        <Setter Property="Background" Value="{DynamicResource BrushPrimaryHover}" />
+    </Style>
+    <Style Selector="Button.primary:pressed:not(:disabled)">
+        <Setter Property="Background" Value="{DynamicResource BrushPrimaryPressed}" />
+    </Style>
+    <Style Selector="Button.secondary">
+        <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource RadiusButton}" />
+    </Style>
+    <Style Selector="Button.secondary:pointerover:not(:disabled)">
+        <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderHover}" />
+    </Style>
+    <Style Selector="Button.secondary:pressed:not(:disabled)">
+        <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}" />
+    </Style>
+    <Style Selector="Button:disabled">
+        <Setter Property="Background" Value="{DynamicResource BrushBorder}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
     </Style>
 </Styles>

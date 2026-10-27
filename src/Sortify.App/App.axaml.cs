@@ -84,7 +84,10 @@ public partial class App : Application
             {
                 trayMenu = new TrayMenu(icon, session);
             }
-            window.Opened += (_, _) => desktop.MainWindow ??= window;
+            window.Opened += (_, _) =>
+            {
+                desktop.MainWindow ??= window;
+            };
             desktop.Exit += (_, _) =>
             {
                 session.Dispose();

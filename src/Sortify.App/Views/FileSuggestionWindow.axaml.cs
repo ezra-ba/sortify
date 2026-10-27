@@ -164,7 +164,6 @@ public partial class FileSuggestionWindow : Window
                 viewModel.HasValidationError = false;
             ToolTip.SetTip(textBox, null);
             textBox.Classes.Remove("invalid");
-            textBox.BorderBrush = new SolidColorBrush(Color.Parse(textBox.IsFocused ? "#B7A5F2" : "#D9D9E0"));
             return;
         }
 
@@ -177,7 +176,6 @@ public partial class FileSuggestionWindow : Window
             return;
 
         var hasValidationError = (textBox.DataContext as FileSuggestionViewModel)?.HasValidationError == true;
-        textBox.BorderBrush = new SolidColorBrush(Color.Parse(hasValidationError ? "#B42318" : "#B7A5F2"));
     }
 
     private static void FileNameTextBox_LostFocus(object? sender, RoutedEventArgs e)
@@ -186,7 +184,6 @@ public partial class FileSuggestionWindow : Window
             return;
 
         var hasValidationError = (textBox.DataContext as FileSuggestionViewModel)?.HasValidationError == true;
-        textBox.BorderBrush = new SolidColorBrush(Color.Parse(hasValidationError ? "#B42318" : "#D9D9E0"));
     }
 
     private void ShowValidationError()
@@ -197,7 +194,6 @@ public partial class FileSuggestionWindow : Window
             ToolTip.SetTip(FileNameTextBox, viewModel.ValidationMessage);
         }
         FileNameTextBox.Classes.Add("invalid");
-        FileNameTextBox.BorderBrush = new SolidColorBrush(Color.Parse("#B42318"));
         ShakeFileNameTextBox();
     }
 

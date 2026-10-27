@@ -12,4 +12,5 @@ public sealed record AppSettings(
     public Guid? DefaultTargetFolderId { get; init; }
 
     public bool CloseToTray { get; init; } = true;
+
 }

@@ -6,6 +6,8 @@
 	- [ ] Launch with LogIn
 	- [ ] Include File Origin (download page) into suggestion
 - [ ] Mehrere Target Ordner auswählen und anlegen
+- [ ] Suchfilter für Target-Ordner einbauen
+- [ ] Scroll-Lösung für mehrere Ordner
 ## Bugs
 - [ ] Fehlerhaft auf Linux:
 	- [ ] Icons (minimieren, maximieren & schließen)

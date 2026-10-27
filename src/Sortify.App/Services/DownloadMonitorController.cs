@@ -2,11 +2,15 @@ using Avalonia.Threading;
 using Sortify.App.ViewModels;
 using Sortify.App.Views;
 using Sortify.Infrastructure.Monitoring;
+using Sortify.Core.Services;
+using Sortify.Infrastructure.FileSystem;
 
 namespace Sortify.App.Services;
 
 public sealed class DownloadMonitorController(MainViewModel viewModel) : IDisposable
 {
+    private readonly IFileMoveService fileMoveService =
+    new FileMoveService();
     private readonly FolderMonitor monitor = new();
     private readonly List<FileSuggestionWindow> popups = [];
     private int session;
@@ -38,7 +42,10 @@ public sealed class DownloadMonitorController(MainViewModel viewModel) : IDispos
                 if (disposed || session != currentSession)
                     return;
                 var popup = new FileSuggestionWindow(
-                    new FileSuggestionViewModel(viewModel.TargetFolders, path))
+                    new FileSuggestionViewModel(
+                        viewModel.TargetFolders,
+                            path,
+                            fileMoveService))
                 {
                     Topmost = true
                 };

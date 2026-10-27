@@ -131,7 +131,7 @@
                 <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto,*" ColumnSpacing="0" RowSpacing="5">
                     <TextBlock FontSize="12" Foreground="#6E6E73" Text="Zielordner"/>
                     <TextBlock Grid.Column="2" FontSize="12" Foreground="#6E6E73" Text="Dateiname"/>
-                    <ComboBox Grid.Row="1" ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTargetFolder}" MinWidth="145">
+                    <ComboBox Grid.Row="1" ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTargetFolder}" MinWidth="145" IsEnabled="{Binding CanEdit}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="vm:TargetFolderViewModel">
                                 <TextBlock Text="{Binding Nickname}"/>
@@ -141,7 +141,7 @@
                     <TextBlock Grid.Row="1" Grid.Column="1" Margin="4,0" VerticalAlignment="Center" FontSize="18" Foreground="#A7A7AF" Text="/"/>
                     <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="0" RowSpacing="3">
                         <TextBox Classes="motion" x:Name="FileNameTextBox" Text="{Binding NewFileName, Mode=TwoWay}" MaxLength="255" PlaceholderText="Dateiname" TextChanged="FileNameTextBox_TextChanged" GotFocus="FileNameTextBox_GotFocus" LostFocus="FileNameTextBox_LostFocus"
-                                 ToolTip.IsOpen="{Binding HasValidationError}"/>
+                                 ToolTip.IsOpen="{Binding HasValidationError}" IsEnabled="{Binding CanEdit}"/>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" Padding="0,0,10,0" Foreground="#6E6E73" Text="{Binding FileExtension}"/>
                     </Grid>
                 </Grid>
@@ -152,11 +152,30 @@
                            ToolTip.Tip="{Binding FilePathPreview}"
                            ToolTip.ToolTipOpening="FilePathPreviewTextBlock_ToolTipOpening"/>
             </StackPanel>
+            <TextBlock Text="{Binding OperationMessage}"
+           TextWrapping="Wrap"
+           Foreground="{Binding OperationMessageColor}"
+           FontSize="12"/>
+
+            <Button Content="Datei erneut prüfen"
+                    Classes="secondary motion"
+                    HorizontalAlignment="Left"
+                    IsVisible="{Binding CanRefreshSource}"
+                    Click="RefreshSourceButton_Click"/>
 
             <Border Height="1" Background="#E6E6EB" Margin="-16,0,-16,-14"/>
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
-                <Button Classes="secondary motion" Content="Abbrechen" HorizontalAlignment="Left" Click="CancelButton_Click"/>
-                <Button Grid.Column="1" Classes="primary motion" Content="Datei einsortieren" IsEnabled="False" ToolTip.Tip="Dateioperationen sind noch nicht angebunden."/>
+            <Button Classes="secondary motion"
+                Content="Abbrechen"
+                HorizontalAlignment="Left"
+                IsEnabled="{Binding CanCancel}"
+                Click="CancelButton_Click"/>
+
+            <Button Grid.Column="1"
+                Classes="primary motion"
+                Content="Datei einsortieren"
+                IsEnabled="{Binding CanConfirmMove}"
+                Click="ConfirmButton_Click"/>
             </Grid>
         </StackPanel>
     </Border>

@@ -115,6 +115,7 @@
 						<TextBlock Classes="eyebrow" Text="ÜBERWACHUNGS-ORDNER"/>
 						<TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding WatchedFolder}"/>
 						<TextBlock Classes="muted" Text="{Binding SettingsStatus}" TextWrapping="Wrap"/>
+						<TextBlock Text="{Binding RuleTargetWarnings}" IsVisible="{Binding HasRuleTargetWarnings}" TextWrapping="Wrap" Foreground="#9A3412"/>
 						<TextBlock Classes="muted" Text="{Binding MonitoringStatus}" TextWrapping="Wrap"/>
 					</StackPanel>
 					<Button Grid.Column="2" Classes="secondary motion" Content="Ordner wechseln" Click="SelectWatchedFolder"/>
@@ -178,6 +179,7 @@
 					<StackPanel Spacing="14">
 						<TextBlock FontSize="19" FontWeight="SemiBold" Text="Verwaltung"/>
 						<Border Margin="0,4,0,2" Height="1"/>
+						<Button Classes="secondary motion" HorizontalContentAlignment="Center" Content="Regel für Target-Ordner anlegen" IsEnabled="{Binding HasSelectedTargetFolder}" Click="OpenTargetRules"/>
 						<Button Classes="primary motion" HorizontalContentAlignment="Center" Content="Popup-Vorschau öffnen" Click="OpenFileSuggestion"/>
 								<Button Classes="primary motion" HorizontalContentAlignment="Center" Content="＋  Target-Ordner hinzufügen" Click="AddTargetFolder"/>
 								<Button Classes="secondary motion" HorizontalContentAlignment="Center" Content="Als Standard festlegen" Command="{Binding SetDefaultTargetFolderCommand}"/>

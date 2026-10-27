@@ -67,7 +67,12 @@ public sealed class RuleValidator : IRuleValidator
                 errors);
         }
 
-        ValidateTargetDirectory(rule.TargetDirectory, errors);
+        // Bei Regeln mit Target-ID entscheidet ausschließlich die Zielreferenz.
+        // Das alte Feld bleibt zur verlustfreien Übernahme erhalten.
+        if (rule.TargetFolderId is null)
+        {
+            ValidateTargetDirectory(rule.TargetDirectory, errors);
+        }
         ValidateRenamePattern(rule.RenamePattern, errors);
 
         return new RuleValidationResult(errors.AsReadOnly());

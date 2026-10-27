@@ -141,6 +141,9 @@
                            ToolTip.Tip="{Binding FilePathPreview}"
                            ToolTip.ToolTipOpening="FilePathPreviewTextBlock_ToolTipOpening"/>
             </StackPanel>
+            <TextBlock Text="{Binding SuggestionExplanation}"
+                       TextWrapping="Wrap" Classes="muted"/>
+
             <TextBlock Text="{Binding OperationMessage}"
            TextWrapping="Wrap"
            FontSize="12"/>

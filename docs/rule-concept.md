@@ -1,18 +1,24 @@
 # Technisches Konzept: Regelbasierte Sortiervorschläge
 
-Stand: 21. Oktober 2026. Status: Regelmodell, Kategoriezuordnung, Regelvalidierung und Regelengine im Arbeitsstand für Issue #26 implementiert; Dateiverarbeitung und Anbindung an die Oberfläche geplant.
+Stand: 23. Oktober 2026. Regelengine, Speicherung und Dateierkennung integriert; Target-ID-Erweiterung im Arbeitsstand für #46. Die Engine ist noch nicht mit der laufenden Dateierkennung verbunden.
+
+## Aktueller Regelzielvertrag (Issue #46)
+
+Die maßgebliche Beschreibung der Target-ID-basierten Auswertung steht in [target-rule-references.md](target-rule-references.md). Regeln referenzieren frei gewählte Targets über stabile IDs. Kandidaten werden nach Target-ID und Dateiname zusammengefasst; ohne Treffer entsteht `NoMatch` ohne Zielvorschlag. Die nachfolgenden Archiv-/Kategorieziele und Angaben zu `CategoryFallback` dokumentieren den älteren Entwurf und gelten nicht für die neue Zielauswahl.
+
+Teamentscheidung: Bei ausreichend eindeutiger Regelübereinstimmung wird das zugeordnete Target vorgeschlagen, bei unsicherer Zuordnung künftig der Standardordner. Bewertungsverfahren und Standardziel-Fallback sind noch nicht implementiert. Jede Dateioperation benötigt weiterhin eine ausdrückliche Bestätigung.
 
 ## Ergänzung: frei wählbare Sortierziele (Issue #37)
 
 Die Teamentscheidung zu #37 sieht frei auswählbare Target-Ordner vor. Das bisherige Modell `<Archiv>/<Kategorie>/<TargetDirectory>` beschreibt den älteren Regelentwurf und ist keine Voraussetzung für die künftige Zielauswahl. Die nachfolgenden Beispiele bleiben bis zur separaten Engine-Anpassung Referenzen für diesen bisherigen Entwurf.
 
-Im Arbeitsstand für #37 werden Targets mit stabiler ID, absolutem Pfad und Spitznamen sowie Listenreihenfolge und optionalem Standardziel gespeichert. Die bestehende ArchiveRootPath-Einstellung bleibt erhalten. Regeln und Engine müssen anschließend separat auf Target-IDs umgestellt werden; es gibt noch keine automatische Zuordnung eines frei gewählten Targets anhand der Kategorie. Ein Standardziel allein löst noch keine Dateioperation aus. Details stehen in [settings-persistence.md](settings-persistence.md).
+Im Arbeitsstand für #37 werden Targets mit stabiler ID, absolutem Pfad und Spitznamen sowie Listenreihenfolge und optionalem Standardziel gespeichert. Die bestehende ArchiveRootPath-Einstellung bleibt erhalten. Die Target-ID-Umstellung von Regeln und Engine erfolgt im Arbeitsstand für #46; es gibt noch keine automatische Zuordnung eines frei gewählten Targets anhand der Kategorie. Ein Standardziel allein löst noch keine Dateioperation aus. Details stehen in [settings-persistence.md](settings-persistence.md).
 
 ## 1. Ziel und Umfang
 
 Sortify soll neue Dateien in einem ausdrücklich ausgewählten Eingangsordner erkennen und nachvollziehbare Vorschläge zum Umbenennen und Archivieren erzeugen. Die Verarbeitung erfolgt vollständig lokal, ohne KI- oder Cloud-Dienste. Dateien und Zielordner werden erst nach ausdrücklicher Bestätigung verändert.
 
-Dieses Dokument beschreibt die fachlichen Entscheidungen, den implementierten Stand und die geplanten Schnittstellen. In Core sind Regelmodell, Dateibeschreibung, Kategoriezuordnung, Regelvalidierung und Regelengine vorhanden. Lokale Speicherung, Ordnerüberwachung, Einrichtung, Dateioperationen und die Anbindung der Engine an die Oberfläche sind noch nicht implementiert. Die Aufteilung folgt [architecture.md](architecture.md).
+Dieses Dokument beschreibt die fachlichen Entscheidungen, den implementierten Stand und die geplanten Schnittstellen. In Core sind Regelmodell, Dateibeschreibung, Kategoriezuordnung, Regelvalidierung und Regelengine vorhanden. Lokale Speicherung und Ordnerüberwachung sind integriert. Die Target-ID-basierte Engine-Anbindung an den laufenden Vorschlagsablauf und bestätigte Dateioperationen sind noch offen. Die Aufteilung folgt [architecture.md](architecture.md).
 
 Die erste Version unterstützt genau einen ausgewählten Überwachungsordner. Mehrere auswählbare Überwachungsordner sind eine mögliche spätere Erweiterung. Rekursive Überwachung von Unterordnern ist davon unabhängig.
 

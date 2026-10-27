@@ -19,106 +19,95 @@
 
     <Window.Styles>
         <Style Selector="TextBlock.muted">
-            <Setter Property="Foreground" Value="#6E6E73"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
         <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
             <Setter Property="Padding" Value="10,6"/>
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
-        <Style Selector="Button.primary:pointerover">
-            <Setter Property="Background" Value="#F7F3FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
-        </Style>
-        <Style Selector="Button.primary:pressed">
-            <Setter Property="Background" Value="#EEE8FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
-        </Style>
         <Style Selector="Button.secondary">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
-            <Setter Property="BorderBrush" Value="#D9D9E0"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="6,4"/>
         </Style>
-        <Style Selector="Button.secondary:pointerover">
-            <Setter Property="Background" Value="#F7F3FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
-        </Style>
-        <Style Selector="Button.secondary:pressed">
-            <Setter Property="Background" Value="#EEE8FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
-        </Style>
         <Style Selector="ComboBox">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
-            <Setter Property="BorderBrush" Value="#D9D9E0"/>
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusInput}"/>
         </Style>
         <Style Selector="ComboBox:pointerover">
-            <Setter Property="Background" Value="#F7F3FF"/>
-            <Setter Property="BorderBrush" Value="#D2C6F7"/>
+            <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderHover}"/>
         </Style>
         <Style Selector="ComboBox:focus">
-            <Setter Property="BorderBrush" Value="#B7A5F2"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushFocus}"/>
         </Style>
         <Style Selector="ComboBox /template/ Popup#PART_Popup Border">
-            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style Selector="ComboBoxItem">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
+            <Setter Property="Padding" Value="12,7"/>
         </Style>
         <Style Selector="ComboBoxItem:pointerover">
-            <Setter Property="Background" Value="#F7F3FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
         </Style>
         <Style Selector="ComboBoxItem:selected">
-            <Setter Property="Background" Value="#EEE8FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
+            <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
         </Style>
         <Style Selector="ComboBoxItem:selected:pointerover">
-            <Setter Property="Background" Value="#E5DCFF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
+            <Setter Property="Background" Value="{DynamicResource BrushSelectedHover}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
         </Style>
         <Style Selector="ComboBoxItem:pressed">
-            <Setter Property="Background" Value="#EEE8FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPressed}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
         </Style>
-        <Style Selector="ComboBoxItem:selected:pressed">
-            <Setter Property="Background" Value="#DCD0FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
+        <Style Selector="TextBox.motion:focus">
+            <Setter Property="BorderBrush" Value="#7657D9"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
-        <Style Selector="ComboBoxItem:pointerover:pressed">
-            <Setter Property="Background" Value="#EEE8FF"/>
-            <Setter Property="Foreground" Value="#1C1C1E"/>
+        <Style Selector="TextBox.motion:focus-visible">
+            <Setter Property="BorderBrush" Value="#7657D9"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style Selector="TextBlock.validation-error">
-            <Setter Property="Foreground" Value="#B42318"/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
         <Style Selector="TextBox.motion.invalid">
-            <Setter Property="BorderBrush" Value="#B42318"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="TextBox.motion.invalid:focus">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="TextBox.motion.invalid:focus-visible">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
     </Window.Styles>
 
     <Border Margin="0"
             Padding="16,16,16,4"
-            Background="#FFFFFF"
-            BorderBrush="#E1E1E6"
+            Background="{DynamicResource BrushSurface}"
+            BorderBrush="{DynamicResource BrushBorder}"
             BorderThickness="1"
-            CornerRadius="16"
+            CornerRadius="{DynamicResource RadiusPopover}"
             ClipToBounds="True">
         <StackPanel Spacing="12">
             <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="10">
-                <Border Width="28" Height="28" Background="#F3EEFF" CornerRadius="14">
-                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" Text="＋" Foreground="#8B72E6"/>
+                <Border Width="28" Height="28" Background="#F0ECFF" CornerRadius="14">
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" Foreground="#7657D9" Text="＋"/>
                 </Border>
-                <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="19" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Neue Datei"/>
-                <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="18" Foreground="#A7A7AF" Text="›"/>
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="19" FontWeight="SemiBold" Text="Neue Datei"/>
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="18" Text="›"/>
                 <TextBlock Grid.Column="3"
                            VerticalAlignment="Center"
                            Classes="muted"
@@ -129,8 +118,8 @@
 
             <StackPanel Spacing="8">
                 <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto,*" ColumnSpacing="0" RowSpacing="5">
-                    <TextBlock FontSize="12" Foreground="#6E6E73" Text="Zielordner"/>
-                    <TextBlock Grid.Column="2" FontSize="12" Foreground="#6E6E73" Text="Dateiname"/>
+                    <TextBlock FontSize="12" Text="Zielordner"/>
+                    <TextBlock Grid.Column="2" FontSize="12" Text="Dateiname"/>
                     <ComboBox Grid.Row="1" ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTargetFolder}" MinWidth="145" IsEnabled="{Binding CanEdit}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="vm:TargetFolderViewModel">
@@ -138,9 +127,9 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Margin="4,0" VerticalAlignment="Center" FontSize="18" Foreground="#A7A7AF" Text="/"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Margin="4,0" VerticalAlignment="Center" FontSize="18" Text="/"/>
                     <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="0" RowSpacing="3">
-                        <TextBox Classes="motion" x:Name="FileNameTextBox" Text="{Binding NewFileName, Mode=TwoWay}" MaxLength="255" PlaceholderText="Dateiname" TextChanged="FileNameTextBox_TextChanged" GotFocus="FileNameTextBox_GotFocus" LostFocus="FileNameTextBox_LostFocus"
+                        <TextBox Classes="motion" x:Name="FileNameTextBox" FocusAdorner="{x:Null}" CornerRadius="{DynamicResource RadiusInput}" BorderThickness="1" BorderBrush="{DynamicResource BrushBorder}" Text="{Binding NewFileName, Mode=TwoWay}" MaxLength="255" PlaceholderText="Dateiname" TextChanged="FileNameTextBox_TextChanged" GotFocus="FileNameTextBox_GotFocus" LostFocus="FileNameTextBox_LostFocus"
                                  ToolTip.IsOpen="{Binding HasValidationError}" IsEnabled="{Binding CanEdit}"/>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" Padding="0,0,10,0" Foreground="#6E6E73" Text="{Binding FileExtension}"/>
                     </Grid>
@@ -154,7 +143,6 @@
             </StackPanel>
             <TextBlock Text="{Binding OperationMessage}"
            TextWrapping="Wrap"
-           Foreground="{Binding OperationMessageColor}"
            FontSize="12"/>
 
             <Button Content="Datei erneut prüfen"
@@ -163,7 +151,7 @@
                     IsVisible="{Binding CanRefreshSource}"
                     Click="RefreshSourceButton_Click"/>
 
-            <Border Height="1" Background="#E6E6EB" Margin="-16,0,-16,-14"/>
+            <Border Height="1" Margin="-16,0,-16,-14"/>
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
             <Button Classes="secondary motion"
                 Content="Abbrechen"

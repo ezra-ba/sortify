@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:Sortify.App.ViewModels" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:platform="using:Avalonia.Controls" mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="760" x:Class="Sortify.App.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/Branding/sortify-icon.png" Title="" Width="1180" Height="760" MinWidth="900" MinHeight="620" Background="#F5F5F7" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:Sortify.App.ViewModels" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:platform="using:Avalonia.Controls" mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="760" x:Class="Sortify.App.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/Branding/sortify-icon.png" Title="" Width="1180" Height="760" MinWidth="900" MinHeight="620" Background="{DynamicResource BrushCanvas}" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
 	<Design.DataContext>
 		<vm:MainViewModel />
 	</Design.DataContext>
@@ -14,95 +14,44 @@
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="CornerRadius" Value="8"/>
 			<Setter Property="Padding" Value="0"/>
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="Foreground" Value="#6E6E73"/>
 			<Setter Property="BorderThickness" Value="0"/>
 			<Setter Property="FontSize" Value="18"/>
 		</Style>
-		<Style Selector="Button.window-button:pointerover">
-			<Setter Property="Background" Value="#F0ECFF"/>
-			<Setter Property="Foreground" Value="#694FC5"/>
-		</Style>
-		<Style Selector="Button.window-button:pressed">
-			<Setter Property="Background" Value="#EEE8FF"/>
-			<Setter Property="Foreground" Value="#5438AE"/>
-		</Style>
-		<Style Selector="Button.window-button.close:pointerover">
-			<Setter Property="Background" Value="#F7F3FF"/>
-			<Setter Property="Foreground" Value="#1C1C1E"/>
-		</Style>
-		<Style Selector="Button.window-button.close:pressed">
-			<Setter Property="Background" Value="#EEE8FF"/>
-			<Setter Property="Foreground" Value="#1C1C1E"/>
-		</Style>
 		<Style Selector="TextBlock.heading">
-			<Setter Property="Foreground" Value="#1C1C1E"/>
 			<Setter Property="FontSize" Value="26"/>
 			<Setter Property="FontWeight" Value="SemiBold"/>
 		</Style>
 		<Style Selector="TextBlock.eyebrow">
-			<Setter Property="Foreground" Value="#6E6E73"/>
 			<Setter Property="FontSize" Value="11"/>
 			<Setter Property="FontWeight" Value="SemiBold"/>
 		</Style>
 		<Style Selector="TextBlock.muted">
-			<Setter Property="Foreground" Value="#6E6E73"/>
 			<Setter Property="FontSize" Value="13"/>
 		</Style>
 		<Style Selector="Button.primary">
-			<Setter Property="Background" Value="#FFFFFF"/>
-			<Setter Property="Foreground" Value="#1C1C1E"/>
 			<Setter Property="Padding" Value="16,10"/>
 			<Setter Property="CornerRadius" Value="5"/>
 		</Style>
-		<Style Selector="Button.primary:pointerover">
-			<Setter Property="Background" Value="#F7F3FF"/>
-			<Setter Property="Foreground" Value="#1C1C1E"/>
-		</Style>
-		<Style Selector="Button.primary:pressed">
-			<Setter Property="Background" Value="#EEE8FF"/>
-			<Setter Property="Foreground" Value="#1C1C1E"/>
-		</Style>
 		<Style Selector="Button.secondary">
-			<Setter Property="Background" Value="#FFFFFF"/>
-			<Setter Property="Foreground" Value="#344054"/>
-			<Setter Property="BorderBrush" Value="#D0D5DD"/>
 			<Setter Property="BorderThickness" Value="1"/>
 			<Setter Property="Padding" Value="14,9"/>
 			<Setter Property="CornerRadius" Value="5"/>
 		</Style>
-		<Style Selector="Button.secondary:pointerover">
-			<Setter Property="Background" Value="#F7F3FF"/>
-			<Setter Property="Foreground" Value="#6547C5"/>
-			<Setter Property="BorderBrush" Value="#C5B8F5"/>
-		</Style>
-		<Style Selector="Button.secondary:pressed">
-			<Setter Property="Background" Value="#EEE8FF"/>
-			<Setter Property="Foreground" Value="#5438AE"/>
-			<Setter Property="BorderBrush" Value="#A58FEB"/>
-		</Style>
 		<Style Selector="Button.settings-button">
-			<Setter Property="Background" Value="#FFFFFF"/>
+			<Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
+			<Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
 			<Setter Property="BorderThickness" Value="0"/>
 			<Setter Property="Padding" Value="0"/>
-			<Setter Property="Foreground" Value="#6E6E73"/>
 			<Setter Property="CornerRadius" Value="18"/>
 		</Style>
-		<Style Selector="Button.settings-button:pointerover">
-			<Setter Property="Background" Value="#F0ECFF"/>
-			<Setter Property="Foreground" Value="#6547C5"/>
-		</Style>
-		<Style Selector="Button.settings-button:pressed">
-			<Setter Property="Background" Value="#EEE8FF"/>
-			<Setter Property="Foreground" Value="#5438AE"/>
-		</Style>
 		<Style Selector="Button.target-folder.selected">
-			<Setter Property="Background" Value="#F4F0FF"/>
-			<Setter Property="BorderBrush" Value="#A58FEB"/>
+			<Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/>
 		</Style>
 		<Style Selector="Button.target-folder">
-			<Setter Property="Background" Value="#FFFFFF"/>
-			<Setter Property="BorderBrush" Value="#E1E1E6"/>
+			<Setter Property="Background" Value="{DynamicResource BrushControlSurface}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
+			<Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
 			<Setter Property="RenderTransformOrigin" Value="50%,50%"/>
 			<Setter Property="RenderTransform">
 				<Setter.Value>
@@ -110,62 +59,61 @@
 				</Setter.Value>
 			</Setter>
 		</Style>
-		<Style Selector="Button.target-folder:pointerover">
-			<Setter Property="Background" Value="#FBFAFF"/>
-			<Setter Property="BorderBrush" Value="#CFC5F7"/>
+		<Style Selector="Button.target-folder.selected">
+			<Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}"/>
+		</Style>
+		<Style Selector="Button.target-folder:pointerover:not(:disabled)">
+			<Setter Property="Background" Value="{DynamicResource BrushSelectedHover}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource BrushBorderHover}"/>
+		</Style>
+		<Style Selector="Button.target-folder.selected:pointerover:not(:disabled)">
+			<Setter Property="Background" Value="{DynamicResource BrushSelectedHover}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource BrushAccentHover}"/>
+		</Style>
+		<Style Selector="Button.target-folder:pressed:not(:disabled)">
+			<Setter Property="Background" Value="{DynamicResource BrushSelectedHover}"/>
 		</Style>
 		<Style Selector="Button.target-folder.press-feedback">
-			<Setter Property="Background" Value="#EAE3FF"/>
-			<Setter Property="BorderBrush" Value="#B9AAEE"/>
-			<Setter Property="RenderTransform">
-				<Setter.Value>
-					<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
-				</Setter.Value>
-			</Setter>
-			<Setter Property="Opacity" Value="0.88"/>
+			<Setter Property="Background" Value="{DynamicResource BrushSelectedHover}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/>
+			<Setter Property="Opacity" Value="0.9"/>
 		</Style>
-		<Style Selector="Button.target-folder.selected">
-			<Setter Property="Background" Value="#F4F0FF"/>
-			<Setter Property="BorderBrush" Value="#A58FEB"/>
-		</Style>
-		<Style Selector="Button.target-folder.selected.press-feedback">
-			<Setter Property="Background" Value="#EAE3FF"/>
-			<Setter Property="BorderBrush" Value="#B9AAEE"/>
+		<Style Selector="Border.surface-card">
+			<Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
 		</Style>
 		<Style Selector="Border.target-folder-card.editing">
-			<Setter Property="Background" Value="#FFFFFF"/>
-			<Setter Property="BorderBrush" Value="#E1E1E6"/>
 			<Setter Property="BorderThickness" Value="1"/>
 		</Style>
 		<Style Selector="Border.target-folder-card.dragging">
-			<Setter Property="Opacity" Value="0"/>
+			<Setter Property="Opacity" Value="0.45"/>
 		</Style>
 	</Window.Styles>
-	<Border BorderBrush="#E1E1E6" BorderThickness="0,1,0,0">
-	<Grid Background="{DynamicResource Brush.Canvas}" RowDefinitions="40,*">
-		<Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="0,0,0,1" Padding="14,0,170,0" platform:Win32Properties.NonClientHitTestResult="Caption">
+	<Border Background="{DynamicResource BrushCanvas}" BorderThickness="0,1,0,0">
+	<Grid RowDefinitions="40,*">
+		<Border Grid.Row="0" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1" Padding="14,0,170,0" platform:Win32Properties.NonClientHitTestResult="Caption">
 			<Grid ColumnDefinitions="Auto,*">
 				<StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
 					<Image Width="24" Height="24" Stretch="Uniform" Source="/Assets/Branding/sortify-icon.png" IsHitTestVisible="False"/>
-					<TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Sortify" IsHitTestVisible="False"/>
+					<TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold" Text="Sortify" IsHitTestVisible="False"/>
 					<Button Classes="settings-button motion" Width="30" Height="30" Margin="8,0,0,0" Click="OpenSettings" IsTabStop="False" platform:Win32Properties.NonClientHitTestResult="Client">
 						<TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" Text="&#xE713;"/>
 					</Button>
 				</StackPanel>
-				<Border Grid.Column="1" Background="Transparent"/>
+				<Border Grid.Column="1"/>
 			</Grid>
 		</Border>
 		<Grid Grid.Row="1">
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled" IsEnabled="{Binding !IsSavingSettings}">
 		<StackPanel Margin="44,34" Spacing="26">
-			<Border Padding="24" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
+			<Border Classes="surface-card" Padding="24" BorderThickness="1" CornerRadius="12">
 				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="22">
-					<Border Width="42" Height="42" Background="#F0ECFF" CornerRadius="21">
-						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Text="◉" Foreground="#7657D9"/>
+					<Border Width="42" Height="42" CornerRadius="21">
+						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Text="◉"/>
 					</Border>
 					<StackPanel Grid.Column="1" Spacing="5">
 						<TextBlock Classes="eyebrow" Text="ÜBERWACHUNGS-ORDNER"/>
-						<TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#1C1C1E" Text="{Binding WatchedFolder}"/>
+						<TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding WatchedFolder}"/>
 						<TextBlock Classes="muted" Text="{Binding SettingsStatus}" TextWrapping="Wrap"/>
 						<TextBlock Classes="muted" Text="{Binding MonitoringStatus}" TextWrapping="Wrap"/>
 					</StackPanel>
@@ -173,19 +121,19 @@
 				</Grid>
 			</Border>
 			<Grid ColumnDefinitions="*,300" ColumnSpacing="22">
-				<Border Padding="24" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
+				<Border Classes="surface-card" Padding="24" BorderThickness="1" CornerRadius="12">
 					<StackPanel Spacing="18">
 						<Grid ColumnDefinitions="*,Auto">
 							<StackPanel Spacing="4">
-								<TextBlock FontSize="19" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Target-Ordner"/>
+								<TextBlock FontSize="19" FontWeight="SemiBold" Text="Target-Ordner"/>
 								<TextBlock Classes="muted" Text="Ziele für die automatische Dateisortierung"/>
 							</StackPanel>
-							<TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="12" Foreground="#8B72E6" Text="{Binding TargetFolders.Count, StringFormat='{}{0} Ziele'}"/>
+							<TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="12" Text="{Binding TargetFolders.Count, StringFormat='{}{0} Ziele'}"/>
 						</Grid>
 						<ItemsControl ItemsSource="{Binding TargetFolders}">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
-									<Border Classes="target-folder-card" Classes.editing="{Binding IsEditingNickname}" Classes.dragging="{Binding IsDragging}" Padding="0" Margin="0,0,0,8" Background="Transparent" BorderThickness="0" CornerRadius="6">
+									<Border Classes="target-folder-card" Classes.editing="{Binding IsEditingNickname}" Classes.dragging="{Binding IsDragging}" Padding="0" Margin="0,0,0,8" BorderThickness="0" CornerRadius="6">
 										<Border.Transitions>
 											<Transitions>
 								<DoubleTransition Property="Opacity" Duration="0:0:0.06" />
@@ -195,18 +143,18 @@
 										<Grid>
 						<Button Classes="target-folder motion" Classes.selected="{Binding IsSelected}" IsVisible="{Binding !IsEditingNickname}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="16" BorderThickness="1" CornerRadius="6" Command="{Binding $parent[Window].DataContext.SelectTargetFolderCommand}" CommandParameter="{Binding}">
 											<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-														<Border Width="34" Height="34" Background="#F0ECFF" CornerRadius="17"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" Foreground="#7657D9" FontWeight="SemiBold"/></Border>
+														<Border Width="34" Height="34" CornerRadius="17"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" FontWeight="SemiBold"/></Border>
 												<StackPanel Grid.Column="1" Spacing="4">
-																								<TextBlock FontWeight="SemiBold" Foreground="#1C1C1E" Text="{Binding Nickname}"/>
+																								<TextBlock FontWeight="SemiBold" Text="{Binding Nickname}"/>
 													<TextBlock Classes="muted" Text="{Binding Path}"/>
 												</StackPanel>
-														<TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#7657D9" Text="STANDARD" IsVisible="{Binding IsDefault}" FontSize="10" FontWeight="SemiBold"/>
+														<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="STANDARD" IsVisible="{Binding IsDefault}" FontSize="10" FontWeight="SemiBold"/>
 											</Grid>
 										</Button>
-						<Border IsVisible="{Binding IsEditingNickname}" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="6" Padding="16">
+						<Border IsVisible="{Binding IsEditingNickname}" Background="{DynamicResource BrushControlSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="6" Padding="16">
 						<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-							<Border Width="34" Height="34" Background="#F0ECFF" CornerRadius="17">
-								<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" Foreground="#7657D9" FontWeight="SemiBold"/>
+							<Border Width="34" Height="34" CornerRadius="17">
+								<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" FontWeight="SemiBold"/>
 							</Border>
 							<StackPanel Grid.Column="1" Spacing="4">
 								<StackPanel Orientation="Horizontal" Spacing="4">
@@ -216,7 +164,7 @@
 								</StackPanel>
 								<TextBlock Classes="muted" Text="{Binding Path}"/>
 							</StackPanel>
-							<TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#7657D9" Text="STANDARD" IsVisible="{Binding IsDefault}" FontSize="10" FontWeight="SemiBold"/>
+							<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="STANDARD" IsVisible="{Binding IsDefault}" FontSize="10" FontWeight="SemiBold"/>
 						</Grid>
 						</Border>
 										</Grid>
@@ -226,10 +174,10 @@
 						</ItemsControl>
 					</StackPanel>
 				</Border>
-				<Border Grid.Column="1" Padding="22" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
+				<Border Classes="surface-card" Grid.Column="1" Padding="22" BorderThickness="1" CornerRadius="12">
 					<StackPanel Spacing="14">
-						<TextBlock FontSize="19" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Verwaltung"/>
-						<Border Margin="0,4,0,2" Height="1" Background="#E6E6EB"/>
+						<TextBlock FontSize="19" FontWeight="SemiBold" Text="Verwaltung"/>
+						<Border Margin="0,4,0,2" Height="1"/>
 						<Button Classes="primary motion" HorizontalContentAlignment="Center" Content="Popup-Vorschau öffnen" Click="OpenFileSuggestion"/>
 								<Button Classes="primary motion" HorizontalContentAlignment="Center" Content="＋  Target-Ordner hinzufügen" Click="AddTargetFolder"/>
 								<Button Classes="secondary motion" HorizontalContentAlignment="Center" Content="Als Standard festlegen" Command="{Binding SetDefaultTargetFolderCommand}"/>
@@ -241,16 +189,16 @@
 		</StackPanel>
 	</ScrollViewer>
 		<Canvas IsHitTestVisible="False">
-			<Border x:Name="DragPreview" Width="420" Padding="16" Background="#FFFFFF" BorderBrush="#B9AAEE" BorderThickness="1" CornerRadius="6" Opacity="0.92" IsVisible="False">
+			<Border x:Name="DragPreview" Width="420" Padding="16" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushAccent}" BorderThickness="1" CornerRadius="6" Opacity="0.96" IsVisible="False">
 				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-					<Border Width="34" Height="34" Background="#F0ECFF" CornerRadius="17">
-						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" Foreground="#7657D9" FontWeight="SemiBold"/>
+					<Border Width="34" Height="34" CornerRadius="17">
+						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" FontWeight="SemiBold"/>
 					</Border>
 					<StackPanel Grid.Column="1" Spacing="4">
-						<TextBlock x:Name="DragPreviewNickname" FontWeight="SemiBold" Foreground="#1C1C1E"/>
+						<TextBlock x:Name="DragPreviewNickname" FontWeight="SemiBold"/>
 						<TextBlock x:Name="DragPreviewPath" Classes="muted"/>
 					</StackPanel>
-					<TextBlock x:Name="DragPreviewDefault" Grid.Column="2" VerticalAlignment="Center" Foreground="#7657D9" Text="STANDARD" IsVisible="False" FontSize="10" FontWeight="SemiBold"/>
+					<TextBlock x:Name="DragPreviewDefault" Grid.Column="2" VerticalAlignment="Center" Text="STANDARD" IsVisible="False" FontSize="10" FontWeight="SemiBold"/>
 				</Grid>
 			</Border>
 		</Canvas>

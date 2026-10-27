@@ -31,10 +31,6 @@ public partial class MainWindow : Window
         AddHandler(InputElement.PointerPressedEvent, TargetFolderPointerPressed, RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(InputElement.PointerMovedEvent, TargetFolderPointerMoved, RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(InputElement.PointerReleasedEvent, TargetFolderPointerReleased, RoutingStrategies.Bubble, handledEventsToo: true);
-        AddHandler(InputElement.PointerEnteredEvent, ButtonPointerEntered, RoutingStrategies.Bubble, handledEventsToo: true);
-        AddHandler(InputElement.PointerExitedEvent, ButtonPointerExited, RoutingStrategies.Bubble, handledEventsToo: true);
-        AddHandler(InputElement.PointerPressedEvent, ButtonPointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(InputElement.PointerReleasedEvent, ButtonPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
     }
 
     private void ApplyNativeTitleBarColor(object? sender, EventArgs e)
@@ -56,83 +52,6 @@ public partial class MainWindow : Window
         int attribute,
         ref int value,
         int valueSize);
-
-    private static readonly IBrush Accent = Brushes.White;
-    private static readonly IBrush AccentHover = new SolidColorBrush(Color.Parse("#F7F3FF"));
-    private static readonly IBrush AccentPressed = new SolidColorBrush(Color.Parse("#EEE8FF"));
-    private static readonly IBrush SoftAccent = new SolidColorBrush(Color.Parse("#F7F3FF"));
-    private static readonly IBrush SoftAccentPressed = new SolidColorBrush(Color.Parse("#EEE8FF"));
-    private static readonly IBrush Surface = new SolidColorBrush(Color.Parse("#FFFFFF"));
-
-    private static Button? GetButton(object? source)
-    {
-        var visual = source as Visual;
-        while (visual is not null)
-        {
-            if (visual is Button button) return button;
-            visual = visual.GetVisualParent();
-        }
-
-        return null;
-    }
-
-    private static void ButtonPointerEntered(object? sender, PointerEventArgs e)
-    {
-        if (GetButton(e.Source) is not { } button) return;
-        if (button.Classes.Contains("window-button"))
-        {
-            button.Background = button.Classes.Contains("close")
-                ? SoftAccent
-                : SoftAccent;
-            return;
-        }
-        button.Background = button.Classes.Contains("primary") ? AccentHover : SoftAccent;
-    }
-
-    private static void ButtonPointerExited(object? sender, PointerEventArgs e)
-    {
-        if (GetButton(e.Source) is not { } button) return;
-        button.RenderTransform = new ScaleTransform(1, 1);
-        if (button.Classes.Contains("window-button"))
-        {
-            button.Background = Brushes.Transparent;
-            return;
-        }
-        button.Background = button.Classes.Contains("primary")
-            ? Accent
-            : button.Classes.Contains("target-folder") && button.Classes.Contains("selected")
-                ? SoftAccent
-                : Surface;
-    }
-
-    private static void ButtonPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (GetButton(e.Source) is not { } button) return;
-        button.RenderTransform = new ScaleTransform(0.97, 0.97);
-        if (button.Classes.Contains("window-button"))
-        {
-            button.Background = button.Classes.Contains("close")
-                ? new SolidColorBrush(Color.Parse("#F9D8D8"))
-                : SoftAccentPressed;
-            return;
-        }
-        button.Background = button.Classes.Contains("primary") ? AccentPressed : SoftAccentPressed;
-    }
-
-    private static void ButtonPointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        var button = GetButton(e.Source) ?? e.Pointer.Captured as Button;
-        if (button is null) return;
-        button.RenderTransform = new ScaleTransform(1, 1);
-        if (button.Classes.Contains("window-button"))
-        {
-            button.Background = Brushes.Transparent;
-            return;
-        }
-        button.Background = button.Classes.Contains("target-folder") && button.Classes.Contains("selected")
-            ? SoftAccent
-            : Brushes.White;
-    }
 
     private void OpenFileSuggestion(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
@@ -336,9 +255,6 @@ public partial class MainWindow : Window
                      .Where(button => button.Classes.Contains("target-folder")))
         {
             button.RenderTransform = new ScaleTransform(1, 1);
-            button.Background = button.Classes.Contains("selected")
-                ? new SolidColorBrush(Color.Parse("#F7F3FF"))
-                : Brushes.White;
         }
     }
 
@@ -360,9 +276,6 @@ public partial class MainWindow : Window
         if (_pressedTargetButton is { } button)
         {
             button.RenderTransform = new ScaleTransform(1, 1);
-            button.Background = button.Classes.Contains("selected")
-                ? new SolidColorBrush(Color.Parse("#F7F3FF"))
-                : Brushes.White;
         }
 
         _pressedTargetButton?.Classes.Remove("press-feedback");

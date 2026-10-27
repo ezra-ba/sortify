@@ -13,4 +13,6 @@ public sealed record AppSettings(
 
     public bool CloseToTray { get; init; } = true;
 
+    public bool DarkMode { get; init; }
+
 }

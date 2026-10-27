@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Sortify.App.ViewModels;
 using Avalonia.Interactivity;
 using System.Runtime.InteropServices;
 
@@ -10,6 +11,7 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         Opened += ApplyNativeTitleBarColor;
+        Opened += (_, _) => EnsureRuleEditor();
     }
 
     private void ApplyNativeTitleBarColor(object? sender, EventArgs e)
@@ -33,6 +35,20 @@ public partial class SettingsWindow : Window
         ref int value,
         int valueSize);
 
+    private void EnsureRuleEditor()
+    {
+        if (RulesEditor.DataContext is not RuleEditorViewModel && DataContext is MainViewModel main)
+            RulesEditor.DataContext = new RuleEditorViewModel(main);
+    }
+
+    public void OpenRulesForTarget(TargetFolderViewModel? target)
+    {
+        EnsureRuleEditor();
+        if (RulesEditor.DataContext is RuleEditorViewModel editor)
+            editor.SelectedTarget = target;
+        SelectSection(RulesButton, new RoutedEventArgs());
+    }
+
     private void SelectSection(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string section }) return;
@@ -40,6 +56,14 @@ public partial class SettingsWindow : Window
         foreach (var button in new[] { GeneralButton, WatchedButton, RulesButton, AppearanceButton })
             button.Classes.Set("selected", ReferenceEquals(button, sender));
 
+        var rulesSelected = section == "Sortierregeln";
+        RulesEditor.IsVisible = rulesSelected;
+        PlaceholderPanel.IsVisible = !rulesSelected;
+        if (rulesSelected)
+        {
+            EnsureRuleEditor();
+            if (RulesEditor.DataContext is RuleEditorViewModel editor) editor.RefreshRules();
+        }
         SectionTitle.Text = section;
         SectionDescription.Text = section switch
         {

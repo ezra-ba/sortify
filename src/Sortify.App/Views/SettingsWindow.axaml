@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" x:Class="Sortify.App.Views.SettingsWindow" Title="" Width="860" Height="560" MinWidth="720" MinHeight="460" Background="#F5F5F7" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" xmlns:views="using:Sortify.App.Views" x:Class="Sortify.App.Views.SettingsWindow" Title="" Width="860" Height="560" MinWidth="720" MinHeight="460" Background="#F5F5F7" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
   <Window.Styles>
     <Style Selector="Button.nav-item">
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -54,7 +54,8 @@
       <StackPanel Spacing="12">
         <TextBlock x:Name="SectionTitle" FontSize="26" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Allgemein"/>
         <TextBlock x:Name="SectionDescription" Classes="muted" Text="Grundlegende Einstellungen für Sortify." TextWrapping="Wrap"/>
-        <Border Margin="0,18,0,0" Padding="22" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
+        <views:RuleEditorView x:Name="RulesEditor" IsVisible="False"/>
+        <Border x:Name="PlaceholderPanel" Margin="0,18,0,0" Padding="22" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
           <StackPanel Spacing="10">
             <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Bereich wird vorbereitet"/>
             <TextBlock Classes="muted" Text="Weitere Optionen können hier ergänzt werden. Die Navigation bleibt dabei bestehen und zeigt die Details des ausgewählten Themas an." TextWrapping="Wrap"/>

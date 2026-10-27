@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Sortify.App.ViewModels"
+             x:Class="Sortify.App.Views.RuleEditorView"
+             x:DataType="vm:RuleEditorViewModel">
+  <StackPanel Spacing="16">
+    <TextBlock Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap" Foreground="#6E6E73"/>
+    <Border Padding="20" Background="White" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
+      <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
+        <TextBlock Text="Neue Sortierregel" FontSize="18" FontWeight="SemiBold"/>
+        <TextBlock Text="Regelname"/>
+        <TextBox x:Name="RuleNameInput" Text="{Binding RuleName, Mode=TwoWay}" PlaceholderText="Zum Beispiel: Rechnungen"/>
+        <TextBlock Text="Target-Ordner"/>
+        <ComboBox x:Name="RuleTargetInput" ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTarget, Mode=TwoWay}" HorizontalAlignment="Stretch" PlaceholderText="Ziel auswählen">
+          <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:TargetFolderViewModel"><TextBlock Text="{Binding Nickname}"/></DataTemplate></ComboBox.ItemTemplate>
+        </ComboBox>
+        <TextBlock Text="Dateiname ohne Endung – regulärer Ausdruck" TextWrapping="Wrap"/>
+        <TextBox x:Name="RulePatternInput" Text="{Binding FileNamePattern, Mode=TwoWay}" PlaceholderText="^rechnung"/>
+        <TextBlock Text="Beispiele: ^rechnung = beginnt mit rechnung; .* = beliebiger Name. Groß-/Kleinschreibung wird ignoriert." FontSize="12" Foreground="#6E6E73" TextWrapping="Wrap"/>
+        <TextBlock Text="Erlaubte Dateiendungen"/>
+        <TextBox x:Name="RuleExtensionsInput" Text="{Binding Extensions, Mode=TwoWay}" PlaceholderText=".pdf, .docx"/>
+        <TextBlock Text="Dateinamen-Vorgabe (optional)"/>
+        <TextBox x:Name="RuleRenameInput" Text="{Binding RenamePattern, Mode=TwoWay}" PlaceholderText="Originalname behalten"/>
+        <TextBlock Text="Leer = Originalname. Beispiel: Rechnung_{name}{ext}. Bei eigener Vorgabe muss {ext} genau einmal am Ende stehen." FontSize="12" Foreground="#6E6E73" TextWrapping="Wrap"/>
+        <Button x:Name="CreateRuleButton" Content="Regel anlegen" Command="{Binding CreateRuleCommand}"/>
+      </StackPanel>
+    </Border>
+    <TextBlock x:Name="RuleResultMessage" Text="{Binding Message}" Foreground="{Binding MessageColor}" TextWrapping="Wrap"/>
+    <TextBlock Text="Gespeicherte Regeln" FontSize="18" FontWeight="SemiBold"/>
+    <ItemsControl ItemsSource="{Binding ExistingRules}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:RuleListItem">
+          <Border Padding="12" Margin="0,0,0,8" Background="White" CornerRadius="6">
+            <StackPanel Spacing="4"><TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding Conditions}" Foreground="#6E6E73" TextWrapping="Wrap"/></StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    <Expander Header="Ziel einer vorhandenen Regel zuordnen" HorizontalAlignment="Stretch">
+      <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
+        <TextBlock Text="Hier kannst du insbesondere Altregeln ohne Target-ID reparieren. Andere Regelfelder bleiben erhalten." TextWrapping="Wrap"/>
+        <ComboBox ItemsSource="{Binding ExistingRules}" SelectedItem="{Binding SelectedExistingRule, Mode=TwoWay}" HorizontalAlignment="Stretch" PlaceholderText="Regel auswählen">
+          <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:RuleListItem"><TextBlock Text="{Binding Label}"/></DataTemplate></ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding RepairTarget, Mode=TwoWay}" HorizontalAlignment="Stretch" PlaceholderText="Target-Ordner auswählen">
+          <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:TargetFolderViewModel"><TextBlock Text="{Binding Nickname}"/></DataTemplate></ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button Content="Zielzuordnung speichern" Command="{Binding AssignTargetCommand}"/>
+      </StackPanel>
+    </Expander>
+  </StackPanel>
+</UserControl>

@@ -26,7 +26,7 @@ Fehlende beziehungsweise ungültige Zielreferenzen machen eine ansonsten gültig
 
 `RuleTargetWarnings` wird getrennt von `SettingsStatus` angezeigt und beim Laden sowie nach UI-Speicheraktionen aktualisiert. Nach Entfernung eines referenzierten Targets bleibt die Regel mit ihrer alten ID erhalten; die Warnung erscheint unmittelbar. Nach erfolgreicher Reparatur verschwindet sie. Auch deaktivierte Regeln werden auf Überarbeitungsbedarf geprüft.
 
-Der Aufruf ist noch nicht an eine tatsächliche Regel-/Target-Auswahlmaske angebunden. Diese Integration muss mit der Regelverwaltung aus #27 abgestimmt werden. Ein vorhandener Backend-Aufruf und automatisierte Tests sind kein Nachweis einer bereits bedienbaren Auswahlmaske.
+Die Regelmaske aus #27 bindet den Aufruf unter „Einstellungen → Sortierregeln → Ziel einer vorhandenen Regel zuordnen“ an. Neue Regeln erhalten ihre explizite Target-ID über `MainViewModel.AddRuleAsync`. Die Implementierung liegt auf dem separaten #27-Branch, der auf #46 aufbaut; daraus folgt noch keine Integration in master.
 
 ## Teamentscheidung und Folgearbeiten
 
@@ -40,4 +40,4 @@ Das Popup wertet nach erfolgreicher Bereitschaftsprüfung die aktuellen gespeich
 
 Core-Tests prüfen Zielreferenzen, entfernte Targets ohne Umleitung, Prioritäten, Mehrdeutigkeiten und das Zusammenfassen anhand der Target-ID. Infrastructure-Tests prüfen vollständige Speicherung, Altformate, Warnungen, explizite Reparatur und Engine-Auswertung nach erneutem Laden. App-Tests prüfen Zuordnung, ungültige Auswahl ohne Schreiben, Speicherfehler und aktuelle Warnungen nach Target-Entfernung.
 
-Offen für die bedienbare Gesamtabnahme: Regel-/Target-Auswahlmaske sowie der manuell geprüfte Ablauf mit echten gespeicherten Regeln und Benutzerentscheidungen. Vor einem Abschluss von #46 ist insbesondere zu klären, ob die Auswahlmaske als Abhängigkeit von #27 oder als Bestandteil dieses Issues nachgewiesen werden soll.
+Die Regel-/Target-Auswahlmaske ist auf dem abhängigen #27-Branch implementiert. Ein Headless-UI-Test prüft gebundene Eingaben, Validierungsfehler, Anlegen, Reparatur einer Altregel sowie Speichern und erneutes Laden. Anschließend prüft er den regelbasierten Popup-Vorschlag mit einem Testdienst, der erst nach expliziter Bestätigung einen Verschiebeauftrag erhält. Am 27. Oktober 2026 bestätigte der Benutzer den manuellen Regelablauf unter Linux einschließlich Neustart, passendem Popup-Vorschlag und bestätigter Dateioperation als erfolgreich. Dieser Nachweis gilt für den kombinierten Stand aus #46 und #27; Windows und macOS bleiben ungeprüft. #27 benötigt vor dem Merge die Target-ID-Grundlagen aus #46.

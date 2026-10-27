@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using Sortify.App.ViewModels;
+using System.Runtime.InteropServices;
 
 namespace Sortify.App.Views;
 
@@ -21,6 +22,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Opened += ApplyNativeTitleBarColor;
         if (OperatingSystem.IsWindows())
         {
             Win32Properties.AddWindowStylesCallback(this, static (style, exStyle) =>
@@ -34,6 +36,26 @@ public partial class MainWindow : Window
         AddHandler(InputElement.PointerPressedEvent, ButtonPointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerReleasedEvent, ButtonPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
     }
+
+    private void ApplyNativeTitleBarColor(object? sender, EventArgs e)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var handle = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+        if (handle == IntPtr.Zero) return;
+
+        var white = 0x00FFFFFF;
+        var darkText = 0x001C1C1C;
+        DwmSetWindowAttribute(handle, 35, ref white, sizeof(int));
+        DwmSetWindowAttribute(handle, 36, ref darkText, sizeof(int));
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(
+        IntPtr hwnd,
+        int attribute,
+        ref int value,
+        int valueSize);
 
     private static readonly IBrush Accent = Brushes.White;
     private static readonly IBrush AccentHover = new SolidColorBrush(Color.Parse("#F7F3FF"));
@@ -118,63 +140,9 @@ public partial class MainWindow : Window
             new FileSuggestionWindow(new FileSuggestionViewModel(viewModel.TargetFolders)).Show(this);
     }
 
-    private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
+    private void OpenSettings(object? sender, RoutedEventArgs e)
     {
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            BeginMoveDrag(e);
-    }
-
-    private void WindowButton_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string action })
-            return;
-
-        switch (action)
-        {
-            case "minimize":
-                WindowState = WindowState.Minimized;
-                break;
-            case "maximize":
-                WindowState = WindowState == WindowState.Maximized
-                    ? WindowState.Normal
-                    : WindowState.Maximized;
-                break;
-            case "close":
-                Close();
-                break;
-        }
-    }
-
-    private static void CloseButton_PointerEntered(object? sender, PointerEventArgs e)
-    {
-        if (sender is Button button)
-        {
-            button.Background = new SolidColorBrush(Color.Parse("#FDECEC"));
-            button.Foreground = new SolidColorBrush(Color.Parse("#1C1C1E"));
-        }
-    }
-
-    private static void CloseButton_PointerExited(object? sender, PointerEventArgs e)
-    {
-        if (sender is Button button)
-        {
-            button.Background = Brushes.Transparent;
-            button.Foreground = new SolidColorBrush(Color.Parse("#6E6E73"));
-        }
-    }
-
-    private static void CloseButton_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (sender is Button button)
-        {
-            button.Background = SoftAccentPressed;
-            button.Foreground = new SolidColorBrush(Color.Parse("#1C1C1E"));
-        }
-    }
-
-    private static void CloseButton_PointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        CloseButton_PointerExited(sender, e);
+        new SettingsWindow { DataContext = DataContext }.Show(this);
     }
 
     private async void SelectWatchedFolder(

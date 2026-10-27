@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" x:Class="Sortify.App.Views.SettingsWindow" Title="" Width="860" Height="560" MinWidth="720" MinHeight="460" Background="#F5F5F7" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
+  <Window.Styles>
+    <Style Selector="Button.nav-item">
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="Padding" Value="12,6"/>
+      <Setter Property="Margin" Value="8,1"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Foreground" Value="#344054"/>
+    </Style>
+    <Style Selector="Button.nav-item:pointerover">
+      <Setter Property="Background" Value="#EAE3FF"/>
+      <Setter Property="Foreground" Value="#6547C5"/>
+    </Style>
+    <Style Selector="Button.nav-item.selected">
+      <Setter Property="Background" Value="#F0ECFF"/>
+      <Setter Property="Foreground" Value="#6547C5"/>
+    </Style>
+    <Style Selector="Button.nav-item.selected:pointerover">
+      <Setter Property="Background" Value="#DDD3FF"/>
+      <Setter Property="Foreground" Value="#5438AE"/>
+    </Style>
+    <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="#6E6E73"/><Setter Property="FontSize" Value="13"/></Style>
+  </Window.Styles>
+  <Border BorderBrush="#E1E1E6" BorderThickness="0,1,0,0">
+  <Grid RowDefinitions="40,*">
+    <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="0,0,0,1" Padding="14,0,170,0" platform:Win32Properties.NonClientHitTestResult="Caption">
+      <StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center" IsHitTestVisible="False">
+        <Image Width="24" Height="24" Stretch="Uniform" Source="/Assets/Branding/sortify-icon.png"/>
+        <TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Sortify · Einstellungen"/>
+      </StackPanel>
+    </Border>
+  <Grid Grid.Row="1" ColumnDefinitions="260,*">
+    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="0,0,1,0" Padding="14,18,10,18">
+      <Grid RowDefinitions="*">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="3">
+            <TextBlock x:Name="GeneralHeader" Text="ALLGEMEIN" FontSize="11" FontWeight="SemiBold" Foreground="#77777F" Margin="10,4,0,7"/>
+            <Button x:Name="GeneralButton" Classes="nav-item selected" Click="SelectSection" Tag="Allgemein" Content="⚙   Allgemein"/>
+            <Button x:Name="WatchedButton" Classes="nav-item" Click="SelectSection" Tag="Überwachungsordner" Content="◉   Überwachungsordner"/>
+            <TextBlock x:Name="SortingHeader" Text="SORTIERUNG" FontSize="11" FontWeight="SemiBold" Foreground="#77777F" Margin="10,18,0,7"/>
+            <Button x:Name="RulesButton" Classes="nav-item" Click="SelectSection" Tag="Sortierregeln" Content="≡   Sortierregeln"/>
+            <TextBlock x:Name="AppearanceHeader" Text="DARSTELLUNG" FontSize="11" FontWeight="SemiBold" Foreground="#77777F" Margin="10,18,0,7"/>
+            <Button x:Name="AppearanceButton" Classes="nav-item" Click="SelectSection" Tag="Darstellung" Content="◐   Darstellung"/>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+    <Grid Grid.Column="1" Background="#F5F5F7">
+    <ScrollViewer Padding="38,32">
+      <StackPanel Spacing="12">
+        <TextBlock x:Name="SectionTitle" FontSize="26" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Allgemein"/>
+        <TextBlock x:Name="SectionDescription" Classes="muted" Text="Grundlegende Einstellungen für Sortify." TextWrapping="Wrap"/>
+        <Border Margin="0,18,0,0" Padding="22" Background="#FFFFFF" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
+          <StackPanel Spacing="10">
+            <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#1C1C1E" Text="Bereich wird vorbereitet"/>
+            <TextBlock Classes="muted" Text="Weitere Optionen können hier ergänzt werden. Die Navigation bleibt dabei bestehen und zeigt die Details des ausgewählten Themas an." TextWrapping="Wrap"/>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+    </Grid>
+  </Grid>
+  </Grid>
+  </Border>
+</Window>

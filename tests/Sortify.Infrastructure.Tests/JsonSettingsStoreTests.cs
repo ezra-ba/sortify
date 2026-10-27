@@ -422,7 +422,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
             await File.ReadAllTextAsync(filePath));
 
         Assert.Equal(
-            2,
+            3,
             document.RootElement.GetProperty("Version").GetInt32());
 
         var service = new SettingsService(CreateStore());
@@ -475,7 +475,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
             await File.ReadAllTextAsync(filePath));
 
         Assert.Equal(
-            2,
+            3,
             document.RootElement.GetProperty("Version").GetInt32());
 
         var reloaded = await CreateStore().LoadAsync();
@@ -521,10 +521,261 @@ public sealed class JsonSettingsStoreTests : IDisposable
                 expectedRule.TargetDirectory,
                 actualRule.TargetDirectory);
             Assert.Equal(
+                expectedRule.TargetFolderId,
+                actualRule.TargetFolderId);
+            Assert.Equal(
                 expectedRule.RenamePattern,
                 actualRule.RenamePattern);
             Assert.Equal(expectedRule.Priority, actualRule.Priority);
             Assert.Equal(expectedRule.IsEnabled, actualRule.IsEnabled);
         }
+    }
+    [Fact]
+    public async Task ReloadedRuleProducesCandidateForSavedTarget()
+    {
+        var target = new TargetFolder(
+            Guid.NewGuid(),
+            Path.Combine(directoryPath, "Invoices"),
+            "Rechnungen");
+
+        var original = CreateSettings();
+
+        var expected = original with
+        {
+            TargetFolders = [target],
+            Rules =
+            [
+                original.Rules[0] with
+            {
+                TargetFolderId = target.Id
+            }
+            ]
+        };
+
+        var firstService = new SettingsService(CreateStore());
+        await firstService.InitializeAsync();
+
+        var saved = await firstService.SaveAsync(expected);
+        Assert.True(saved.IsSuccess);
+
+        // Neue Instanzen lesen ausschließlich den gespeicherten Stand.
+        var secondService = new SettingsService(CreateStore());
+        var loaded = await secondService.InitializeAsync();
+
+        Assert.Equal(SettingsLoadStatus.Loaded, loaded.Status);
+        Assert.NotNull(secondService.Current);
+
+        var settings = secondService.Current;
+        AssertSettingsEqual(expected, settings);
+
+        var file = new FileDescriptor(
+            Path.Combine(
+                directoryPath,
+                "Inbox",
+                "Schule",
+                "rechnung_2026.pdf"),
+            "rechnung_2026",
+            ".pdf",
+            "Schule/rechnung_2026.pdf",
+            100,
+            new DateTimeOffset(
+                2026, 10, 23, 12, 0, 0, TimeSpan.Zero));
+
+        var engine = new RuleEngine(
+            new RuleValidator(),
+            new RuleTargetValidator());
+
+        var result = engine.Evaluate(
+            file,
+            settings.Rules,
+            settings.TargetFolders);
+
+        Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
+
+        var candidate = Assert.Single(result.Candidates);
+        Assert.Equal(target.Id, candidate.TargetFolderId);
+        Assert.Equal("Archiv_rechnung_2026.pdf", candidate.FileName);
+        Assert.Equal("", candidate.TargetDirectory);
+
+        var reference = Assert.Single(candidate.Rules);
+        Assert.Equal(expected.Rules[0].Id, reference.Id);
+        Assert.Empty(result.Diagnostics);
+        Assert.Empty(loaded.Warnings);
+    }
+    [Fact]
+    public async Task LoadPreservesVersionTwoRuleWithoutTargetAssignment()
+    {
+        var target = new TargetFolder(
+            Guid.NewGuid(),
+            Path.Combine(directoryPath, "LegacyTarget"),
+            "Rechnungen");
+
+        var original = CreateSettings();
+
+        var expected = original with
+        {
+            TargetFolders = [target],
+            DefaultTargetFolderId = target.Id
+        };
+
+        // Altes Regelformat: TargetFolderId fehlt tatsächlich im JSON.
+        var legacyRules = expected.Rules.Select(rule => new
+        {
+            rule.Id,
+            rule.Name,
+            rule.FileNamePattern,
+            rule.AllowedExtensions,
+            rule.RelativePathPattern,
+            rule.TargetDirectory,
+            rule.RenamePattern,
+            rule.Priority,
+            rule.IsEnabled
+        }).ToArray();
+
+        var json = JsonSerializer.Serialize(new
+        {
+            Version = 2,
+            Settings = new
+            {
+                expected.WatchedFolderPath,
+                expected.ArchiveRootPath,
+                expected.IncludeSubdirectories,
+                Rules = legacyRules,
+                expected.TargetFolders,
+                expected.DefaultTargetFolderId
+            }
+        });
+
+        await File.WriteAllTextAsync(filePath, json);
+
+        var loaded = await CreateStore().LoadAsync();
+
+        Assert.Equal(SettingsLoadStatus.Loaded, loaded.Status);
+        Assert.NotNull(loaded.Settings);
+        AssertSettingsEqual(expected, loaded.Settings);
+
+        // Keine Zuordnung anhand von Spitzname oder Standardziel erraten.
+        Assert.Null(Assert.Single(loaded.Settings.Rules).TargetFolderId);
+
+        // Laden verändert die alte Datei nicht.
+        Assert.Equal(json, await File.ReadAllTextAsync(filePath));
+
+        var saved = await CreateStore().SaveAsync(loaded.Settings);
+        Assert.True(saved.IsSuccess);
+
+        using var document = JsonDocument.Parse(
+            await File.ReadAllTextAsync(filePath));
+
+        Assert.Equal(
+            3,
+            document.RootElement.GetProperty("Version").GetInt32());
+
+        var reloaded = await CreateStore().LoadAsync();
+
+        Assert.Equal(SettingsLoadStatus.Loaded, reloaded.Status);
+        Assert.NotNull(reloaded.Settings);
+        AssertSettingsEqual(expected, reloaded.Settings);
+    }
+    [Theory]
+    [InlineData(null)]
+    [InlineData("00000000-0000-0000-0000-000000000000")]
+    [InlineData("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")]
+    public async Task InvalidTargetReferenceCanBeExplicitlyAssigned(
+    string? reference)
+    {
+        var target = new TargetFolder(
+            Guid.NewGuid(),
+            Path.Combine(directoryPath, "Invoices"),
+            "Rechnungen");
+
+        var original = CreateSettings();
+
+        var settings = original with
+        {
+            TargetFolders = [target],
+            Rules =
+            [
+                original.Rules[0] with
+            {
+                TargetFolderId = reference is null
+                    ? null
+                    : Guid.Parse(reference)
+            }
+            ]
+        };
+
+        var saved = await CreateStore().SaveAsync(settings);
+        Assert.True(saved.IsSuccess);
+
+        var originalJson = await File.ReadAllTextAsync(filePath);
+
+        var service = new SettingsService(CreateStore());
+        var loaded = await service.InitializeAsync();
+
+        Assert.Equal(SettingsLoadStatus.Loaded, loaded.Status);
+        Assert.Null(loaded.ErrorMessage);
+        Assert.NotNull(service.Current);
+        AssertSettingsEqual(settings, service.Current);
+
+        var warning = Assert.Single(loaded.Warnings);
+        Assert.Equal(settings.Rules[0].Id, warning.RuleId);
+        Assert.Equal(settings.Rules[0].Name, warning.RuleName);
+        Assert.False(string.IsNullOrWhiteSpace(warning.Message));
+
+        // Laden und Warnung dürfen die Datei nicht verändern.
+        Assert.Equal(originalJson, await File.ReadAllTextAsync(filePath));
+
+        var ruleId = settings.Rules[0].Id;
+
+        // Explizite Auswahl des Targets, keine automatische Zuordnung.
+        var assigned = await service.UpdateAsync(current => current with
+        {
+            Rules = current.Rules
+                .Select(rule => rule.Id == ruleId
+                    ? rule with { TargetFolderId = target.Id }
+                    : rule)
+                .ToArray()
+        });
+
+        Assert.True(assigned.IsSuccess);
+
+        var reloaded = await CreateStore().LoadAsync();
+
+        Assert.Equal(SettingsLoadStatus.Loaded, reloaded.Status);
+        Assert.NotNull(reloaded.Settings);
+        Assert.Empty(reloaded.Warnings);
+
+        var expected = settings with
+        {
+            Rules =
+            [
+                settings.Rules[0] with { TargetFolderId = target.Id }
+            ]
+        };
+
+        AssertSettingsEqual(expected, reloaded.Settings);
+
+        var file = new FileDescriptor(
+            Path.Combine(directoryPath, "rechnung_2026.pdf"),
+            "rechnung_2026",
+            ".pdf",
+            "Schule/rechnung_2026.pdf",
+            100,
+            DateTimeOffset.UnixEpoch);
+
+        var engine = new RuleEngine(
+            new RuleValidator(),
+            new RuleTargetValidator());
+
+        var result = engine.Evaluate(
+            file,
+            reloaded.Settings.Rules,
+            reloaded.Settings.TargetFolders);
+
+        Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
+        Assert.Equal(
+            target.Id,
+            Assert.Single(result.Candidates).TargetFolderId);
+        Assert.Empty(result.Diagnostics);
     }
 }

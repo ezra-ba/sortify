@@ -1,12 +1,12 @@
 # Lokale Speicherung von Einstellungen und Regeln
 
-Stand: 21. Oktober 2026. Speicherung aus Issue #28, erweitert im Arbeitsstand für Issue #37.
+Stand: 23. Oktober 2026. Speicherung aus #28 und #37, erweitert im Arbeitsstand für #46.
 
 ## Umfang und Format
 
-Ein Überwachungsordner, ein Archiv-Stammordner, `IncludeSubdirectories` und die vollständige Regelliste werden gemeinsam als JSON gespeichert. `SettingsDocument` schreibt `Version = 2` und `Settings` mit den Feldern von `AppSettings`. Zusätzlich werden `TargetFolders` und `DefaultTargetFolderId` gespeichert. Alle Regelfelder einschließlich ID, Priorität und Aktivierungszustand bleiben erhalten. Ordnerpfade dürfen vor der Einrichtung `null` sein; eine leere Regelliste ist erlaubt. Profile und Import/Export sind nicht Bestandteil dieses Issues.
+Ein Überwachungsordner, ein Archiv-Stammordner, `IncludeSubdirectories` und die vollständige Regelliste werden gemeinsam als JSON gespeichert. `SettingsDocument` schreibt `Version = 3` und `Settings` mit den Feldern von `AppSettings`. Zusätzlich werden `TargetFolders` und `DefaultTargetFolderId` gespeichert. Alle Regelfelder einschließlich ID, Priorität und Aktivierungszustand bleiben erhalten. Ordnerpfade dürfen vor der Einrichtung `null` sein; eine leere Regelliste ist erlaubt. Profile und Import/Export sind nicht Bestandteil dieses Issues.
 
-Versionen 1 und 2 werden gelesen; andere Formatversionen werden abgelehnt. In Version-1-Dateien fehlende Target-Eigenschaften erhalten eine leere Liste und kein Standardziel. Laden verändert die vorhandene Datei nicht. Erst das nächste erfolgreiche Speichern schreibt Version 2; bisherige Ordnerangaben und Regelfelder bleiben erhalten. Ältere App-Stände mit ausschließlich Version-1-Unterstützung können Version 2 nicht laden. Fehlende Konstruktorfelder und ungültige JSON-Daten führen zu einem Ladefehler. Explizite Nullwerte werden zusätzlich fachlich validiert.
+Versionen 1, 2 und 3 werden gelesen; andere Formatversionen werden abgelehnt. In Version-1-Dateien fehlende Target-Eigenschaften erhalten eine leere Liste und kein Standardziel. Laden verändert die vorhandene Datei nicht. Erst das nächste erfolgreiche Speichern schreibt Version 3; bisherige Ordnerangaben und Regelfelder bleiben erhalten. Ältere App-Stände können Version 3 nicht laden. Version 3 ergänzt die optionale TargetFolderId einer Regel. Fehlende oder unbekannte Regelzielreferenzen werden als Warnungen gemeldet und ohne automatische Zuordnung erhalten; Details beschreibt [target-rule-references.md](target-rule-references.md). Fehlende Konstruktorfelder und ungültige JSON-Daten führen zu einem Ladefehler. Explizite Nullwerte werden zusätzlich fachlich validiert.
 
 ## Speicherort
 
@@ -40,7 +40,7 @@ Nur erfolgreiches Speichern aktualisiert `SettingsService.Current`. Ein angeford
 
 `MainViewModel.SaveWatchedFolderAsync(path)` speichert die Ordnerauswahl und erhält die übrigen Einstellungen. Der angezeigte Ordner ändert sich erst nach erfolgreichem Speichern.
 
-`MainViewModel.SaveRulesAsync(updatedRules)` nimmt die vollständige aktualisierte Regelliste entgegen und erhält Ordnerpfade und Rekursionseinstellung. Die Regelverwaltung aus Issue #27 muss diese Methode beziehungsweise denselben Einstellungsdienst noch anbinden. Target-Ordner sind Teil von `AppSettings` und werden wie im folgenden Abschnitt beschrieben gespeichert.
+`MainViewModel.SaveRulesAsync(updatedRules)` nimmt die vollständige aktualisierte Regelliste entgegen und erhält Ordnerpfade und Rekursionseinstellung. Die Regelverwaltung aus Issue #27 nutzt zum einzelnen Hinzufügen `MainViewModel.AddRuleAsync(rule)`. Dieser Aufruf validiert Regel, Target-ID und eindeutige Regel-ID innerhalb der Dienstsperre und ergänzt die aktuelle Liste, ohne bestehende Regeln zu ersetzen. Target-Ordner sind Teil von `AppSettings` und werden wie im folgenden Abschnitt beschrieben gespeichert.
 
 Nach erfolgreicher Initialisierung stehen Regeln über `ISettingsService.Current.Rules` bereit. Der tatsächliche Übergabenachweis an die Engine aus Issue #26 ist noch offen. Eine Ordnerüberwachung oder Dateioperation wird durch das Laden allein nicht gestartet.
 
@@ -56,7 +56,7 @@ Hinzufügen, Entfernen, Standardwechsel, Spitznamen und Umsortieren verwenden `U
 
 Exakt gleiche Pfadzeichenketten werden beim Hinzufügen als bereits vorhanden erkannt. Eine Gleichsetzung unterschiedlicher Schreibweisen anhand des tatsächlichen Dateisystems oder symbolischer Links ist noch nicht implementiert. Ein zeitweise nicht erreichbarer Target-Ordner wird nicht automatisch entfernt. Die Standardmarkierung allein definiert noch kein Fallback-Verhalten der Engine.
 
-Die bestehende `ArchiveRootPath`-Eigenschaft bleibt unverändert erhalten und wird nicht automatisch zu einem Target konvertiert. Die Umstellung von Regeln und Engine auf Target-IDs erfolgt separat. Die bisherige Archiv-/Kategoriehierarchie ist keine Voraussetzung des künftig vorgesehenen Zielmodells.
+Die bestehende `ArchiveRootPath`-Eigenschaft bleibt unverändert erhalten und wird nicht automatisch zu einem Target konvertiert. Die Target-ID-Verknüpfung und Popup-Anbindung liegen im Arbeitsstand für #46. Die Auswahlmaske ist auf dem darauf aufbauenden #27-Branch implementiert. Die bisherige Archiv-/Kategoriehierarchie ist keine Voraussetzung des künftig vorgesehenen Zielmodells.
 
 ## Verifikation und verbleibende Abnahme
 
@@ -64,4 +64,4 @@ Infrastructure-Tests prüfen Validierung, fehlende und beschädigte Dateien, For
 
 App-Tests prüfen fehlgeschlagenes Hinzufügen, Entfernen, Standardwechsel und Aufheben, Spitznamen und Umsortieren. Ein kontrolliert wartender Speicher prüft die aktive UI-Sperre und ihre Freigabe nach Erfolg, Speicherfehler und Ausnahme. Infrastructure-Tests prüfen zusätzlich Target-Validierung, Reihenfolge, Standardverweis, Version-1-Kompatibilität und überlappende Dienständerungen.
 
-Manuelle Neustarts für Ordnerauswahl sowie Target-Aktionen wurden durchgeführt. Die Integration der tatsächlichen Regelanlage aus #27 und die Übergabe geladener Regeln an die Engine aus #26 bleiben als gemeinsame Integrationsnachweise offen. Die Tests der ViewModels ersetzen keine vollständige Oberflächenprüfung auf allen Zielplattformen.
+Manuelle Neustarts für Ordnerauswahl sowie Target-Aktionen wurden durchgeführt. Die Auswertung neu geladener Target-ID-Regeln wird durch Integrationstests nachgewiesen. Ein Headless-UI-Test für #27 prüft Regelanlage über gebundene Eingaben, Validierung, Zielreparatur und einen Vorschlag nach erneutem Laden. Der Benutzer bestätigte am 27. Oktober 2026 auch den manuellen Regelablauf unter Linux mit Neustart, laufender Dateierkennung, passendem Vorschlag und bestätigter Verschiebung als erfolgreich. Die Tests der ViewModels ersetzen keine vollständige Oberflächenprüfung auf allen Zielplattformen.

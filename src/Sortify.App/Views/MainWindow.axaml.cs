@@ -59,6 +59,14 @@ public partial class MainWindow : Window
             new FileSuggestionWindow(new FileSuggestionViewModel(viewModel.TargetFolders)).Show(this);
     }
 
+    private void OpenTargetRules(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel { SelectedTargetFolder: { } target }) return;
+        var settings = new SettingsWindow { DataContext = DataContext };
+        settings.OpenRulesForTarget(target);
+        settings.Show(this);
+    }
+
     private void OpenSettings(object? sender, RoutedEventArgs e)
     {
         new SettingsWindow { DataContext = DataContext }.Show(this);

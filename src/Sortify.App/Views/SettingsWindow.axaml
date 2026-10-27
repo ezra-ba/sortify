@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" x:Class="Sortify.App.Views.SettingsWindow" Title="" Width="860" Height="560" MinWidth="720" MinHeight="460" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" xmlns:views="using:Sortify.App.Views" x:Class="Sortify.App.Views.SettingsWindow" Title="" Width="860" Height="560" MinWidth="720" MinHeight="460" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
   <Window.Styles>
     <Style Selector="Button.nav-item">
       <Setter Property="HorizontalContentAlignment" Value="Left"/>

@@ -72,6 +72,22 @@ public partial class MainViewModel : ViewModelBase
 
     public AppSettings? CurrentSettings => settingsService?.Current;
 
+    public async Task<SettingsSaveResult> SaveDarkModeAsync(bool enabled)
+    {
+        if (settingsService is null)
+            return new SettingsSaveResult(false, "Die Einstellungen sind nicht verfügbar.");
+
+        var result = await settingsService.UpdateAsync(settings => settings with
+        {
+            DarkMode = enabled
+        });
+
+        SettingsStatus = result.IsSuccess
+            ? "Darstellung gespeichert."
+            : result.ErrorMessage ?? "Die Darstellung konnte nicht gespeichert werden.";
+        return result;
+    }
+
 
     public event Action? MonitoringFolderConfigured;
 

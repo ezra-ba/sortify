@@ -19,7 +19,12 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         Opened += ApplyNativeTitleBarColor;
-        Opened += (_, _) => EnsureRuleEditor();
+        Opened += (_, _) =>
+        {
+            EnsureRuleEditor();
+            if (DataContext is MainViewModel main)
+                DarkModeToggle.IsChecked = main.CurrentSettings?.DarkMode == true;
+        };
     }
 
     private void ApplyNativeTitleBarColor(object? sender, EventArgs e)
@@ -78,7 +83,7 @@ public partial class SettingsWindow : Window
         PlaceholderPanel.IsVisible = !appearanceSelected;
     }
 
-    private void DarkModeChanged(object? sender, RoutedEventArgs e)
+    private async void DarkModeChanged(object? sender, RoutedEventArgs e)
     {
         AnimateDarkModeKnob();
         if (Application.Current is not { } application)
@@ -90,6 +95,9 @@ public partial class SettingsWindow : Window
         application.RequestedThemeVariant = isDark
             ? ThemeVariant.Dark
             : ThemeVariant.Light;
+
+        if (DataContext is MainViewModel main)
+            await main.SaveDarkModeAsync(isDark);
 
     }
 

@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia;
+using Avalonia.Styling;
 using Sortify.App.ViewModels;
 using Sortify.Core.Services;
 
@@ -44,6 +46,12 @@ public sealed class DesktopSession : IDisposable
         await viewModel.InitializeSettingsAsync();
         if (disposed)
             return;
+        if (settings?.Current is { } loadedSettings && Application.Current is { } application)
+        {
+            application.RequestedThemeVariant = loadedSettings.DarkMode
+                ? ThemeVariant.Dark
+                : ThemeVariant.Light;
+        }
         initialized = true;
         RestartMonitoring();
         try

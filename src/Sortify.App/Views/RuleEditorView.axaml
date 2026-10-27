@@ -3,49 +3,68 @@
              xmlns:vm="using:Sortify.App.ViewModels"
              x:Class="Sortify.App.Views.RuleEditorView"
              x:DataType="vm:RuleEditorViewModel">
+  <UserControl.Styles>
+    <Style Selector="TextBlock.field-label">
+      <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Margin" Value="0,4,0,0"/>
+    </Style>
+    <Style Selector="Border.rule-card">
+      <Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource RadiusCard}"/>
+    </Style>
+    <Style Selector="Border.rule-item">
+      <Setter Property="Background" Value="{DynamicResource BrushControlSurface}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource RadiusButton}"/>
+    </Style>
+  </UserControl.Styles>
   <StackPanel Spacing="16">
-    <TextBlock Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap" Foreground="#6E6E73"/>
-    <Border Padding="20" Background="White" BorderBrush="#E1E1E6" BorderThickness="1" CornerRadius="8">
+    <TextBlock Classes="muted" Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap"/>
+    <Border Classes="rule-card" Padding="20">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
-        <TextBlock Text="Neue Sortierregel" FontSize="18" FontWeight="SemiBold"/>
-        <TextBlock Text="Regelname"/>
-        <TextBox x:Name="RuleNameInput" Text="{Binding RuleName, Mode=TwoWay}" PlaceholderText="Zum Beispiel: Rechnungen"/>
-        <TextBlock Text="Target-Ordner"/>
+        <TextBlock Classes="heading" Text="Neue Sortierregel" FontSize="18"/>
+        <TextBlock Classes="field-label" Text="Regelname"/>
+        <TextBox Classes="motion" x:Name="RuleNameInput" Text="{Binding RuleName, Mode=TwoWay}" PlaceholderText="Zum Beispiel: Rechnungen"/>
+        <TextBlock Classes="field-label" Text="Target-Ordner"/>
         <ComboBox x:Name="RuleTargetInput" ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTarget, Mode=TwoWay}" HorizontalAlignment="Stretch" PlaceholderText="Ziel auswählen">
           <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:TargetFolderViewModel"><TextBlock Text="{Binding Nickname}"/></DataTemplate></ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Text="Dateiname ohne Endung – regulärer Ausdruck" TextWrapping="Wrap"/>
-        <TextBox x:Name="RulePatternInput" Text="{Binding FileNamePattern, Mode=TwoWay}" PlaceholderText="^rechnung"/>
-        <TextBlock Text="Beispiele: ^rechnung = beginnt mit rechnung; .* = beliebiger Name. Groß-/Kleinschreibung wird ignoriert." FontSize="12" Foreground="#6E6E73" TextWrapping="Wrap"/>
-        <TextBlock Text="Erlaubte Dateiendungen"/>
-        <TextBox x:Name="RuleExtensionsInput" Text="{Binding Extensions, Mode=TwoWay}" PlaceholderText=".pdf, .docx"/>
-        <TextBlock Text="Dateinamen-Vorgabe (optional)"/>
-        <TextBox x:Name="RuleRenameInput" Text="{Binding RenamePattern, Mode=TwoWay}" PlaceholderText="Originalname behalten"/>
-        <TextBlock Text="Leer = Originalname. Beispiel: Rechnung_{name}{ext}. Bei eigener Vorgabe muss {ext} genau einmal am Ende stehen." FontSize="12" Foreground="#6E6E73" TextWrapping="Wrap"/>
-        <Button x:Name="CreateRuleButton" Content="Regel anlegen" Command="{Binding CreateRuleCommand}"/>
+        <TextBlock Classes="field-label" Text="Dateiname ohne Endung – regulärer Ausdruck" TextWrapping="Wrap"/>
+        <TextBox Classes="motion" x:Name="RulePatternInput" Text="{Binding FileNamePattern, Mode=TwoWay}" PlaceholderText="^rechnung"/>
+        <TextBlock Classes="muted" Text="Beispiele: ^rechnung = beginnt mit rechnung; .* = beliebiger Name. Groß-/Kleinschreibung wird ignoriert." TextWrapping="Wrap"/>
+        <TextBlock Classes="field-label" Text="Erlaubte Dateiendungen"/>
+        <TextBox Classes="motion" x:Name="RuleExtensionsInput" Text="{Binding Extensions, Mode=TwoWay}" PlaceholderText=".pdf, .docx"/>
+        <TextBlock Classes="field-label" Text="Dateinamen-Vorgabe (optional)"/>
+        <TextBox Classes="motion" x:Name="RuleRenameInput" Text="{Binding RenamePattern, Mode=TwoWay}" PlaceholderText="Originalname behalten"/>
+        <TextBlock Classes="muted" Text="Leer = Originalname. Beispiel: Rechnung_{name}{ext}. Bei eigener Vorgabe muss {ext} genau einmal am Ende stehen." TextWrapping="Wrap"/>
+        <Button Classes="primary motion" x:Name="CreateRuleButton" Content="Regel anlegen" Command="{Binding CreateRuleCommand}" HorizontalAlignment="Left"/>
       </StackPanel>
     </Border>
     <TextBlock x:Name="RuleResultMessage" Text="{Binding Message}" Foreground="{Binding MessageColor}" TextWrapping="Wrap"/>
-    <TextBlock Text="Gespeicherte Regeln" FontSize="18" FontWeight="SemiBold"/>
+    <TextBlock Classes="heading" Text="Gespeicherte Regeln" FontSize="18"/>
     <ItemsControl ItemsSource="{Binding ExistingRules}">
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="vm:RuleListItem">
-          <Border Padding="12" Margin="0,0,0,8" Background="White" CornerRadius="6">
-            <StackPanel Spacing="4"><TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding Conditions}" Foreground="#6E6E73" TextWrapping="Wrap"/></StackPanel>
+          <Border Classes="rule-item" Padding="12" Margin="0,0,0,8">
+            <StackPanel Spacing="4"><TextBlock Classes="heading" Text="{Binding Label}" TextWrapping="Wrap"/><TextBlock Classes="muted" Text="{Binding Conditions}" TextWrapping="Wrap"/></StackPanel>
           </Border>
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
-    <Expander Header="Ziel einer vorhandenen Regel zuordnen" HorizontalAlignment="Stretch">
+    <Expander Header="Ziel einer vorhandenen Regel zuordnen" HorizontalAlignment="Stretch" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="{DynamicResource RadiusCard}" Padding="14">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
-        <TextBlock Text="Hier kannst du insbesondere Altregeln ohne Target-ID reparieren. Andere Regelfelder bleiben erhalten." TextWrapping="Wrap"/>
+        <TextBlock Classes="muted" Text="Hier kannst du insbesondere Altregeln ohne Target-ID reparieren. Andere Regelfelder bleiben erhalten." TextWrapping="Wrap"/>
         <ComboBox ItemsSource="{Binding ExistingRules}" SelectedItem="{Binding SelectedExistingRule, Mode=TwoWay}" HorizontalAlignment="Stretch" PlaceholderText="Regel auswählen">
           <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:RuleListItem"><TextBlock Text="{Binding Label}"/></DataTemplate></ComboBox.ItemTemplate>
         </ComboBox>
         <ComboBox ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding RepairTarget, Mode=TwoWay}" HorizontalAlignment="Stretch" PlaceholderText="Target-Ordner auswählen">
           <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:TargetFolderViewModel"><TextBlock Text="{Binding Nickname}"/></DataTemplate></ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Content="Zielzuordnung speichern" Command="{Binding AssignTargetCommand}"/>
+        <Button Classes="secondary motion" Content="Zielzuordnung speichern" Command="{Binding AssignTargetCommand}" HorizontalAlignment="Left"/>
       </StackPanel>
     </Expander>
   </StackPanel>

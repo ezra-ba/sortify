@@ -1,0 +1,43 @@
+
+
+
+
+
+/**
+* Änderungen protokollieren
+*/
+
+USE wer_streamt_was;
+
+CREATE TABLE movie_access_log (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    movie_id    INT NULL,                 -- NULL = Listen-/Suchabfrage
+    action      VARCHAR(20) NOT NULL,     -- 'SELECT', 'INSERT', 'UPDATE', 'DELETE'
+    details     VARCHAR(255) NULL,
+    app_user_id INT NULL,                 -- eingeloggter User aus der Session
+    db_user     VARCHAR(100) NOT NULL DEFAULT (CURRENT_USER()),
+    accessed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+DELIMITER //
+
+CREATE TRIGGER trg_movies_after_update
+AFTER UPDATE ON movies
+FOR EACH ROW
+BEGIN
+    INSERT INTO movie_access_log (movie_id, action, details)
+    VALUES (NEW.id, 'UPDATE',
+            CONCAT('Titel: "', OLD.title, '" -> "', NEW.title, '"'));
+END //
+
+CREATE TRIGGER trg_movies_after_delete
+AFTER DELETE ON movies
+FOR EACH ROW
+BEGIN
+    INSERT INTO movie_access_log (movie_id, action, details)
+    VALUES (OLD.id, 'DELETE', CONCAT('Gelöscht: ', OLD.title));
+END //
+
+DELIMITER ;

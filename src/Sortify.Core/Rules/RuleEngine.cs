@@ -50,14 +50,19 @@ public sealed class RuleEngine : IRuleEngine
             RegexTimeout);
     }
     private readonly IRuleValidator validator;
+    private readonly IRuleTargetValidator targetValidator;
 
-    public RuleEngine(IRuleValidator validator)
+    public RuleEngine(
+        IRuleValidator validator,
+        IRuleTargetValidator targetValidator)
     {
         this.validator = validator;
+        this.targetValidator = targetValidator;
     }
     public RuleEvaluationResult Evaluate(
         FileDescriptor file,
-        IReadOnlyCollection<SortRule> rules)
+        IReadOnlyCollection<SortRule> rules,
+        IReadOnlyCollection<TargetFolder> targets)
     {
         var category = FileCategoryMap.GetCategory(file.Extension);
 
@@ -88,6 +93,22 @@ public sealed class RuleEngine : IRuleEngine
                     diagnostics.Add(new RuleEvaluationDiagnostic(
                         rule.Id,
                         "InvalidRule",
+                        error.FieldName,
+                        error.Message));
+                }
+
+                continue;
+            }
+
+            var targetValidation = targetValidator.Validate(rule, targets);
+
+            if (!targetValidation.IsValid)
+            {
+                foreach (var error in targetValidation.Errors)
+                {
+                    diagnostics.Add(new RuleEvaluationDiagnostic(
+                        rule.Id,
+                        "InvalidTargetReference",
                         error.FieldName,
                         error.Message));
                 }
@@ -182,9 +203,12 @@ public sealed class RuleEngine : IRuleEngine
 
                 proposedCandidates.Add(new RuleTargetCandidate(
                     category,
-                    rule.TargetDirectory,
+                    "",
                     fileName,
-                    new[] { new RuleReference(rule.Id, rule.Name) }));
+                    new[] { new RuleReference(rule.Id, rule.Name) })
+                {
+                    TargetFolderId = rule.TargetFolderId
+                });
             }
 
             if (diagnostics.Any(diagnostic =>
@@ -198,13 +222,16 @@ public sealed class RuleEngine : IRuleEngine
 
             var candidates = proposedCandidates
                 .GroupBy(candidate => (
-                    candidate.TargetDirectory,
+                    candidate.TargetFolderId,
                     candidate.FileName))
                 .Select(group => new RuleTargetCandidate(
                     category,
-                    group.Key.TargetDirectory,
+                    "",
                     group.Key.FileName,
-                    group.SelectMany(candidate => candidate.Rules).ToArray()))
+                    group.SelectMany(candidate => candidate.Rules).ToArray())
+                {
+                    TargetFolderId = group.Key.TargetFolderId
+                })
                 .ToArray();
 
             return new RuleEvaluationResult(
@@ -215,32 +242,9 @@ public sealed class RuleEngine : IRuleEngine
                 diagnostics.AsReadOnly());
         }
 
-        var fallbackFileName =
-            file.FileNameWithoutExtension + file.Extension;
-
-        if (!PortableNameValidator.IsValid(fallbackFileName))
-        {
-            diagnostics.Add(new RuleEvaluationDiagnostic(
-                null,
-                "InvalidFileName",
-                null,
-                "Der ursprüngliche Dateiname ist für das Archiv nicht zulässig."));
-
-            return new RuleEvaluationResult(
-                RuleEvaluationStatus.Failed,
-                Array.Empty<RuleTargetCandidate>(),
-                diagnostics.AsReadOnly());
-        }
-
-        var candidate = new RuleTargetCandidate(
-            category,
-            "",
-            fallbackFileName,
-            Array.Empty<RuleReference>());
-
         return new RuleEvaluationResult(
-            RuleEvaluationStatus.CategoryFallback,
-            new[] { candidate },
+            RuleEvaluationStatus.NoMatch,
+            Array.Empty<RuleTargetCandidate>(),
             diagnostics.AsReadOnly());
     }
 }

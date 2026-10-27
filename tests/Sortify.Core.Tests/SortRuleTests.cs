@@ -31,4 +31,43 @@ public sealed class SortRuleTests
         Assert.Equal(100, rule.Priority);
         Assert.True(rule.IsEnabled);
     }
+    [Fact]
+    public void RulePreservesTargetFolderReference()
+    {
+        var targetId = Guid.NewGuid();
+
+        var rule = new SortRule(
+            Guid.NewGuid(),
+            "Rechnungen",
+            "^rechnung",
+            [".pdf"],
+            null,
+            "",
+            null,
+            100,
+            true)
+        {
+            TargetFolderId = targetId
+        };
+
+        Assert.Equal(targetId, rule.TargetFolderId);
+    }
+
+    [Fact]
+    public void LegacyRuleHasNoTargetFolderReference()
+    {
+        var rule = new SortRule(
+            Guid.NewGuid(),
+            "Alte Rechnungsregel",
+            "^rechnung",
+            [".pdf"],
+            null,
+            "Rechnungen",
+            null,
+            100,
+            true);
+
+        Assert.Null(rule.TargetFolderId);
+        Assert.Equal("Rechnungen", rule.TargetDirectory);
+    }
 }

@@ -5,7 +5,16 @@ namespace Sortify.Core.Tests;
 
 public sealed class RuleEngineTests
 {
-    private readonly RuleEngine engine = new(new RuleValidator());
+    private readonly RuleEngine engine = new(
+    new RuleValidator(),
+    new RuleTargetValidator());
+
+    private static readonly TargetFolder TestTarget = new(
+        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+        Path.Combine(Path.GetTempPath(), "Sortify-TestTarget"),
+        "Testziel");
+
+    private static TargetFolder[] TestTargets => [TestTarget];
 
     private static FileDescriptor CreateFile(string extension) => new(
         "Eingang/download" + extension,
@@ -23,7 +32,8 @@ public sealed class RuleEngineTests
     {
         var result = engine.Evaluate(
             CreateFile(extension),
-            Array.Empty<SortRule>());
+            Array.Empty<SortRule>(),
+            TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Ignored, result.Status);
         Assert.Empty(result.Candidates);
@@ -31,25 +41,19 @@ public sealed class RuleEngineTests
     }
 
     [Theory]
-    [InlineData(".pdf", "Dokumente")]
-    [InlineData(".PDF", "Dokumente")]
-    [InlineData(".png", "Bilder")]
-    [InlineData(".xlsx", "Tabellen")]
-    public void EvaluateReturnsCategoryFallbackWithoutRules(
-        string extension,
-        string expectedCategory)
+    [InlineData(".pdf")]
+    [InlineData(".PDF")]
+    [InlineData(".png")]
+    [InlineData(".xlsx")]
+    public void EvaluateReturnsNoMatchWithoutRules(string extension)
     {
         var result = engine.Evaluate(
             CreateFile(extension),
-            Array.Empty<SortRule>());
+            Array.Empty<SortRule>(),
+            TestTargets);
 
-        Assert.Equal(RuleEvaluationStatus.CategoryFallback, result.Status);
-
-        var candidate = Assert.Single(result.Candidates);
-        Assert.Equal(expectedCategory, candidate.Category);
-        Assert.Equal("", candidate.TargetDirectory);
-        Assert.Equal("download" + extension, candidate.FileName);
-        Assert.Empty(candidate.Rules);
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
+        Assert.Empty(result.Candidates);
         Assert.Empty(result.Diagnostics);
     }
     private static SortRule CreateRule() => new(
@@ -60,8 +64,11 @@ public sealed class RuleEngineTests
         null,
         "Downloads",
         null,
-        100,
-        true);
+    100,
+    true)
+    {
+        TargetFolderId = TestTarget.Id
+    };
     [Fact]
     public void EvaluateSkipsDisabledRules()
     {
@@ -71,10 +78,10 @@ public sealed class RuleEngineTests
             FileNamePattern = "["
         };
 
-        var result = engine.Evaluate(CreateFile(".pdf"), [rule]);
+        var result = engine.Evaluate(CreateFile(".pdf"), [rule], TestTargets);
 
-        Assert.Equal(RuleEvaluationStatus.CategoryFallback, result.Status);
-        Assert.Single(result.Candidates);
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
+        Assert.Empty(result.Candidates);
         Assert.Empty(result.Diagnostics);
     }
 
@@ -83,10 +90,10 @@ public sealed class RuleEngineTests
     {
         var rule = CreateRule() with { FileNamePattern = "[" };
 
-        var result = engine.Evaluate(CreateFile(".pdf"), [rule]);
+        var result = engine.Evaluate(CreateFile(".pdf"), [rule], TestTargets);
 
-        Assert.Equal(RuleEvaluationStatus.CategoryFallback, result.Status);
-        Assert.Single(result.Candidates);
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
+        Assert.Empty(result.Candidates);
 
         var diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(rule.Id, diagnostic.RuleId);
@@ -104,10 +111,11 @@ public sealed class RuleEngineTests
             Priority = -1
         };
 
-        var result = engine.Evaluate(CreateFile(".pdf"), [rule]);
+        var result = engine.Evaluate(CreateFile(".pdf"), [rule], TestTargets);
 
-        Assert.Equal(RuleEvaluationStatus.CategoryFallback, result.Status);
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
         Assert.Equal(2, result.Diagnostics.Count);
+        Assert.Empty(result.Candidates);
 
         Assert.All(result.Diagnostics, diagnostic =>
         {
@@ -125,13 +133,14 @@ public sealed class RuleEngineTests
     {
         var rule = CreateRule();
 
-        var result = engine.Evaluate(CreateFile(".pdf"), [rule]);
+        var result = engine.Evaluate(CreateFile(".pdf"), [rule], TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
 
         var candidate = Assert.Single(result.Candidates);
         Assert.Equal("Dokumente", candidate.Category);
-        Assert.Equal("Downloads", candidate.TargetDirectory);
+        Assert.Equal(TestTarget.Id, candidate.TargetFolderId);
+        Assert.Equal("", candidate.TargetDirectory);
         Assert.Equal("download.pdf", candidate.FileName);
 
         var reference = Assert.Single(candidate.Rules);
@@ -149,7 +158,7 @@ public sealed class RuleEngineTests
             AllowedExtensions = [".PDF"]
         };
 
-        var result = engine.Evaluate(CreateFile(".pdf"), [rule]);
+        var result = engine.Evaluate(CreateFile(".pdf"), [rule], TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
     }
@@ -170,10 +179,10 @@ public sealed class RuleEngineTests
             RelativePathPattern = pathPattern
         };
 
-        var result = engine.Evaluate(CreateFile(".pdf"), [rule]);
+        var result = engine.Evaluate(CreateFile(".pdf"), [rule], TestTargets);
 
-        Assert.Equal(RuleEvaluationStatus.CategoryFallback, result.Status);
-        Assert.Empty(Assert.Single(result.Candidates).Rules);
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
+        Assert.Empty(result.Candidates);
         Assert.Empty(result.Diagnostics);
     }
 
@@ -190,7 +199,7 @@ public sealed class RuleEngineTests
             RelativePath = "Schule/download.pdf"
         };
 
-        var result = engine.Evaluate(file, [rule]);
+        var result = engine.Evaluate(file, [rule], TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
     }
@@ -203,7 +212,8 @@ public sealed class RuleEngineTests
 
         var result = engine.Evaluate(
             CreateFile(".pdf"),
-            [invalidRule, validRule]);
+            [invalidRule, validRule],
+            TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
 
@@ -233,12 +243,13 @@ public sealed class RuleEngineTests
             ? [higher, lower]
             : [lower, higher];
 
-        var result = engine.Evaluate(CreateFile(".pdf"), rules);
+        var result = engine.Evaluate(CreateFile(".pdf"), rules, TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
 
         var candidate = Assert.Single(result.Candidates);
-        Assert.Equal("Wichtig", candidate.TargetDirectory);
+        Assert.Equal(higher.TargetFolderId, candidate.TargetFolderId);
+        Assert.Equal("", candidate.TargetDirectory);
         Assert.Equal(higher.Id, Assert.Single(candidate.Rules).Id);
     }
 
@@ -250,7 +261,8 @@ public sealed class RuleEngineTests
 
         var result = engine.Evaluate(
             CreateFile(".pdf"),
-            [first, second]);
+            [first, second],
+            TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
 
@@ -266,21 +278,34 @@ public sealed class RuleEngineTests
     public void EvaluateReturnsAmbiguousForEqualPriorityDifferentTargets(
         bool reverseOrder)
     {
-        var first = CreateRule() with { TargetDirectory = "Schule" };
-        var second = CreateRule() with { TargetDirectory = "Privat" };
+        var otherTarget = new TargetFolder(
+            Guid.NewGuid(),
+            Path.Combine(Path.GetTempPath(), "Sortify-OtherTarget"),
+            "Anderes Ziel");
+
+        var first = CreateRule();
+        var second = CreateRule() with
+        {
+            TargetFolderId = otherTarget.Id
+        };
 
         SortRule[] rules = reverseOrder
             ? [second, first]
             : [first, second];
 
-        var result = engine.Evaluate(CreateFile(".pdf"), rules);
+        var result = engine.Evaluate(
+            CreateFile(".pdf"),
+            rules,
+            [TestTarget, otherTarget]);
 
         Assert.Equal(RuleEvaluationStatus.Ambiguous, result.Status);
         Assert.Equal(2, result.Candidates.Count);
+
         Assert.Contains(result.Candidates,
-            candidate => candidate.TargetDirectory == "Schule");
+            candidate => candidate.TargetFolderId == TestTarget.Id);
         Assert.Contains(result.Candidates,
-            candidate => candidate.TargetDirectory == "Privat");
+            candidate => candidate.TargetFolderId == otherTarget.Id);
+
         Assert.Empty(result.Diagnostics);
     }
 
@@ -296,7 +321,8 @@ public sealed class RuleEngineTests
 
         var result = engine.Evaluate(
             CreateFile(".pdf"),
-            [matching, nonMatching]);
+            [matching, nonMatching],
+            TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
         var candidate = Assert.Single(result.Candidates);
@@ -313,7 +339,7 @@ public sealed class RuleEngineTests
     {
         var rule = CreateRule() with { RenamePattern = pattern };
 
-        var result = engine.Evaluate(CreateFile(".pdf"), [rule]);
+        var result = engine.Evaluate(CreateFile(".pdf"), [rule], TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
         Assert.Equal(
@@ -329,7 +355,7 @@ public sealed class RuleEngineTests
             RenamePattern = "Schule_{name}{ext}"
         };
 
-        var result = engine.Evaluate(CreateFile(".PDF"), [rule]);
+        var result = engine.Evaluate(CreateFile(".PDF"), [rule], TestTargets);
 
         Assert.Equal("Schule_download.PDF",
             Assert.Single(result.Candidates).FileName);
@@ -349,7 +375,8 @@ public sealed class RuleEngineTests
 
         var result = engine.Evaluate(
             CreateFile(".pdf"),
-            [first, second]);
+            [first, second],
+            TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Ambiguous, result.Status);
         Assert.Equal(2, result.Candidates.Count);
@@ -366,7 +393,8 @@ public sealed class RuleEngineTests
 
         var result = engine.Evaluate(
             CreateFile(".pdf"),
-            [first, second]);
+            [first, second],
+            TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
         Assert.Equal(2, Assert.Single(result.Candidates).Rules.Count);
@@ -387,7 +415,7 @@ public sealed class RuleEngineTests
             RenamePattern = "{name}{ext}"
         };
 
-        var result = engine.Evaluate(file, [rule]);
+        var result = engine.Evaluate(file, [rule], TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Failed, result.Status);
         Assert.Empty(result.Candidates);
@@ -412,7 +440,7 @@ public sealed class RuleEngineTests
             RenamePattern = "{name}{ext}"
         };
 
-        var result = engine.Evaluate(file, [rule]);
+        var result = engine.Evaluate(file, [rule], TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
         Assert.Equal("download{ext}.pdf",
@@ -421,7 +449,8 @@ public sealed class RuleEngineTests
     [Theory]
     [InlineData("CON")]
     [InlineData("rechnung?")]
-    public void EvaluateRejectsInvalidFallbackFileName(string name)
+    public void EvaluateDoesNotGenerateTargetNameWithoutMatchingRule(
+        string name)
     {
         var file = CreateFile(".pdf") with
         {
@@ -430,14 +459,14 @@ public sealed class RuleEngineTests
             SourcePath = "Eingang/" + name + ".pdf"
         };
 
-        var result = engine.Evaluate(file, Array.Empty<SortRule>());
+        var result = engine.Evaluate(
+            file,
+            Array.Empty<SortRule>(),
+            TestTargets);
 
-        Assert.Equal(RuleEvaluationStatus.Failed, result.Status);
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
         Assert.Empty(result.Candidates);
-
-        var diagnostic = Assert.Single(result.Diagnostics);
-        Assert.Equal("InvalidFileName", diagnostic.Code);
-        Assert.Null(diagnostic.RuleId);
+        Assert.Empty(result.Diagnostics);
     }
 
     [Fact]
@@ -456,7 +485,7 @@ public sealed class RuleEngineTests
             RenamePattern = "Rechnung{ext}"
         };
 
-        var result = engine.Evaluate(file, [rule]);
+        var result = engine.Evaluate(file, [rule], TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
         Assert.Equal(
@@ -498,7 +527,8 @@ public sealed class RuleEngineTests
 
         var result = engine.Evaluate(
             file,
-            [matchingRule, timeoutRule]);
+            [matchingRule, timeoutRule],
+            TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Failed, result.Status);
         Assert.Empty(result.Candidates);
@@ -517,42 +547,63 @@ public sealed class RuleEngineTests
         new(
         Guid.NewGuid(), "Rechnungen",
         @"^rechnung(?:en)?(?:[-_ ]|$)",
-        [".pdf"], null, "Rechnungen", null, 200, true),
+        [".pdf"], null, "Rechnungen", null, 200, true)
+    {
+        TargetFolderId = TestTarget.Id
+    },
 
     new(
         Guid.NewGuid(), "Mathematik",
         @"^(?:mathe|mathematik)(?:[-_ ]|$)",
         [".pdf", ".docx"], null,
-        "Schule/Mathematik", null, 150, true),
+        "Schule/Mathematik", null, 150, true)
+    {
+        TargetFolderId = TestTarget.Id
+    },
 
     new(
         Guid.NewGuid(), "Stundenpläne",
         @"^stundenplan(?:[-_ ]|$)",
         [".pdf", ".docx"], null,
-        "Schule/Stundenpläne", null, 180, true),
+        "Schule/Stundenpläne", null, 180, true)
+    {
+        TargetFolderId = TestTarget.Id
+    },
 
     new(
         Guid.NewGuid(), "Schulpräsentationen",
         @"^(?:referat|präsentation)(?:[-_ ]|$)",
-        [".pptx"], null, "Schule", null, 150, true),
+        [".pptx"], null, "Schule", null, 150, true)
+    {
+        TargetFolderId = TestTarget.Id
+    },
 
     new(
         Guid.NewGuid(), "Notenlisten",
         @"^(?:noten|notenliste)(?:[-_ ]|$)",
         [".xlsx", ".csv"], null,
-        "Schule/Noten", null, 180, true),
+        "Schule/Noten", null, 180, true)
+    {
+        TargetFolderId = TestTarget.Id
+    },
 
     new(
         Guid.NewGuid(), "Screenshots",
         @"^(?:screenshot|bildschirmfoto)(?:[-_ ]|$)",
         [".png", ".jpg", ".jpeg"], null,
-        "Screenshots", null, 120, true),
+        "Screenshots", null, 120, true)
+    {
+        TargetFolderId = TestTarget.Id
+    },
 
     new(
         Guid.NewGuid(), "Quartalsübersichten",
         @"^Q[1-4][-_ ]",
         [".xlsx"], null,
         "Quartalsübersichten", null, 160, true)
+    {
+        TargetFolderId = TestTarget.Id
+    }
     ];
 
     private static FileDescriptor CreateNamedFile(string fileName) => new(
@@ -564,42 +615,36 @@ public sealed class RuleEngineTests
         new DateTimeOffset(2026, 10, 14, 12, 0, 0, TimeSpan.Zero));
     [Theory]
     [InlineData(
-        "rechnung_2026.pdf", "Dokumente", "Rechnungen", "Rechnungen")]
+        "rechnung_2026.pdf", "Dokumente", "Rechnungen")]
     [InlineData(
-    "rechnungen_2026.pdf", "Dokumente", "Rechnungen", "Rechnungen")]
+    "rechnungen_2026.pdf", "Dokumente", "Rechnungen")]
     [InlineData(
-        "mathe_aufgaben.docx", "Dokumente",
-        "Schule/Mathematik", "Mathematik")]
+        "mathe_aufgaben.docx", "Dokumente", "Mathematik")]
     [InlineData(
-        "stundenplan_2026.pdf", "Dokumente",
-        "Schule/Stundenpläne", "Stundenpläne")]
+        "stundenplan_2026.pdf", "Dokumente", "Stundenpläne")]
     [InlineData(
-        "referat_biologie.pptx", "Präsentationen",
-        "Schule", "Schulpräsentationen")]
+        "referat_biologie.pptx", "Präsentationen", "Schulpräsentationen")]
     [InlineData(
-        "notenliste_2026.xlsx", "Tabellen",
-        "Schule/Noten", "Notenlisten")]
+        "notenliste_2026.xlsx", "Tabellen", "Notenlisten")]
     [InlineData(
-        "Screenshot_2026-09-30.png", "Bilder",
-        "Screenshots", "Screenshots")]
+        "Screenshot_2026-09-30.png", "Bilder", "Screenshots")]
     [InlineData(
-        "Q3_Präsentation.xlsx", "Tabellen",
-        "Quartalsübersichten", "Quartalsübersichten")]
+        "Q3_Präsentation.xlsx", "Tabellen", "Quartalsübersichten")]
     public void EvaluateMatchesConceptExamples(
         string fileName,
         string expectedCategory,
-        string expectedDirectory,
         string expectedRuleName)
     {
         var rules = CreateConceptRules();
 
-        var result = engine.Evaluate(CreateNamedFile(fileName), rules);
+        var result = engine.Evaluate(CreateNamedFile(fileName), rules, TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
 
         var candidate = Assert.Single(result.Candidates);
         Assert.Equal(expectedCategory, candidate.Category);
-        Assert.Equal(expectedDirectory, candidate.TargetDirectory);
+        Assert.Equal(TestTarget.Id, candidate.TargetFolderId);
+        Assert.Equal("", candidate.TargetDirectory);
         Assert.Equal(fileName, candidate.FileName);
 
         var reference = Assert.Single(candidate.Rules);
@@ -612,27 +657,22 @@ public sealed class RuleEngineTests
     }
 
     [Theory]
-    [InlineData("mathematiker.pdf", "Dokumente")]
-    [InlineData("ferienplan.pdf", "Dokumente")]
-    [InlineData("referat_biologie.pdf", "Dokumente")]
-    [InlineData("notendienst.xlsx", "Tabellen")]
-    [InlineData("screenshotter.png", "Bilder")]
-    [InlineData("Q5_Übersicht.xlsx", "Tabellen")]
-    public void EvaluateUsesFallbackForConceptCounterexamples(
-        string fileName,
-        string expectedCategory)
+    [InlineData("mathematiker.pdf")]
+    [InlineData("ferienplan.pdf")]
+    [InlineData("referat_biologie.pdf")]
+    [InlineData("notendienst.xlsx")]
+    [InlineData("screenshotter.png")]
+    [InlineData("Q5_Übersicht.xlsx")]
+    public void EvaluateReturnsNoMatchForConceptCounterexamples(
+        string fileName)
     {
         var result = engine.Evaluate(
             CreateNamedFile(fileName),
-            CreateConceptRules());
+            CreateConceptRules(),
+            TestTargets);
 
-        Assert.Equal(RuleEvaluationStatus.CategoryFallback, result.Status);
-
-        var candidate = Assert.Single(result.Candidates);
-        Assert.Equal(expectedCategory, candidate.Category);
-        Assert.Equal("", candidate.TargetDirectory);
-        Assert.Equal(fileName, candidate.FileName);
-        Assert.Empty(candidate.Rules);
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
+        Assert.Empty(result.Candidates);
         Assert.Empty(result.Diagnostics);
     }
 
@@ -644,10 +684,136 @@ public sealed class RuleEngineTests
     {
         var result = engine.Evaluate(
             CreateNamedFile(fileName),
-            CreateConceptRules());
+            CreateConceptRules(),
+            TestTargets);
 
         Assert.Equal(RuleEvaluationStatus.Ignored, result.Status);
         Assert.Empty(result.Candidates);
         Assert.Empty(result.Diagnostics);
+    }
+    [Fact]
+    public void EvaluateReportsMissingTargetReference()
+    {
+        var rule = CreateRule() with { TargetFolderId = null };
+
+        var result = engine.Evaluate(
+            CreateFile(".pdf"),
+            [rule],
+            TestTargets);
+
+        var diagnostic = Assert.Single(result.Diagnostics);
+
+        Assert.Equal("InvalidTargetReference", diagnostic.Code);
+        Assert.Equal(rule.Id, diagnostic.RuleId);
+        Assert.Equal(nameof(SortRule.TargetFolderId), diagnostic.FieldName);
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
+        Assert.Empty(result.Candidates);
+
+        Assert.DoesNotContain(
+            result.Candidates.SelectMany(candidate => candidate.Rules),
+            reference => reference.Id == rule.Id);
+    }
+    [Fact]
+    public void EvaluateIgnoresLegacyDirectoriesForSameTarget()
+    {
+        var first = CreateRule() with { TargetDirectory = "Schule" };
+        var second = CreateRule() with { TargetDirectory = "Privat" };
+
+        var result = engine.Evaluate(
+            CreateFile(".pdf"),
+            [first, second],
+            TestTargets);
+
+        Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
+
+        var candidate = Assert.Single(result.Candidates);
+        Assert.Equal(TestTarget.Id, candidate.TargetFolderId);
+        Assert.Equal("", candidate.TargetDirectory);
+        Assert.Equal(2, candidate.Rules.Count);
+        Assert.Empty(result.Diagnostics);
+    }
+    [Theory]
+    [InlineData("00000000-0000-0000-0000-000000000000")]
+    [InlineData("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")]
+    public void EvaluateRejectsEmptyOrUnknownTargetReference(string targetId)
+    {
+        var rule = CreateRule() with
+        {
+            TargetFolderId = Guid.Parse(targetId)
+        };
+
+        var result = engine.Evaluate(
+            CreateFile(".pdf"),
+            [rule],
+            TestTargets);
+
+        Assert.Equal(RuleEvaluationStatus.NoMatch, result.Status);
+        Assert.Empty(result.Candidates);
+
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal("InvalidTargetReference", diagnostic.Code);
+        Assert.Equal(rule.Id, diagnostic.RuleId);
+        Assert.Equal(nameof(SortRule.TargetFolderId), diagnostic.FieldName);
+    }
+    [Fact]
+    public void EvaluateDoesNotRedirectRuleAfterTargetWasRemoved()
+    {
+        var rule = CreateRule();
+
+        var beforeRemoval = engine.Evaluate(
+            CreateFile(".pdf"),
+            [rule],
+            TestTargets);
+
+        Assert.Equal(RuleEvaluationStatus.Matched, beforeRemoval.Status);
+        Assert.Equal(
+            TestTarget.Id,
+            Assert.Single(beforeRemoval.Candidates).TargetFolderId);
+
+        // Gleicher Pfad und Name, aber eine andere stabile ID.
+        var replacement = TestTarget with { Id = Guid.NewGuid() };
+
+        var afterRemoval = engine.Evaluate(
+            CreateFile(".pdf"),
+            [rule],
+            [replacement]);
+
+        Assert.Equal(RuleEvaluationStatus.NoMatch, afterRemoval.Status);
+        Assert.Empty(afterRemoval.Candidates);
+
+        var diagnostic = Assert.Single(afterRemoval.Diagnostics);
+        Assert.Equal("InvalidTargetReference", diagnostic.Code);
+        Assert.Equal(rule.Id, diagnostic.RuleId);
+    }
+    [Fact]
+    public void EvaluateExcludesUnknownTargetWithoutBlockingValidRule()
+    {
+        var invalidRule = CreateRule() with
+        {
+            TargetFolderId = Guid.NewGuid(),
+            Priority = 500
+        };
+
+        var validRule = CreateRule() with
+        {
+            Priority = 100
+        };
+
+        var result = engine.Evaluate(
+            CreateFile(".pdf"),
+            [invalidRule, validRule],
+            TestTargets);
+
+        Assert.Equal(RuleEvaluationStatus.Matched, result.Status);
+
+        var candidate = Assert.Single(result.Candidates);
+        Assert.Equal(TestTarget.Id, candidate.TargetFolderId);
+        Assert.Equal(
+            validRule.Id,
+            Assert.Single(candidate.Rules).Id);
+
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal("InvalidTargetReference", diagnostic.Code);
+        Assert.Equal(invalidRule.Id, diagnostic.RuleId);
     }
 }

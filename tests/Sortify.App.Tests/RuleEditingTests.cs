@@ -13,7 +13,7 @@ public sealed class RuleEditingTests
         var target = new TargetFolder(Guid.NewGuid(), Path.GetTempPath(), "School");
         FileNameCondition[] conditions = [new(FileNameConditionKind.StartsWith, "old")];
         var rule = new SortRule(Guid.NewGuid(), "Old rule", simple ? SimpleRuleCompiler.Compile(conditions).Pattern! : "^old",
-            [".pdf"], "^school", "Legacy/path", "{name}{ext}", 77, false)
+            [".pdf"], "^school", "Legacy/path", "{name}{ext}", 77, true)
             { TargetFolderId = target.Id, NameConditions = simple ? conditions : null };
         return new AppSettings(Path.GetTempPath(), null, true, [rule]) { TargetFolders = [target] };
     }
@@ -41,7 +41,7 @@ public sealed class RuleEditingTests
         var saved = Assert.Single(main.CurrentSettings!.Rules);
         Assert.Equal(initial.Rules[0].Id, saved.Id);
         Assert.Equal(77, saved.Priority);
-        Assert.False(saved.IsEnabled);
+        Assert.True(saved.IsEnabled);
         Assert.Equal("^school", saved.RelativePathPattern);
         Assert.Equal("Legacy/path", saved.TargetDirectory);
         Assert.Equal("Updated", saved.Name);

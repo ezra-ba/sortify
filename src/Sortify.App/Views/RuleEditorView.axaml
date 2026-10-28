@@ -30,7 +30,13 @@
     <TextBlock Classes="muted" Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap"/>
     <Border x:Name="RuleEditorForm" Classes="rule-card" Padding="20">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
+        <CheckBox x:Name="RuleActiveCheckBox" Content="Regel aktiv" IsVisible="{Binding IsEditing}"
+                  IsChecked="{Binding IsRuleActive, Mode=TwoWay}"/>
         <TextBlock Classes="heading" Text="{Binding EditorTitle}" FontSize="18"/>
+        <TextBlock Classes="muted" Text="Neue Regeln sind automatisch aktiv." IsVisible="{Binding !IsEditing}"/>
+        <TextBlock Classes="muted" Text="Diese Regel ist inaktiv und wird nicht ausgeführt. Zum Bearbeiten wieder aktivieren. Der Status wird mit „Änderungen speichern“ übernommen."
+                   IsVisible="{Binding !IsRuleActive}" TextWrapping="Wrap"/>
+        <StackPanel x:Name="RuleFieldsPanel" Spacing="10" IsEnabled="{Binding CanEditRuleFields}">
         <TextBlock Classes="field-label" Text="Regelname"/>
         <TextBox Classes="motion" x:Name="RuleNameInput" Text="{Binding RuleName, Mode=TwoWay}" PlaceholderText="Zum Beispiel: Rechnungen"/>
         <TextBlock Classes="field-label" Text="Target-Ordner"/>
@@ -70,6 +76,7 @@
         <TextBlock Classes="field-label" Text="Dateinamen-Vorgabe (optional)"/>
         <TextBox Classes="motion" x:Name="RuleRenameInput" Text="{Binding RenamePattern, Mode=TwoWay}" PlaceholderText="Originalname behalten"/>
         <TextBlock Classes="muted" Text="Leer = Originalname. Beispiel: Rechnung_{name}{ext}. Bei eigener Vorgabe muss {ext} genau einmal am Ende stehen." TextWrapping="Wrap"/>
+        </StackPanel>
         <Button Classes="primary motion" x:Name="CreateRuleButton" Content="{Binding SaveButtonText}" Command="{Binding CreateRuleCommand}" HorizontalAlignment="Left"/>
         <Button Classes="secondary motion" Content="Bearbeiten abbrechen" Command="{Binding CancelEditCommand}" IsVisible="{Binding IsEditing}" HorizontalAlignment="Left"/>
       </StackPanel>
@@ -82,6 +89,11 @@
           <Border Classes="rule-item" Padding="12" Margin="0,0,0,8">
             <StackPanel Spacing="8">
               <TextBlock Classes="heading" Text="{Binding Label}" TextWrapping="Wrap"/>
+              <Border IsVisible="{Binding IsInactive}" Background="{DynamicResource BrushRuleTagDisabledBackground}"
+                      BorderBrush="{DynamicResource BrushRuleTagDisabledBorder}" BorderThickness="1" CornerRadius="999"
+                      Padding="8,3" HorizontalAlignment="Left">
+                <TextBlock Text="Inaktiv" FontSize="12" Foreground="{DynamicResource BrushRuleTagDisabledForeground}"/>
+              </Border>
               <TextBlock Classes="muted" Text="{Binding Conditions}" TextWrapping="Wrap"/>
               <StackPanel Orientation="Horizontal" Spacing="8" IsEnabled="{Binding !$parent[UserControl].DataContext.IsSaving}">
                 <Button Classes="secondary motion" Content="Bearbeiten" Command="{Binding $parent[UserControl].DataContext.EditRuleCommand}" CommandParameter="{Binding}"/>

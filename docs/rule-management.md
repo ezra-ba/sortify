@@ -53,3 +53,11 @@ Bei einer gespeicherten Regel öffnet „Bearbeiten“ das Formular mit der vorh
 Bereits geöffnete Datei-Popups behalten den angezeigten Vorschlag. Neue Auswertungen verwenden den aktuellen Regelbestand. Eine Regeländerung führt selbst keine Dateioperation aus.
 
 Verifikation des kombinierten Stands: Release-Build ohne Fehler und Warnungen; 380 Tests erfolgreich. Prüfungen umfassen einfache und Regex-Regeln, erhaltene versteckte Felder, Speicherfehler, Abbruch und Bestätigung der Löschung, Persistenz und veraltete Bearbeitungsstände. Die manuelle Prüfung dieser neuen Funktionen steht noch aus. Die geplante neue Listenansicht und Target-Tags bleiben separate Folgearbeiten.
+
+## Einstieg über Target-Tags (#70)
+
+Der Arbeitsstand für #70 zeigt die zugeordneten Regeln als klickbare Tags rechts in den Target-Karten. Ein Klick öffnet exakt die gewählte Regel zur Bearbeitung. „Keine Regel“ öffnet die Neuanlage mit vorbelegtem Target; gleiche aktive Erkennungsbedingungen und Prioritäten in verschiedenen Targets erhalten eine Warnkennzeichnung. Siehe [target-rule-tags.md](target-rule-tags.md) für Definition, Bedienung und Light-/Darkmode-Aufnahmen.
+
+## Regeln aktivieren und deaktivieren
+
+Der aktuelle #70-Arbeitsstand ergänzt beim Bearbeiten die erste Checkbox „Regel aktiv“. Ohne Haken sind die Parameterfelder gesperrt; die Statusänderung wird mit „Änderungen speichern“ übernommen. Neue Regeln sind automatisch aktiv. Die gespeicherte Liste kennzeichnet deaktivierte Regeln mit „Inaktiv“, Target-Tags erscheinen grau. Details, Speicherverhalten und Theme-Aufnahmen stehen in [target-rule-tags.md](target-rule-tags.md#aktivstatus-bedienen).

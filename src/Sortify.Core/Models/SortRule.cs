@@ -11,5 +11,7 @@ public sealed record SortRule(
     int Priority,
     bool IsEnabled)
 {
+    public IReadOnlyList<FileNameCondition>? NameConditions { get; init; }
+
     public Guid? TargetFolderId { get; init; }
 }

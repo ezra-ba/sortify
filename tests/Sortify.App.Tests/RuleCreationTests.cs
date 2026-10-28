@@ -56,7 +56,7 @@ public sealed class RuleCreationTests
         await main.InitializeSettingsAsync();
         var editor = new RuleEditorViewModel(main)
         {
-            RuleName = "Invoice", FileNamePattern = "^invoice", Extensions = "PDF; .pdf",
+            IsAdvancedMode = true, RuleName = "Invoice", FileNamePattern = "^invoice", Extensions = "PDF; .pdf",
             RenamePattern = "sorted_{name}{ext}", SelectedTarget = main.TargetFolders[0]
         };
         await editor.CreateRuleCommand.ExecuteAsync(null);

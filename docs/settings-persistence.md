@@ -65,3 +65,7 @@ Infrastructure-Tests prüfen Validierung, fehlende und beschädigte Dateien, For
 App-Tests prüfen fehlgeschlagenes Hinzufügen, Entfernen, Standardwechsel und Aufheben, Spitznamen und Umsortieren. Ein kontrolliert wartender Speicher prüft die aktive UI-Sperre und ihre Freigabe nach Erfolg, Speicherfehler und Ausnahme. Infrastructure-Tests prüfen zusätzlich Target-Validierung, Reihenfolge, Standardverweis, Version-1-Kompatibilität und überlappende Dienständerungen.
 
 Manuelle Neustarts für Ordnerauswahl sowie Target-Aktionen wurden durchgeführt. Die Auswertung neu geladener Target-ID-Regeln wird durch Integrationstests nachgewiesen. Ein Headless-UI-Test für #27 prüft Regelanlage über gebundene Eingaben, Validierung, Zielreparatur und einen Vorschlag nach erneutem Laden. Der Benutzer bestätigte am 27. Oktober 2026 auch den manuellen Regelablauf unter Linux mit Neustart, laufender Dateierkennung, passendem Vorschlag und bestätigter Verschiebung als erfolgreich. Die Tests der ViewModels ersetzen keine vollständige Oberflächenprüfung auf allen Zielplattformen.
+
+## Einfache Bedingungen – Formatversion 4
+
+Der Arbeitsstand für #41 speichert `SortRule.NameConditions` mit Bedingungsart und wörtlichem Suchtext. Versionen 1 bis 3 bleiben lesbar und werden beim Laden nicht umgeschrieben. Erst erfolgreiches Speichern schreibt Version 4. Das kompilierte Muster wird auf Übereinstimmung mit der Definition geprüft. Siehe [simple-rule-conditions.md](simple-rule-conditions.md).

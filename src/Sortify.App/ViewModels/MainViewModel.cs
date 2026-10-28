@@ -66,7 +66,7 @@ public partial class MainViewModel : ViewModelBase
 
     public string DefaultTargetFolderButtonText =>
     SelectedTargetFolder?.IsDefault == true
-        ? "Standard aufheben"
+        ? "Standard entfernen"
         : "Als Standard festlegen";
     private readonly ISettingsService? settingsService;
     private readonly ILoginStartup? loginStartup;

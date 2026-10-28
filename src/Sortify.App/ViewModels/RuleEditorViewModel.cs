@@ -10,6 +10,15 @@ namespace Sortify.App.ViewModels;
 public partial class RuleEditorViewModel : ViewModelBase
 {
     private readonly MainViewModel main;
+    private SortRule? editingRule;
+    private SortRule? pendingDeleteRule;
+    public bool IsEditing => editingRule is not null;
+    public string EditorTitle => IsEditing ? "Sortierregel bearbeiten" : "Neue Sortierregel";
+    public string SaveButtonText => IsEditing ? "Änderungen speichern" : "Regel anlegen";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDeletePending))]
+    public partial string? PendingDeleteName { get; set; }
+    public bool IsDeletePending => PendingDeleteName is not null;
 
     public RuleEditorViewModel(MainViewModel main)
     {
@@ -82,23 +91,112 @@ public partial class RuleEditorViewModel : ViewModelBase
             }
             pattern = compiled.Pattern!;
         }
-        var rule = new SortRule(Guid.NewGuid(), RuleName.Trim(), pattern,
-            extensions, null, "", string.IsNullOrWhiteSpace(RenamePattern) ? null : RenamePattern,
-            0, true) { TargetFolderId = SelectedTarget.Id, NameConditions = conditions };
+        var original = editingRule;
+        var rule = (original ?? new SortRule(Guid.NewGuid(), "", "", [], null, "", null, 0, true)) with
+        {
+            Name = RuleName.Trim(), FileNamePattern = pattern, AllowedExtensions = extensions,
+            RenamePattern = string.IsNullOrWhiteSpace(RenamePattern) ? null : RenamePattern,
+            TargetFolderId = SelectedTarget.Id, NameConditions = conditions
+        };
 
         IsSaving = true;
         try
         {
-            var result = await main.AddRuleAsync(rule);
+            var result = original is null ? await main.AddRuleAsync(rule) : await main.UpdateRuleAsync(original, rule);
             ShowResult(result);
             if (result.IsSuccess)
             {
                 RefreshRules();
-                RuleName = "";
-                FileNamePattern = "";
-                NameConditions.Clear();
-                AddCondition();
-                RenamePattern = "";
+                ResetEditor();
+            }
+        }
+        finally { IsSaving = false; }
+    }
+
+    [RelayCommand]
+    private void EditRule(RuleListItem item)
+    {
+        if (IsSaving) return;
+        var rule = main.CurrentSettings?.Rules.FirstOrDefault(rule => rule.Id == item.Id);
+        if (rule is null)
+        {
+            ShowResult(new(false, "Die Regel ist nicht mehr vorhanden. Bitte die Übersicht neu öffnen."));
+            return;
+        }
+        CancelDelete();
+        editingRule = rule;
+        RuleName = rule.Name;
+        FileNamePattern = rule.FileNamePattern;
+        Extensions = string.Join(", ", rule.AllowedExtensions);
+        RenamePattern = rule.RenamePattern ?? "";
+        SelectedTarget = TargetFolders.FirstOrDefault(target => target.Id == rule.TargetFolderId);
+        IsAdvancedMode = rule.NameConditions is null;
+        NameConditions.Clear();
+        if (rule.NameConditions is not null)
+            foreach (var condition in rule.NameConditions)
+                NameConditions.Add(new(row => NameConditions.Remove(row)) { Kind = condition.Kind, Text = condition.Text });
+        else AddCondition();
+        Message = "";
+        NotifyEditorMode();
+    }
+
+    [RelayCommand]
+    private void CancelEdit()
+    {
+        if (!IsSaving) ResetEditor();
+    }
+
+    private void ResetEditor()
+    {
+        editingRule = null;
+        RuleName = "";
+        FileNamePattern = "";
+        RenamePattern = "";
+        IsAdvancedMode = false;
+        NameConditions.Clear();
+        AddCondition();
+        NotifyEditorMode();
+    }
+
+    private void NotifyEditorMode()
+    {
+        OnPropertyChanged(nameof(IsEditing));
+        OnPropertyChanged(nameof(EditorTitle));
+        OnPropertyChanged(nameof(SaveButtonText));
+    }
+
+    [RelayCommand]
+    private void RequestDelete(RuleListItem item)
+    {
+        if (IsSaving) return;
+        pendingDeleteRule = main.CurrentSettings?.Rules.FirstOrDefault(rule => rule.Id == item.Id);
+        PendingDeleteName = pendingDeleteRule?.Name;
+        if (pendingDeleteRule is null) ShowResult(new(false, "Die Regel ist nicht mehr vorhanden."));
+    }
+
+    [RelayCommand]
+    private void CancelDelete()
+    {
+        if (IsSaving) return;
+        pendingDeleteRule = null;
+        PendingDeleteName = null;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmDeleteAsync()
+    {
+        if (IsSaving || pendingDeleteRule is not { } original) return;
+        IsSaving = true;
+        try
+        {
+            var result = await main.RemoveRuleAsync(original);
+            ShowResult(result);
+            if (result.IsSuccess)
+            {
+                pendingDeleteRule = null;
+                PendingDeleteName = null;
+                if (editingRule?.Id == original.Id) ResetEditor();
+                RefreshRules();
             }
         }
         finally { IsSaving = false; }

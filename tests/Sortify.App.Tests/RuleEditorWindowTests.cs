@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Input;
 using Sortify.App.ViewModels;
 using Sortify.App.Views;
@@ -55,6 +56,13 @@ public sealed class RuleEditorWindowTests
                 Dispatcher.UIThread.RunJobs();
                 await command.ExecuteAsync(null);
                 Assert.Equal(2, editor.ExistingRules.Count);
+                Dispatcher.UIThread.RunJobs();
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+                var editButton = view.GetVisualDescendants().OfType<Button>().First(button => Equals(button.Content, "Bearbeiten"));
+                Assert.NotNull(editButton.Command);
+                Assert.IsType<RuleListItem>(editButton.CommandParameter);
+                var removeButton = view.GetVisualDescendants().OfType<Button>().First(button => Equals(button.Content, "Entfernen") && button.CommandParameter is RuleListItem);
+                Assert.NotNull(removeButton.Command);
                 Assert.Equal("#15803D", editor.MessageColor);
                 Assert.Equal(".PDF", Assert.Single(main.CurrentSettings!.Rules[1].AllowedExtensions));
                 Assert.True(main.HasRuleTargetWarnings);

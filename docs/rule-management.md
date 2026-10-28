@@ -1,6 +1,6 @@
 # Eigene Sortierregeln anlegen
 
-Stand: 27. Oktober 2026. Arbeitsstand für #27, abhängig von #46. Noch nicht in master integriert.
+Stand: 28. Oktober 2026. Die ursprüngliche Regelanlage aus #27 ist in master integriert. Die Erweiterungen #41 (einfache Bedingungen) und #65 (Bearbeiten/Entfernen) liegen auf aufeinander aufbauenden Feature-Branches und sind noch nicht in master integriert.
 
 ## Bedienung
 
@@ -34,10 +34,22 @@ Unter „Ziel einer vorhandenen Regel zuordnen“ lassen sich eine gespeicherte 
 
 `RuleEditorViewModel` übernimmt Formularzustand und Rückmeldungen. `RuleEditorView` enthält die gebundene Darstellung; SettingsWindow und MainWindow öffnen beziehungsweise navigieren zur Maske.
 
-Die vereinfachten Bedingungen „enthält“, „beginnt mit“ und „endet mit“ samt eigenem Speicherformat sind weiterhin Gegenstand von #41. Die Umsetzung von #41 ergänzt nun die Buttons und eine gemeinsame Übersetzung für die vorhandene Engine; der aktuelle Stand ist separat dokumentiert. Bearbeiten sämtlicher Regelfelder und Entfernen von Regeln bleiben optionale Folgearbeiten. Die Target-Reparatur aus #46 ist ausdrücklich verfügbar.
+Die vereinfachten Bedingungen „enthält“, „beginnt mit“ und „endet mit“ samt eigenem Speicherformat sind im Arbeitsstand von #41 implementiert. Die Umsetzung von #41 ergänzt nun die Buttons und eine gemeinsame Übersetzung für die vorhandene Engine; der aktuelle Stand ist separat dokumentiert. Der Arbeitsstand von #65 ergänzt Bearbeiten und ausdrücklich bestätigtes Entfernen. Priorität, Aktivstatus und relative Pfadbedingung werden beim Bearbeiten erhalten; die Maske bietet dafür derzeit keine eigenen Eingaben. Die Target-Reparatur aus #46 ist ausdrücklich verfügbar.
 
-Der #27-Branch baut auf dem #46-Branch auf. Vor einer Integration nach master müssen die Target-ID-Grundlagen integriert sein. Es wurden keine GitHub-Zuständigkeiten automatisch geändert und keine Teammitglieder benachrichtigt.
+Die Target-ID-Grundlagen und #27 sind bereits integriert. Der aktuelle #65-Branch baut auf #41 auf; zuerst #41, dann #65 integrieren. Es wurden keine GitHub-Zuständigkeiten automatisch geändert und keine Teammitglieder benachrichtigt.
 
 ## Verifikation
 
 Release-Build und Tests prüfen die Eingaben, Validierungsfehler ohne Schreibzugriff, erhaltene Entwürfe bei Speicherfehlern, das Ergänzen vorhandener Regeln, die gebundene Oberfläche und die Persistenz nach erneutem Laden. Ein Headless-UI-Test prüft außerdem die Reparatur einer Altregel und den anschließenden Popup-Vorschlag mit einem Test-Verschiebedienst. Am 27. Oktober 2026 hat der Benutzer den beschriebenen manuellen Ablauf unter Linux als erfolgreich bestätigt: Regelanlage, Erhalt nach vollständigem Neustart, regelbasierter Ziel- und Dateinamenvorschlag sowie bestätigtes Einsortieren. Windows und macOS wurden dafür noch nicht manuell geprüft. Der letzte Release-Build war ohne Fehler und Warnungen; alle 352 Tests bestanden.
+
+## Bearbeiten und Entfernen (#65)
+
+Bei einer gespeicherten Regel öffnet „Bearbeiten“ das Formular mit der vorhandenen Definition. Einfache Regeln stellen sämtliche Bedingungsbuttons und Originalsuchtexte wieder her. Bestehende Regex-Regeln öffnen im erweiterten Modus. „Änderungen speichern“ erhält ID und nicht bearbeitete Felder. „Bearbeiten abbrechen“ verändert den gespeicherten Stand nicht.
+
+„Entfernen“ zeigt zunächst den Regelnamen und eine ausdrückliche Bestätigung. Erst „Entfernen bestätigen“ speichert die Löschung; „Abbrechen“ verändert nichts. Dateien und Target-Ordner werden dabei nicht gelöscht. Ein Speicherfehler erhält die Regel, den Entwurf beziehungsweise die offene Löschbestätigung.
+
+`UpdateRuleAsync(original, replacement)` und `RemoveRuleAsync(original)` vergleichen innerhalb der Einstellungsdienstsperre den aktuellen mit dem ursprünglich geöffneten Regelstand. Eine inzwischen geänderte oder entfernte Regel wird nicht überschrieben. Die Meldung fordert zum erneuten Laden auf; der Entwurf bleibt zunächst erhalten.
+
+Bereits geöffnete Datei-Popups behalten den angezeigten Vorschlag. Neue Auswertungen verwenden den aktuellen Regelbestand. Eine Regeländerung führt selbst keine Dateioperation aus.
+
+Verifikation des kombinierten Stands: Release-Build ohne Fehler und Warnungen; 380 Tests erfolgreich. Prüfungen umfassen einfache und Regex-Regeln, erhaltene versteckte Felder, Speicherfehler, Abbruch und Bestätigung der Löschung, Persistenz und veraltete Bearbeitungsstände. Die manuelle Prüfung dieser neuen Funktionen steht noch aus. Die geplante neue Listenansicht und Target-Tags bleiben separate Folgearbeiten.

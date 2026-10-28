@@ -65,6 +65,12 @@ public partial class SettingsWindow : Window
         SelectSection(RulesButton, new RoutedEventArgs());
     }
 
+    public bool OpenRuleForEditing(Guid ruleId)
+    {
+        SelectSection(RulesButton, new RoutedEventArgs());
+        return RulesEditor.DataContext is RuleEditorViewModel editor && editor.OpenRuleForEditing(ruleId);
+    }
+
     private void SelectSection(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string section }) return;
@@ -84,6 +90,7 @@ public partial class SettingsWindow : Window
         SectionTitle.Text = section;
         var appearanceSelected = section == "Darstellung";
         AppearanceCard.IsVisible = appearanceSelected;
+        PlaceholderPanel.IsVisible = !appearanceSelected && !rulesSelected;
     }
 
     private async void DarkModeChanged(object? sender, RoutedEventArgs e)

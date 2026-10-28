@@ -153,6 +153,7 @@ public partial class MainViewModel : ViewModelBase
 
     private void RefreshRuleTargetWarnings()
     {
+        RefreshTargetRuleTags();
         if (settingsService?.Current is not { } settings)
         {
             RuleTargetWarnings = "";
@@ -785,6 +786,18 @@ public partial class TargetFolderViewModel : ObservableObject
         Nickname = nickname;
         Path = path;
         IsDefault = isDefault;
+        RuleTags.Add(TargetRuleTagViewModel.Missing(id));
+    }
+
+    public ObservableCollection<TargetRuleTagViewModel> RuleTags { get; } = [];
+    public bool HasDuplicateRules => RuleTags.Any(tag => tag.IsDuplicate);
+
+    public void SetRuleTags(IReadOnlyList<TargetRuleTagViewModel> tags)
+    {
+        if (RuleTags.SequenceEqual(tags)) return;
+        RuleTags.Clear();
+        foreach (var tag in tags) RuleTags.Add(tag);
+        OnPropertyChanged(nameof(HasDuplicateRules));
     }
 
     public Guid Id { get; }

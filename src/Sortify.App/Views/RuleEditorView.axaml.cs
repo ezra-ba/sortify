@@ -46,7 +46,8 @@ public partial class RuleEditorView : UserControl
             if (!ReferenceEquals(DataContext, editor) || !editor.IsEditing || TopLevel.GetTopLevel(this) is null)
                 return;
 
-            RuleNameInput.Focus();
+            if (editor.CanEditRuleFields) RuleNameInput.Focus();
+            else RuleActiveCheckBox.Focus();
             var scroll = this.GetVisualAncestors().OfType<ScrollViewer>().FirstOrDefault();
             if (scroll?.Content is Visual content &&
                 RuleEditorForm.TranslatePoint(default, content) is { } position)

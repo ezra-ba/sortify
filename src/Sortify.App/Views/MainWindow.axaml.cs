@@ -67,6 +67,21 @@ public partial class MainWindow : Window
         settings.Show(this);
     }
 
+    private void OpenRuleTag(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: TargetRuleTagViewModel tag } ||
+            DataContext is not MainViewModel { IsSavingSettings: false } main)
+            return;
+        var target = main.TargetFolders.FirstOrDefault(folder => folder.Id == tag.TargetId);
+        if (target is null) return;
+        main.SelectTargetFolder(target);
+        var settings = new SettingsWindow { DataContext = main };
+        settings.Show(this);
+        if (tag.RuleId is { } ruleId) settings.OpenRuleForEditing(ruleId);
+        else settings.OpenRulesForTarget(target);
+        e.Handled = true;
+    }
+
     private void OpenSettings(object? sender, RoutedEventArgs e)
     {
         new SettingsWindow { DataContext = DataContext }.Show(this);
@@ -130,6 +145,13 @@ public partial class MainWindow : Window
         await viewModel.AddTargetFolderAsync(path);
     }
 
+    private static bool IsRuleTagSource(object? source)
+    {
+        for (var visual = source as Visual; visual is not null; visual = visual.GetVisualParent())
+            if (visual is Button button && button.Classes.Contains("rule-tag")) return true;
+        return false;
+    }
+
     private void TargetFolderPointerPressed(object? sender, PointerPressedEventArgs e)
     {
 
@@ -137,6 +159,8 @@ public partial class MainWindow : Window
         {
             return;
         }
+
+        if (IsRuleTagSource(e.Source)) return;
 
         if (e.Source is Button button && button.Classes.Contains("nickname-action"))
             return;
@@ -171,6 +195,8 @@ public partial class MainWindow : Window
         {
             return;
         }
+
+        if (IsRuleTagSource(e.Source)) return;
 
         if (e.Source is Button button && button.Classes.Contains("nickname-action"))
             return;
@@ -235,6 +261,8 @@ public partial class MainWindow : Window
         object? sender,
         PointerReleasedEventArgs e)
     {
+
+        if (IsRuleTagSource(e.Source)) return;
 
         if (e.Source is Button button &&
             button.Classes.Contains("nickname-action"))

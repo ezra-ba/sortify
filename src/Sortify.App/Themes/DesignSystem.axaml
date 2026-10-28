@@ -5,6 +5,18 @@
     <!-- Sortify design tokens: solid surfaces, restrained contrast, no glass effects. -->
     <ResourceDictionary.ThemeDictionaries>
       <ResourceDictionary x:Key="Light">
+        <SolidColorBrush x:Key="BrushRuleTagNormalBackground" Color="#F0ECFF" />
+        <SolidColorBrush x:Key="BrushRuleTagNormalForeground" Color="#5B3CB0" />
+        <SolidColorBrush x:Key="BrushRuleTagNormalBorder" Color="#D7CBFA" />
+        <SolidColorBrush x:Key="BrushRuleTagMissingBackground" Color="#FEF3F2" />
+        <SolidColorBrush x:Key="BrushRuleTagMissingForeground" Color="#B42318" />
+        <SolidColorBrush x:Key="BrushRuleTagMissingBorder" Color="#FECDCA" />
+        <SolidColorBrush x:Key="BrushRuleTagWarningBackground" Color="#FFFAEB" />
+        <SolidColorBrush x:Key="BrushRuleTagWarningForeground" Color="#854A0E" />
+        <SolidColorBrush x:Key="BrushRuleTagWarningBorder" Color="#FEDF89" />
+        <SolidColorBrush x:Key="BrushRuleTagDisabledBackground" Color="#F2F4F7" />
+        <SolidColorBrush x:Key="BrushRuleTagDisabledForeground" Color="#475467" />
+        <SolidColorBrush x:Key="BrushRuleTagDisabledBorder" Color="#D0D5DD" />
         <Color x:Key="ThemeAccentColor">#7657D9</Color>
         <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush" Color="#7657D9" />
         <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush3" Color="#6545C5" />
@@ -54,6 +66,18 @@
         <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="#DCD0FF" />
       </ResourceDictionary>
       <ResourceDictionary x:Key="Dark">
+        <SolidColorBrush x:Key="BrushRuleTagNormalBackground" Color="#382C54" />
+        <SolidColorBrush x:Key="BrushRuleTagNormalForeground" Color="#DDCCFF" />
+        <SolidColorBrush x:Key="BrushRuleTagNormalBorder" Color="#6E53A3" />
+        <SolidColorBrush x:Key="BrushRuleTagMissingBackground" Color="#422628" />
+        <SolidColorBrush x:Key="BrushRuleTagMissingForeground" Color="#FDA29B" />
+        <SolidColorBrush x:Key="BrushRuleTagMissingBorder" Color="#85444B" />
+        <SolidColorBrush x:Key="BrushRuleTagWarningBackground" Color="#463719" />
+        <SolidColorBrush x:Key="BrushRuleTagWarningForeground" Color="#FEDF89" />
+        <SolidColorBrush x:Key="BrushRuleTagWarningBorder" Color="#8B6A26" />
+        <SolidColorBrush x:Key="BrushRuleTagDisabledBackground" Color="#303038" />
+        <SolidColorBrush x:Key="BrushRuleTagDisabledForeground" Color="#B8B8C3" />
+        <SolidColorBrush x:Key="BrushRuleTagDisabledBorder" Color="#4C4C58" />
         <Color x:Key="ThemeAccentColor">#9B82F3</Color>
         <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush" Color="#9B82F3" />
         <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush3" Color="#B09DF8" />

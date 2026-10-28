@@ -88,6 +88,46 @@
 		<Style Selector="Border.target-folder-card.dragging">
 			<Setter Property="Opacity" Value="0.45"/>
 		</Style>
+
+        <Style Selector="Border.target-folder-card">
+            <Setter Property="Background" Value="{DynamicResource BrushControlSurface}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
+        </Style>
+        <Style Selector="Border.target-folder-card.selected">
+            <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/>
+        </Style>
+        <Style Selector="Button.target-folder, Button.target-folder.selected">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Button.rule-tag, Button.rule-tag:pointerover, Button.rule-tag:pressed">
+            <Setter Property="Background" Value="{DynamicResource BrushRuleTagNormalBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushRuleTagNormalForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushRuleTagNormalBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="999"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MaxWidth" Value="220"/>
+        </Style>
+        <Style Selector="Button.rule-tag.missing, Button.rule-tag.missing:pointerover, Button.rule-tag.missing:pressed">
+            <Setter Property="Background" Value="{DynamicResource BrushRuleTagMissingBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushRuleTagMissingForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushRuleTagMissingBorder}"/>
+        </Style>
+        <Style Selector="Button.rule-tag.duplicate, Button.rule-tag.duplicate:pointerover, Button.rule-tag.duplicate:pressed">
+            <Setter Property="Background" Value="{DynamicResource BrushRuleTagWarningBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushRuleTagWarningForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushRuleTagWarningBorder}"/>
+        </Style>
+        <Style Selector="Button.rule-tag.inactive, Button.rule-tag.inactive:pointerover, Button.rule-tag.inactive:pressed">
+            <Setter Property="Background" Value="{DynamicResource BrushRuleTagDisabledBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushRuleTagDisabledForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushRuleTagDisabledBorder}"/>
+        </Style>
+        <Style Selector="Button.rule-tag:pointerover"><Setter Property="Opacity" Value="0.85"/></Style>
+        <Style Selector="Button.rule-tag:pressed"><Setter Property="Opacity" Value="0.7"/></Style>
 	</Window.Styles>
 	<Border Background="{DynamicResource BrushCanvas}" BorderThickness="0,1,0,0">
 	<Grid RowDefinitions="40,*">
@@ -131,48 +171,61 @@
 							</StackPanel>
 							<TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="12" Text="{Binding TargetFolders.Count, StringFormat='{}{0} Ziele'}"/>
 						</Grid>
-						<ItemsControl ItemsSource="{Binding TargetFolders}">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate>
-									<Border Classes="target-folder-card" Classes.editing="{Binding IsEditingNickname}" Classes.dragging="{Binding IsDragging}" Padding="0" Margin="0,0,0,8" BorderThickness="0" CornerRadius="6">
-										<Border.Transitions>
-											<Transitions>
-								<DoubleTransition Property="Opacity" Duration="0:0:0.06" />
-												<TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.16" />
-											</Transitions>
-										</Border.Transitions>
-										<Grid>
-						<Button Classes="target-folder motion" Classes.selected="{Binding IsSelected}" IsVisible="{Binding !IsEditingNickname}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="16" BorderThickness="1" CornerRadius="6" Command="{Binding $parent[Window].DataContext.SelectTargetFolderCommand}" CommandParameter="{Binding}">
-											<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-														<Border Width="34" Height="34" CornerRadius="17"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" FontWeight="SemiBold"/></Border>
-												<StackPanel Grid.Column="1" Spacing="4">
-																								<TextBlock FontWeight="SemiBold" Text="{Binding Nickname}"/>
-													<TextBlock Classes="muted" Text="{Binding Path}"/>
-												</StackPanel>
-														<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="STANDARD" IsVisible="{Binding IsDefault}" FontSize="10" FontWeight="SemiBold"/>
-											</Grid>
-										</Button>
-						<Border IsVisible="{Binding IsEditingNickname}" Background="{DynamicResource BrushControlSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="6" Padding="16">
-						<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-							<Border Width="34" Height="34" CornerRadius="17">
-								<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" FontWeight="SemiBold"/>
-							</Border>
-							<StackPanel Grid.Column="1" Spacing="4">
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<TextBox Width="150" Text="{Binding DraftNickname, Mode=TwoWay}"/>
-									<Button Content="OK" Command="{Binding $parent[Window].DataContext.SaveTargetNicknameCommand}" CommandParameter="{Binding}"/>
-									<Button Content="Abbrechen" Command="{Binding CancelRenameCommand}"/>
-								</StackPanel>
-								<TextBlock Classes="muted" Text="{Binding Path}"/>
-							</StackPanel>
-							<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="STANDARD" IsVisible="{Binding IsDefault}" FontSize="10" FontWeight="SemiBold"/>
-						</Grid>
-						</Border>
-										</Grid>
-									</Border>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
+                        <ItemsControl ItemsSource="{Binding TargetFolders}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:TargetFolderViewModel">
+                                    <Border Classes="target-folder-card" Classes.selected="{Binding IsSelected}"
+                                            Classes.editing="{Binding IsEditingNickname}" Classes.dragging="{Binding IsDragging}"
+                                            Margin="0,0,0,8" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                                        <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.06"/></Transitions></Border.Transitions>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Button Grid.Column="0" Classes="target-folder motion" Classes.selected="{Binding IsSelected}"
+                                                    IsVisible="{Binding !IsEditingNickname}" HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch" Padding="16" BorderThickness="0" CornerRadius="6"
+                                                    MinHeight="72" Command="{Binding $parent[Window].DataContext.SelectTargetFolderCommand}" CommandParameter="{Binding}">
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                                    <Border Width="34" Height="34" CornerRadius="17"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="•" FontWeight="SemiBold"/></Border>
+                                                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                                        <TextBlock FontWeight="SemiBold" Text="{Binding Nickname}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Nickname}"/>
+                                                        <TextBlock Classes="muted" Text="{Binding Path}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Path}"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
+                                            <Border Grid.Column="0" IsVisible="{Binding IsEditingNickname}" Padding="16">
+                                                <StackPanel Spacing="4">
+                                                    <WrapPanel>
+                                                        <TextBox Width="150" Text="{Binding DraftNickname, Mode=TwoWay}"/>
+                                                        <Button Classes="nickname-action" Content="OK" Command="{Binding $parent[Window].DataContext.SaveTargetNicknameCommand}" CommandParameter="{Binding}"/>
+                                                        <Button Classes="nickname-action" Content="Abbrechen" Command="{Binding CancelRenameCommand}"/>
+                                                    </WrapPanel>
+                                                    <TextBlock Classes="muted" Text="{Binding Path}" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" MaxWidth="240" Margin="8,12,14,12" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <TextBlock HorizontalAlignment="Right" Text="STANDARD" IsVisible="{Binding IsDefault}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource BrushAccent}"/>
+                                                <ItemsControl ItemsSource="{Binding RuleTags}" HorizontalAlignment="Right">
+                                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel HorizontalAlignment="Right"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:TargetRuleTagViewModel">
+                                                            <Button Classes="rule-tag" Classes.missing="{Binding IsMissing}" Classes.duplicate="{Binding IsDuplicate}"
+                                                                    Classes.inactive="{Binding IsDisabled}" Margin="4,2,0,2" Click="OpenRuleTag"
+                                                                    ToolTip.Tip="{Binding ToolTip}" AutomationProperties.Name="{Binding AccessibleName}">
+                                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5">
+                                                                    <TextBlock Text="!" Foreground="{Binding $parent[Button].Foreground}" FontWeight="Bold" IsVisible="{Binding IsDuplicate}" VerticalAlignment="Center"/>
+                                                                    <TextBlock Grid.Column="1" Foreground="{Binding $parent[Button].Foreground}" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                                </Grid>
+                                                            </Button>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <TextBlock Text="Gleiche Bedingungen in mehreren Zielen" IsVisible="{Binding HasDuplicateRules}"
+                                                           Foreground="{DynamicResource BrushRuleTagWarningForeground}" FontSize="11" TextWrapping="Wrap" MaxWidth="230" HorizontalAlignment="Right"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 					</StackPanel>
 				</Border>
 				<Border Classes="surface-card" Grid.Column="1" Padding="22" BorderThickness="1" CornerRadius="12">

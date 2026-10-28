@@ -69,6 +69,7 @@ public partial class MainViewModel : ViewModelBase
         ? "Standard aufheben"
         : "Als Standard festlegen";
     private readonly ISettingsService? settingsService;
+    private readonly ILoginStartup? loginStartup;
 
     public AppSettings? CurrentSettings => settingsService?.Current;
 
@@ -99,10 +100,44 @@ public partial class MainViewModel : ViewModelBase
         // Für die Vorschau im Avalonia-Designer.
     }
 
-    public MainViewModel(ISettingsService settingsService)
+    public MainViewModel(ISettingsService settingsService, ILoginStartup? loginStartup = null)
     {
         ArgumentNullException.ThrowIfNull(settingsService);
         this.settingsService = settingsService;
+        this.loginStartup = loginStartup;
+    }
+
+    public async Task<SettingsSaveResult> SaveGeneralSettingsAsync(
+        bool autoStart, bool startMinimized, bool closeToTray)
+    {
+        if (settingsService is null)
+            return new SettingsSaveResult(false, "Die Einstellungen sind nicht verfügbar.");
+
+        if (loginStartup is { IsSupported: true })
+        {
+            try
+            {
+                loginStartup.SetEnabled(autoStart);
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException
+                or System.Security.SecurityException or ArgumentException
+                or PlatformNotSupportedException)
+            {
+                return new SettingsSaveResult(false, "Autostart konnte nicht geändert werden: " + error.Message);
+            }
+        }
+
+        var result = await settingsService.UpdateAsync(settings => settings with
+        {
+            AutoStart = autoStart,
+            StartMinimized = startMinimized,
+            CloseToTray = closeToTray
+        });
+
+        SettingsStatus = result.IsSuccess
+            ? "Allgemeine Einstellungen gespeichert."
+            : result.ErrorMessage ?? "Die allgemeinen Einstellungen konnten nicht gespeichert werden.";
+        return result;
     }
 
     [ObservableProperty]

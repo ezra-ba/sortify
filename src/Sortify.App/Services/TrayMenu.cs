@@ -20,7 +20,7 @@ public sealed class TrayMenu : IDisposable
         open.Click += (_, _) => session.ShowMainWindow();
         pause.Click += (_, _) => session.TogglePause();
         closeToTray.Click += async (_, _) => await session.ToggleCloseToTrayAsync();
-        login.Click += (_, _) => session.ToggleLoginStartup();
+        login.Click += async (_, _) => await session.ToggleLoginStartupAsync();
         var exit = new NativeMenuItem("Beenden");
         exit.Click += (_, _) => session.Exit();
         icon.Menu = new NativeMenu

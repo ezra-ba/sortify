@@ -64,7 +64,8 @@ public sealed class DesktopSession : IDisposable
             showRequested = true;
         }
         StateChanged?.Invoke();
-        if (!background || showRequested || !TrayAvailable || !monitor.IsMonitoring)
+        var startMinimized = settings?.Current?.StartMinimized == true;
+        if (!background || !startMinimized || showRequested || !TrayAvailable || !monitor.IsMonitoring)
             ShowMainWindow();
     }
 
@@ -113,7 +114,7 @@ public sealed class DesktopSession : IDisposable
             ShowMainWindow();
     }
 
-    public void ToggleLoginStartup()
+    public async Task ToggleLoginStartupAsync()
     {
         if (!initialized || disposed || !LoginStartupSupported)
             return;
@@ -121,6 +122,8 @@ public sealed class DesktopSession : IDisposable
         {
             loginStartup.SetEnabled(!LoginStartupEnabled);
             LoginStartupEnabled = loginStartup.IsEnabled;
+            if (settings is not null)
+                await settings.UpdateAsync(current => current with { AutoStart = LoginStartupEnabled });
             viewModel.SettingsStatus = LoginStartupEnabled ? "Autostart aktiviert." : "Autostart deaktiviert.";
         }
         catch (Exception error) when (IsPreferenceError(error))
@@ -130,6 +133,8 @@ public sealed class DesktopSession : IDisposable
         }
         StateChanged?.Invoke();
     }
+
+    public void ToggleLoginStartup() => _ = ToggleLoginStartupAsync();
 
     private static bool IsPreferenceError(Exception error) => error is IOException
         or UnauthorizedAccessException or System.Security.SecurityException

@@ -3,6 +3,9 @@ using Avalonia;
 using Avalonia.Styling;
 using Sortify.App.ViewModels;
 using Sortify.Core.Services;
+using Sortify.Core.Rules;
+using Sortify.Infrastructure.FileSystem;
+using Sortify.Infrastructure.Monitoring;
 
 namespace Sortify.App.Services;
 
@@ -30,7 +33,8 @@ public sealed class DesktopSession : IDisposable
     public event Action? StateChanged;
 
     public DesktopSession(MainViewModel viewModel, Window window, ISettingsService? settings,
-        ILoginStartup loginStartup, Action shutdown, bool trayAvailable)
+        ILoginStartup loginStartup, Action shutdown, bool trayAvailable,
+        IFileMoveService? fileMoveService = null, IRuleEngine? ruleEngine = null, FolderMonitor? monitor = null)
     {
         this.viewModel = viewModel;
         this.window = window;
@@ -39,7 +43,10 @@ public sealed class DesktopSession : IDisposable
         this.shutdown = shutdown;
         lifetime = new DesktopLifetimeController(
             new LifetimeHost(window, () => Avalonia.Threading.Dispatcher.UIThread.Post(Exit)), trayAvailable);
-        monitor = new DownloadMonitorController(viewModel);
+        this.monitor = new DownloadMonitorController(viewModel,
+            fileMoveService ?? new FileMoveService(),
+            ruleEngine ?? new RuleEngine(new RuleValidator(), new RuleTargetValidator()),
+            monitor ?? new FolderMonitor());
         viewModel.MonitoringFolderConfigured += RestartMonitoring;
         window.Closing += OnClosing;
     }

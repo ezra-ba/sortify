@@ -11,6 +11,9 @@ using Sortify.Core.Rules;
 using Sortify.Core.Services;
 using Sortify.Infrastructure.Persistence;
 using Sortify.Infrastructure.Startup;
+using Sortify.Infrastructure.Logging;
+using Sortify.Infrastructure.FileSystem;
+using Sortify.Infrastructure.Monitoring;
 
 namespace Sortify.App;
 
@@ -61,13 +64,14 @@ public partial class App : Application
         cancellationToken.ThrowIfCancellationRequested();
         reportStatus("Oberfläche wird vorbereitet …");
         MainViewModel viewModel;
+        IActivityLog log = new JsonActivityLog(JsonActivityLog.GetDefaultDirectory());
         ISettingsService? settingsService = null;
 
         try
         {
-            var store = new JsonSettingsStore(
+            var store = new LoggedSettingsStore(new JsonSettingsStore(
                 SettingsStoragePath.GetDefaultFilePath(),
-                new SettingsValidator(new RuleValidator()));
+                new SettingsValidator(new RuleValidator())), log);
             settingsService = new SettingsService(store);
             viewModel = new MainViewModel(settingsService,
                 new WindowsLoginStartup(Environment.ProcessPath));
@@ -77,7 +81,11 @@ public partial class App : Application
             viewModel = new MainViewModel { SettingsStatus = exception.Message };
         }
 
-        var window = new MainWindow { DataContext = viewModel };
+        var moves = (IFileMoveService)new LoggedFileMoveService(new FileMoveService(), log);
+        var engine = (IRuleEngine)new LoggedRuleEngine(
+            new RuleEngine(new RuleValidator(), new RuleTargetValidator()), log);
+        var monitor = new FolderMonitor(log);
+        var window = new MainWindow(log) { DataContext = viewModel };
 
         // Keep unsupported tray environments accessible instead of hiding the only window.
         var trayAvailable = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
@@ -96,7 +104,8 @@ public partial class App : Application
             }
         }
         session = new DesktopSession(viewModel, window, settingsService,
-            new WindowsLoginStartup(Environment.ProcessPath), () => desktop.Shutdown(), trayAvailable);
+            new WindowsLoginStartup(Environment.ProcessPath), () => desktop.Shutdown(), trayAvailable,
+            moves, engine, monitor);
         if (icon is not null)
             trayMenu = new TrayMenu(icon, session);
 

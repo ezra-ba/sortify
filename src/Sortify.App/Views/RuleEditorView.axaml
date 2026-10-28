@@ -27,8 +27,24 @@
     </Style>
   </UserControl.Styles>
   <StackPanel Spacing="16">
-    <TextBlock Classes="muted" Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap"/>
-    <Border x:Name="RuleEditorForm" Classes="rule-card" Padding="20">
+    <TextBlock Classes="muted" IsVisible="{Binding IsOverview}" Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap"/>
+    <Button x:Name="BackToRulesButton" Classes="secondary motion" Content="Zur Übersicht"
+            Command="{Binding CancelEditCommand}" IsVisible="{Binding IsFormVisible}" IsEnabled="{Binding !IsSaving}" HorizontalAlignment="Left"/>
+    <TextBlock x:Name="RuleResultMessage" Text="{Binding Message}" Foreground="{Binding MessageColor}" IsVisible="{Binding HasMessage}" TextWrapping="Wrap"/>
+    <Border x:Name="EmptyRulesPanel" Classes="rule-card" Padding="32" IsVisible="{Binding ShowEmptyState}">
+      <StackPanel Spacing="16" HorizontalAlignment="Center" MaxWidth="480" Margin="0,12">
+        <Border Width="56" Height="56" CornerRadius="28" Background="{DynamicResource BrushSurfaceSubtle}" HorizontalAlignment="Center">
+          <Path Data="M 12,2 L 12,22 M 2,12 L 22,12" Width="24" Height="24" Stretch="Uniform"
+                Stroke="{DynamicResource BrushAccent}" StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        <TextBlock Classes="heading" Text="Noch keine Sortierregeln" FontSize="20" HorizontalAlignment="Center" TextAlignment="Center"/>
+        <TextBlock Classes="muted" Text="Erstelle deine erste Regel und lege fest, welche Dateien zu welchem Target-Ordner passen."
+                   TextWrapping="Wrap" TextAlignment="Center"/>
+        <Button x:Name="EmptyCreateRuleButton" Classes="primary motion" Content="Neue Regel erstellen"
+                Command="{Binding BeginCreateCommand}" IsEnabled="{Binding !IsSaving}" HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Border>
+    <Border x:Name="RuleEditorForm" Classes="rule-card" Padding="20" IsVisible="{Binding IsFormVisible}">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
         <CheckBox x:Name="RuleActiveCheckBox" Content="Regel aktiv" IsVisible="{Binding IsEditing}"
                   IsChecked="{Binding IsRuleActive, Mode=TwoWay}"/>
@@ -78,12 +94,17 @@
         <TextBlock Classes="muted" Text="Leer = Originalname. Beispiel: Rechnung_{name}{ext}. Bei eigener Vorgabe muss {ext} genau einmal am Ende stehen." TextWrapping="Wrap"/>
         </StackPanel>
         <Button Classes="primary motion" x:Name="CreateRuleButton" Content="{Binding SaveButtonText}" Command="{Binding CreateRuleCommand}" HorizontalAlignment="Left"/>
-        <Button Classes="secondary motion" Content="Bearbeiten abbrechen" Command="{Binding CancelEditCommand}" IsVisible="{Binding IsEditing}" HorizontalAlignment="Left"/>
+        <Button Classes="secondary motion" Content="Abbrechen" Command="{Binding CancelEditCommand}" HorizontalAlignment="Left"/>
       </StackPanel>
     </Border>
-    <TextBlock x:Name="RuleResultMessage" Text="{Binding Message}" Foreground="{Binding MessageColor}" TextWrapping="Wrap"/>
-    <TextBlock Classes="heading" Text="Gespeicherte Regeln" FontSize="18"/>
-    <ItemsControl ItemsSource="{Binding ExistingRules}">
+    <StackPanel x:Name="RuleOverviewPanel" Spacing="16" IsVisible="{Binding ShowRuleList}">
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+      <TextBlock Classes="heading" Text="Gespeicherte Regeln" FontSize="18" VerticalAlignment="Center"/>
+      <Border Grid.Column="1" Background="{DynamicResource BrushSurfaceSubtle}" CornerRadius="999" Padding="10,4">
+        <TextBlock Text="{Binding RuleCountLabel}" Foreground="{DynamicResource BrushAccent}" FontSize="12"/>
+      </Border>
+    </Grid>
+    <ItemsControl x:Name="RulesList" ItemsSource="{Binding ExistingRules}">
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="vm:RuleListItem">
           <Border Classes="rule-item" Padding="12" Margin="0,0,0,8">
@@ -127,5 +148,6 @@
         <Button Classes="secondary motion" Content="Zielzuordnung speichern" Command="{Binding AssignTargetCommand}" HorizontalAlignment="Left"/>
       </StackPanel>
     </Expander>
+    </StackPanel>
   </StackPanel>
 </UserControl>

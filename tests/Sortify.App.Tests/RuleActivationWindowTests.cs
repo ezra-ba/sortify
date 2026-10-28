@@ -80,14 +80,16 @@ public sealed class RuleActivationWindowTests
                 await reloaded.InitializeAsync();
                 Assert.False(reloaded.Current!.Rules[0].IsEnabled);
 
+                Dispatcher.UIThread.RunJobs();
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+                var inactiveLabel = view.GetVisualDescendants().OfType<TextBlock>().Single(text => text.Text == "Inaktiv" && text.DataContext is RuleListItem item && item.Id == original.Id);
+                Assert.True(Assert.IsType<Border>(inactiveLabel.Parent).IsVisible);
                 Assert.True(window.OpenRuleForEditing(original.Id));
                 Dispatcher.UIThread.RunJobs();
                 AvaloniaHeadlessPlatform.ForceRenderTimerTick();
                 Assert.False(checkbox.IsChecked);
                 Assert.True(checkbox.IsFocused);
                 Assert.False(fields.IsEffectivelyEnabled);
-                var inactiveLabel = view.GetVisualDescendants().OfType<TextBlock>().Single(text => text.Text == "Inaktiv" && text.DataContext is RuleListItem item && item.Id == original.Id);
-                Assert.True(Assert.IsType<Border>(inactiveLabel.Parent).IsVisible);
                 using (var frame = window.CaptureRenderedFrame())
                 {
                     Assert.NotNull(frame);

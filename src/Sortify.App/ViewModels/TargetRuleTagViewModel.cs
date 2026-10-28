@@ -14,6 +14,6 @@ public sealed record TargetRuleTagViewModel(
             + (IsDisabled ? "; deaktiviert" : "");
 
     public static TargetRuleTagViewModel Missing(Guid targetId) => new(
-        targetId, null, "Keine Regel", false, false,
+        targetId, null, "Neue Regel erstellen", false, false,
         "Diesem Target-Ordner ist keine Regel zugeordnet. Klicken, um eine Regel anzulegen.");
 }

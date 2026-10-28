@@ -107,14 +107,23 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="999"/>
             <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="MinHeight" Value="28"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="MaxWidth" Value="220"/>
         </Style>
         <Style Selector="Button.rule-tag.missing, Button.rule-tag.missing:pointerover, Button.rule-tag.missing:pressed">
-            <Setter Property="Background" Value="{DynamicResource BrushRuleTagMissingBackground}"/>
-            <Setter Property="Foreground" Value="{DynamicResource BrushRuleTagMissingForeground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BrushRuleTagMissingBorder}"/>
+            <Setter Property="Background" Value="{DynamicResource BrushRuleTagNormalBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushRuleTagNormalForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushRuleTagNormalBorder}"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="MinWidth" Value="36"/>
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="MaxWidth" Value="36"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="8"/>
         </Style>
         <Style Selector="Button.rule-tag.duplicate, Button.rule-tag.duplicate:pointerover, Button.rule-tag.duplicate:pressed">
             <Setter Property="Background" Value="{DynamicResource BrushRuleTagWarningBackground}"/>
@@ -210,9 +219,13 @@
                                                             <Button Classes="rule-tag" Classes.missing="{Binding IsMissing}" Classes.duplicate="{Binding IsDuplicate}"
                                                                     Classes.inactive="{Binding IsDisabled}" Margin="4,2,0,2" Click="OpenRuleTag"
                                                                     ToolTip.Tip="{Binding ToolTip}" AutomationProperties.Name="{Binding AccessibleName}">
-                                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5">
-                                                                    <TextBlock Text="!" Foreground="{Binding $parent[Button].Foreground}" FontWeight="Bold" IsVisible="{Binding IsDuplicate}" VerticalAlignment="Center"/>
-                                                                    <TextBlock Grid.Column="1" Foreground="{Binding $parent[Button].Foreground}" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                                <Grid>
+                                                                    <Path IsVisible="{Binding IsMissing}" Data="M 12,2 L 12,22 M 2,12 L 22,12" Width="14" Height="14" Stretch="Uniform"
+                                                                          Stroke="{Binding $parent[Button].Foreground}" StrokeThickness="1.75" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="0" IsVisible="{Binding !IsMissing}">
+                                                                        <TextBlock Text="!" Margin="0,0,5,0" Foreground="{Binding $parent[Button].Foreground}" FontWeight="Bold" IsVisible="{Binding IsDuplicate}" VerticalAlignment="Center"/>
+                                                                        <TextBlock Grid.Column="1" Foreground="{Binding $parent[Button].Foreground}" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                                    </Grid>
                                                                 </Grid>
                                                             </Button>
                                                         </DataTemplate>

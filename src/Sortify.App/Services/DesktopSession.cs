@@ -10,6 +10,7 @@ public sealed class DesktopSession : IDisposable
 {
     private readonly MainViewModel viewModel;
     private readonly Window window;
+    private readonly DesktopLifetimeController lifetime;
     private readonly ISettingsService? settings;
     private readonly ILoginStartup loginStartup;
     private readonly Action shutdown;
@@ -18,7 +19,8 @@ public sealed class DesktopSession : IDisposable
     private bool showRequested;
     private bool disposed;
 
-    public bool TrayAvailable { get; }
+    public bool TrayAvailable => lifetime.TrayAvailable;
+    public bool IsInBackground => lifetime.IsInBackground;
     public bool CloseToTray => settings?.Current?.CloseToTray ?? true;
     public bool IsPaused { get; private set; }
     public bool LoginStartupSupported => loginStartup.IsSupported;
@@ -35,7 +37,8 @@ public sealed class DesktopSession : IDisposable
         this.settings = settings;
         this.loginStartup = loginStartup;
         this.shutdown = shutdown;
-        TrayAvailable = trayAvailable;
+        lifetime = new DesktopLifetimeController(
+            new LifetimeHost(window, () => Avalonia.Threading.Dispatcher.UIThread.Post(Exit)), trayAvailable);
         monitor = new DownloadMonitorController(viewModel);
         viewModel.MonitoringFolderConfigured += RestartMonitoring;
         window.Closing += OnClosing;
@@ -69,10 +72,9 @@ public sealed class DesktopSession : IDisposable
             viewModel.SettingsStatus = "Autostart konnte nicht gelesen werden: " + error.Message;
             showRequested = true;
         }
-        StateChanged?.Invoke();
         var startMinimized = settings?.Current?.StartMinimized == true;
-        if (!background || !startMinimized || showRequested || !TrayAvailable || !monitor.IsMonitoring)
-            ShowMainWindow();
+        lifetime.Start(background && startMinimized && !showRequested && monitor.IsMonitoring);
+        StateChanged?.Invoke();
     }
 
     public void ShowStartupFailure()
@@ -93,9 +95,16 @@ public sealed class DesktopSession : IDisposable
         showRequested = true;
         if (!initialized)
             return;
-        window.Show();
-        window.WindowState = WindowState.Normal;
-        window.Activate();
+        lifetime.Show();
+    }
+
+    // The native tray adapter reports availability on the UI thread.
+    // Losing a usable tray must restore a hidden window rather than orphan the process.
+    public void SetTrayAvailability(bool available)
+    {
+        if (disposed) return;
+        lifetime.SetTrayAvailable(available);
+        StateChanged?.Invoke();
     }
 
     public void TogglePause()
@@ -159,18 +168,9 @@ public sealed class DesktopSession : IDisposable
 
     private void OnClosing(object? sender, WindowClosingEventArgs args)
     {
-        if (disposed || args.CloseReason is WindowCloseReason.OSShutdown or WindowCloseReason.ApplicationShutdown)
-            return;
-        if (TrayAvailable && CloseToTray)
-        {
-            args.Cancel = true;
-            window.Hide();
-        }
-        else
-        {
-            // Finish closing this window before requesting application shutdown.
-            Avalonia.Threading.Dispatcher.UIThread.Post(Exit);
-        }
+        if (disposed) return;
+        args.Cancel = lifetime.RequestClose(CloseToTray,
+            args.CloseReason is WindowCloseReason.OSShutdown or WindowCloseReason.ApplicationShutdown);
     }
 
     public void Exit()
@@ -186,8 +186,23 @@ public sealed class DesktopSession : IDisposable
         if (disposed)
             return;
         disposed = true;
+        lifetime.Stop();
         viewModel.MonitoringFolderConfigured -= RestartMonitoring;
         window.Closing -= OnClosing;
         monitor.Dispose();
     }
+
+    private sealed class LifetimeHost(Window window, Action requestShutdown) : IDesktopLifetimeHost
+    {
+        public void ShowWindow()
+        {
+            window.Show();
+            window.WindowState = WindowState.Normal;
+            window.Activate();
+        }
+
+        public void HideWindow() => window.Hide();
+        public void RequestShutdown() => requestShutdown();
+    }
+
 }

@@ -332,7 +332,7 @@ public partial class MainWindow : Window
 
         DragPreviewNickname.Text = folder.Nickname;
         DragPreviewPath.Text = folder.Path;
-        DragPreviewDefault.IsVisible = folder.IsDefault;
+        DragPreview.DataContext = folder;
         DragPreview.IsVisible = true;
         Canvas.SetLeft(DragPreview, canvasPosition.X - _dragOffset.X);
         Canvas.SetTop(DragPreview, canvasPosition.Y - _dragOffset.Y);
@@ -347,6 +347,7 @@ public partial class MainWindow : Window
         _draggedTargetFolder = null;
         _dragOffset = new Point();
         _hasDragged = false;
+        DragPreview.DataContext = null;
         DragPreview.IsVisible = false;
     }
 }

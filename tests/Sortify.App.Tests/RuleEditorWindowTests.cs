@@ -38,16 +38,18 @@ public sealed class RuleEditorWindowTests
                 window.Show();
                 var view = window.FindControl<RuleEditorView>("RulesEditor")!;
                 var editor = Assert.IsType<RuleEditorViewModel>(view.DataContext);
+                editor.IsAdvancedMode = false;
                 Assert.Same(main.TargetFolders[0], editor.SelectedTarget);
                 view.FindControl<TextBox>("RuleNameInput")!.Text = "Rechnungen";
-                view.FindControl<TextBox>("RulePatternInput")!.Text = "[";
+                editor.NameConditions[0].Text = "";
                 Dispatcher.UIThread.RunJobs();
                 var button = view.FindControl<Button>("CreateRuleButton")!;
                 var command = Assert.IsAssignableFrom<IAsyncRelayCommand>(button.Command);
                 await command.ExecuteAsync(null);
                 Assert.Single(main.CurrentSettings!.Rules);
-                Assert.Contains("ungültig", view.FindControl<TextBlock>("RuleResultMessage")!.Text);
-                view.FindControl<TextBox>("RulePatternInput")!.Text = "^rechnung";
+                Assert.Contains("Suchtext", view.FindControl<TextBlock>("RuleResultMessage")!.Text);
+                editor.NameConditions[0].StartsWithCommand.Execute(null);
+                editor.NameConditions[0].Text = "rechnung";
                 view.FindControl<TextBox>("RuleExtensionsInput")!.Text = "PDF, .pdf";
                 view.FindControl<TextBox>("RuleRenameInput")!.Text = "sortiert_{name}{ext}";
                 Dispatcher.UIThread.RunJobs();
@@ -74,6 +76,7 @@ public sealed class RuleEditorWindowTests
                 Assert.Equal(2, reloaded.CurrentSettings!.Rules.Count);
                 var saved = reloaded.CurrentSettings.Rules.Single(rule => rule.Name == "Rechnungen");
                 Assert.Equal(target.Id, saved.TargetFolderId);
+                Assert.Equal(new FileNameCondition(FileNameConditionKind.StartsWith, "rechnung"), Assert.Single(saved.NameConditions!));
                 var source = Path.Combine(root, "rechnung_2026.PDF");
                 var moves = new Moves(source);
                 var popup = new FileSuggestionViewModel(reloaded.TargetFolders, source, moves,

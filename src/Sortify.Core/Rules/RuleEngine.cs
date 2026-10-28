@@ -207,7 +207,9 @@ public sealed class RuleEngine : IRuleEngine
                     fileName,
                     new[] { new RuleReference(rule.Id, rule.Name) })
                 {
-                    TargetFolderId = rule.TargetFolderId
+                    TargetFolderId = rule.TargetFolderId,
+                    Reasons = new[] { new RuleMatchReason(rule.Id, rule.Name, file.Extension,
+                        rule.NameConditions?.ToArray()) }
                 });
             }
 
@@ -230,7 +232,8 @@ public sealed class RuleEngine : IRuleEngine
                     group.Key.FileName,
                     group.SelectMany(candidate => candidate.Rules).ToArray())
                 {
-                    TargetFolderId = group.Key.TargetFolderId
+                    TargetFolderId = group.Key.TargetFolderId,
+                    Reasons = group.SelectMany(candidate => candidate.Reasons).ToArray()
                 })
                 .ToArray();
 

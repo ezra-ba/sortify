@@ -9,7 +9,7 @@ public sealed class JsonSettingsStore : ISettingsStore
 {
     private readonly IRuleTargetValidator targetValidator =
     new RuleTargetValidator();
-    private const int CurrentVersion = 3;
+    private const int CurrentVersion = 4;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

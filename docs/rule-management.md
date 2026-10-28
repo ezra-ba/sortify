@@ -20,7 +20,7 @@ Beispiel:
 
 `rechnung_2026.pdf` ergibt den Vorschlag `sortiert_rechnung_2026.pdf` im ausgewählten Ziel. Die Regel wird bei „Regel anlegen“ gespeichert. Ein Popup-Vorschlag führt weiterhin erst nach „Datei einsortieren“ eine Dateioperation aus.
 
-Die Namensbedingung ist in dieser ersten Maske ein regulärer Ausdruck für den Dateinamen ohne letzte Endung. Groß-/Kleinschreibung wird ignoriert. `^rechnung` bedeutet „beginnt mit rechnung“, `.*` passt auf beliebige Namen. Dateiendungen können mit Leerzeichen, Komma oder Semikolon getrennt werden; ein führender Punkt wird bei Bedarf ergänzt. Es gelten weiterhin die unterstützten Endungen aus FileCategoryMap.
+Die Namensbedingung kann jetzt über einfache Buttons erfasst werden; Details stehen in [simple-rule-conditions.md](simple-rule-conditions.md). Im ausdrücklich erweiterten Modus bleibt ein regulärer Ausdruck für den Dateinamen ohne letzte Endung möglich. Groß-/Kleinschreibung wird ignoriert. `^rechnung` bedeutet „beginnt mit rechnung“, `.*` passt auf beliebige Namen. Dateiendungen können mit Leerzeichen, Komma oder Semikolon getrennt werden; ein führender Punkt wird bei Bedarf ergänzt. Es gelten weiterhin die unterstützten Endungen aus FileCategoryMap.
 
 Neue Regeln sind aktiv und haben Priorität 0. Bei mehreren gleichpriorisierten unterschiedlichen Kandidaten bleibt die Auswertung mehrdeutig; das Popup schlägt dann ein konfiguriertes Standardziel vor. Ohne Standardziel bleibt die Zielauswahl leer. Fehlerhafte Regeln werden nicht übernommen. Scheitert das Speichern, bleiben Entwurf und bisheriger gespeicherter Stand erhalten.
 
@@ -34,7 +34,7 @@ Unter „Ziel einer vorhandenen Regel zuordnen“ lassen sich eine gespeicherte 
 
 `RuleEditorViewModel` übernimmt Formularzustand und Rückmeldungen. `RuleEditorView` enthält die gebundene Darstellung; SettingsWindow und MainWindow öffnen beziehungsweise navigieren zur Maske.
 
-Die vereinfachten Bedingungen „enthält“, „beginnt mit“ und „endet mit“ samt eigenem Speicherformat sind weiterhin Gegenstand von #41. Diese Maske implementiert keine konkurrierende Übersetzung dafür. Bearbeiten sämtlicher Regelfelder und Entfernen von Regeln bleiben optionale Folgearbeiten. Die Target-Reparatur aus #46 ist ausdrücklich verfügbar.
+Die vereinfachten Bedingungen „enthält“, „beginnt mit“ und „endet mit“ samt eigenem Speicherformat sind weiterhin Gegenstand von #41. Die Umsetzung von #41 ergänzt nun die Buttons und eine gemeinsame Übersetzung für die vorhandene Engine; der aktuelle Stand ist separat dokumentiert. Bearbeiten sämtlicher Regelfelder und Entfernen von Regeln bleiben optionale Folgearbeiten. Die Target-Reparatur aus #46 ist ausdrücklich verfügbar.
 
 Der #27-Branch baut auf dem #46-Branch auf. Vor einer Integration nach master müssen die Target-ID-Grundlagen integriert sein. Es wurden keine GitHub-Zuständigkeiten automatisch geändert und keine Teammitglieder benachrichtigt.
 

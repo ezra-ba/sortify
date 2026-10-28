@@ -256,3 +256,7 @@ Erster fachlicher Meilenstein: `rechnung_2026.pdf` wird im Eingangsordner erkann
 - [Microsoft: Best Practices for Regular Expressions in .NET](https://learn.microsoft.com/dotnet/standard/base-types/best-practices) – Zeitlimits und Umgang mit problematischen Eingaben.
 - [Microsoft: About the Open XML SDK](https://learn.microsoft.com/en-us/office/open-xml/about-the-open-xml-sdk) – lokale Verarbeitung von Office-Dokumentstrukturen.
 - [Microsoft: Working with the shared string table](https://learn.microsoft.com/en-us/office/open-xml/spreadsheet/working-with-the-shared-string-table) – Beispiel für die zusätzliche Extraktionslogik bei XLSX.
+
+## Umsetzung einfacher Bedingungen (#41)
+
+Buttons für Enthält, Beginnt mit, Endet mit sowie Beliebiger Name, UND-Verknüpfung, wörtliche Suchtexte, Speicherung und strukturierte Trefferbegründungen sind im aktuellen Arbeitsstand implementiert. Die genaue Semantik und Grenzen stehen in [simple-rule-conditions.md](simple-rule-conditions.md). Die vorhandene Regex-Engine bleibt die einzige Auswertung.

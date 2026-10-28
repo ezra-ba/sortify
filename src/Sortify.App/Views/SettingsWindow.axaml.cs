@@ -59,10 +59,9 @@ public partial class SettingsWindow : Window
 
     public void OpenRulesForTarget(TargetFolderViewModel? target)
     {
-        EnsureRuleEditor();
-        if (RulesEditor.DataContext is RuleEditorViewModel editor)
-            editor.SelectedTarget = target;
         SelectSection(RulesButton, new RoutedEventArgs());
+        if (RulesEditor.DataContext is RuleEditorViewModel editor)
+            editor.BeginCreateForTarget(target);
     }
 
     public bool OpenRuleForEditing(Guid ruleId)
@@ -80,12 +79,13 @@ public partial class SettingsWindow : Window
 
         var rulesSelected = section == "Sortierregeln";
         RulesEditor.IsVisible = rulesSelected;
+        RuleActions.IsVisible = rulesSelected;
         var generalSelected = section == "Allgemein";
         GeneralSettingsPanel.IsVisible = generalSelected;
         if (rulesSelected)
         {
             EnsureRuleEditor();
-            if (RulesEditor.DataContext is RuleEditorViewModel editor) editor.RefreshRules();
+            if (RulesEditor.DataContext is RuleEditorViewModel editor) editor.ShowOverviewCommand.Execute(null);
         }
         SectionTitle.Text = section;
         var appearanceSelected = section == "Darstellung";

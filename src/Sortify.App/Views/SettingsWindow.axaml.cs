@@ -90,7 +90,6 @@ public partial class SettingsWindow : Window
         SectionTitle.Text = section;
         var appearanceSelected = section == "Darstellung";
         AppearanceCard.IsVisible = appearanceSelected;
-        PlaceholderPanel.IsVisible = !appearanceSelected && !rulesSelected;
     }
 
     private async void DarkModeChanged(object? sender, RoutedEventArgs e)

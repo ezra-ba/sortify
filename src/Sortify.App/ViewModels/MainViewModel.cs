@@ -169,14 +169,15 @@ public partial class MainViewModel : ViewModelBase
         RuleTargetWarnings = string.Join(Environment.NewLine, messages);
     }
 
-    public async Task InitializeSettingsAsync()
+    public async Task InitializeSettingsAsync(CancellationToken cancellationToken = default)
     {
         if (settingsService is null)
         {
             return;
         }
 
-        var result = await settingsService.InitializeAsync();
+        var result = await settingsService.InitializeAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
 
         WatchedFolder = settingsService.Current?.WatchedFolderPath
             ?? "Noch kein Ordner ausgewählt";

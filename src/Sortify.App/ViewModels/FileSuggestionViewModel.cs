@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Sortify.Core.Rules;
+using Sortify.App.Services;
 using Sortify.Core.Models;
 using Sortify.Core.Services;
 
@@ -204,8 +205,9 @@ public partial class FileSuggestionViewModel : ViewModelBase
             {
                 SelectedTargetFolder = target;
                 NewFileName = Path.GetFileNameWithoutExtension(candidate.FileName);
-                SuggestionExplanation = "Passende Regel: " +
-                    string.Join(", ", candidate.Rules.Select(rule => rule.Name));
+                SuggestionExplanation = candidate.Reasons.Count > 0
+                    ? string.Join(Environment.NewLine, candidate.Reasons.Select(RuleExplanationFormatter.Describe))
+                    : "Passende Regel: " + string.Join(", ", candidate.Rules.Select(rule => rule.Name));
                 return;
             }
         }

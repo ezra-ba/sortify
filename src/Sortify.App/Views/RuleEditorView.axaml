@@ -4,6 +4,10 @@
              x:Class="Sortify.App.Views.RuleEditorView"
              x:DataType="vm:RuleEditorViewModel">
   <UserControl.Styles>
+    <Style Selector="Button.secondary.selected">
+      <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/>
+    </Style>
     <Style Selector="TextBlock.field-label">
       <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
@@ -33,9 +37,34 @@
         <ComboBox x:Name="RuleTargetInput" ItemsSource="{Binding TargetFolders}" SelectedItem="{Binding SelectedTarget, Mode=TwoWay}" HorizontalAlignment="Stretch" PlaceholderText="Ziel auswählen">
           <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:TargetFolderViewModel"><TextBlock Text="{Binding Nickname}"/></DataTemplate></ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Classes="field-label" Text="Dateiname ohne Endung – regulärer Ausdruck" TextWrapping="Wrap"/>
-        <TextBox Classes="motion" x:Name="RulePatternInput" Text="{Binding FileNamePattern, Mode=TwoWay}" PlaceholderText="^rechnung"/>
-        <TextBlock Classes="muted" Text="Beispiele: ^rechnung = beginnt mit rechnung; .* = beliebiger Name. Groß-/Kleinschreibung wird ignoriert." TextWrapping="Wrap"/>
+        <TextBlock Classes="field-label" Text="Dateiname ohne Endung"/>
+        <CheckBox Content="Erweitert: regulären Ausdruck verwenden" IsChecked="{Binding IsAdvancedMode, Mode=TwoWay}"/>
+        <StackPanel IsVisible="{Binding !IsAdvancedMode}" Spacing="10">
+          <TextBlock Classes="muted" Text="Alle Bedingungen müssen passen. Suchtext wird wörtlich geprüft; Groß-/Kleinschreibung wird ignoriert." TextWrapping="Wrap"/>
+          <ItemsControl ItemsSource="{Binding NameConditions}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:FileNameConditionViewModel">
+                <StackPanel Spacing="8" Margin="0,0,0,10">
+                  <WrapPanel>
+                    <Button Classes="secondary motion" Classes.selected="{Binding IsContains}" Content="Enthält" Command="{Binding ContainsCommand}" Margin="0,0,6,6"/>
+                    <Button Classes="secondary motion" Classes.selected="{Binding IsStartsWith}" Content="Beginnt mit" Command="{Binding StartsWithCommand}" Margin="0,0,6,6"/>
+                    <Button Classes="secondary motion" Classes.selected="{Binding IsEndsWith}" Content="Endet mit" Command="{Binding EndsWithCommand}" Margin="0,0,6,6"/>
+                    <Button Classes="secondary motion" Classes.selected="{Binding IsAnyName}" Content="Beliebiger Name" Command="{Binding AnyNameCommand}" Margin="0,0,6,6"/>
+                  </WrapPanel>
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <TextBox Classes="motion" Text="{Binding Text, Mode=TwoWay}" IsVisible="{Binding NeedsText}" PlaceholderText="Suchtext eingeben"/>
+                    <Button Grid.Column="1" Classes="secondary motion" Content="Entfernen" Command="{Binding RemoveCommand}"/>
+                  </Grid>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Classes="secondary motion" Content="Weitere Bedingung" Command="{Binding AddConditionCommand}" HorizontalAlignment="Left"/>
+        </StackPanel>
+        <StackPanel IsVisible="{Binding IsAdvancedMode}" Spacing="8">
+          <TextBox Classes="motion" x:Name="RulePatternInput" Text="{Binding FileNamePattern, Mode=TwoWay}" PlaceholderText="^rechnung"/>
+          <TextBlock Classes="muted" Text="Bestehende Regex-Regeln bleiben erhalten. Beispiel: ^rechnung = beginnt mit rechnung; .* = beliebiger Name." TextWrapping="Wrap"/>
+        </StackPanel>
         <TextBlock Classes="field-label" Text="Erlaubte Dateiendungen"/>
         <TextBox Classes="motion" x:Name="RuleExtensionsInput" Text="{Binding Extensions, Mode=TwoWay}" PlaceholderText=".pdf, .docx"/>
         <TextBlock Classes="field-label" Text="Dateinamen-Vorgabe (optional)"/>

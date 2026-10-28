@@ -422,7 +422,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
             await File.ReadAllTextAsync(filePath));
 
         Assert.Equal(
-            3,
+            4,
             document.RootElement.GetProperty("Version").GetInt32());
 
         var service = new SettingsService(CreateStore());
@@ -475,7 +475,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
             await File.ReadAllTextAsync(filePath));
 
         Assert.Equal(
-            3,
+            4,
             document.RootElement.GetProperty("Version").GetInt32());
 
         var reloaded = await CreateStore().LoadAsync();
@@ -667,7 +667,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
             await File.ReadAllTextAsync(filePath));
 
         Assert.Equal(
-            3,
+            4,
             document.RootElement.GetProperty("Version").GetInt32());
 
         var reloaded = await CreateStore().LoadAsync();

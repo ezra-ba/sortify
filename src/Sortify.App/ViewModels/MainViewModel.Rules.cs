@@ -29,7 +29,8 @@ public partial class MainViewModel
             }
 
             // Do not retain a mutable collection owned by the editor.
-            var snapshot = rule with { AllowedExtensions = rule.AllowedExtensions.ToArray() };
+            var snapshot = rule with { AllowedExtensions = rule.AllowedExtensions.ToArray(),
+                NameConditions = rule.NameConditions?.ToArray() };
             var result = await settingsService.UpdateAsync(current =>
             {
                 // Validate against the latest state while the settings service holds its lock.

@@ -223,7 +223,8 @@ public partial class MainViewModel : ViewModelBase
         var rulesSnapshot = rules
             .Select(rule => rule with
             {
-                AllowedExtensions = rule.AllowedExtensions.ToArray()
+                AllowedExtensions = rule.AllowedExtensions.ToArray(),
+                NameConditions = rule.NameConditions?.ToArray()
             })
             .ToArray();
 

@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Sortify.Core.Models;
+using Sortify.Core.Rules;
+using Sortify.App.Services;
 
 namespace Sortify.App.ViewModels;
 
@@ -13,9 +15,14 @@ public partial class RuleEditorViewModel : ViewModelBase
     {
         this.main = main;
         RefreshRules();
+        AddCondition();
     }
 
     public ObservableCollection<TargetFolderViewModel> TargetFolders => main.TargetFolders;
+    public ObservableCollection<FileNameConditionViewModel> NameConditions { get; } = [];
+    [ObservableProperty] public partial bool IsAdvancedMode { get; set; }
+    [RelayCommand] private void AddCondition() => NameConditions.Add(new(condition => NameConditions.Remove(condition)));
+
     public ObservableCollection<RuleListItem> ExistingRules { get; } = [];
 
     [ObservableProperty] public partial string RuleName { get; set; } = "";
@@ -40,7 +47,9 @@ public partial class RuleEditorViewModel : ViewModelBase
                 var target = settings.TargetFolders.FirstOrDefault(folder => folder.Id == rule.TargetFolderId);
                 ExistingRules.Add(new(rule.Id, rule.Name,
                     target is null ? "Zielzuordnung fehlt" : target.Nickname,
-                    rule.FileNamePattern + " · " + string.Join(", ", rule.AllowedExtensions)));
+                    (rule.NameConditions is null ? "Regex: " + rule.FileNamePattern
+                        : string.Join(" und ", rule.NameConditions.Select(RuleExplanationFormatter.Describe)))
+                    + " · " + string.Join(", ", rule.AllowedExtensions)));
             }
         }
         SelectedExistingRule = ExistingRules.FirstOrDefault(rule => rule.Id == selectedId);
@@ -61,9 +70,21 @@ public partial class RuleEditorViewModel : ViewModelBase
             .Select(extension => extension.StartsWith('.') ? extension : "." + extension)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        var rule = new SortRule(Guid.NewGuid(), RuleName.Trim(), FileNamePattern,
+        var conditions = IsAdvancedMode ? null : NameConditions.Select(condition => condition.ToCondition()).ToArray();
+        var pattern = FileNamePattern;
+        if (conditions is not null)
+        {
+            var compiled = SimpleRuleCompiler.Compile(conditions);
+            if (!compiled.IsValid)
+            {
+                ShowResult(new(false, string.Join(Environment.NewLine, compiled.Errors.Select(error => error.Message))));
+                return;
+            }
+            pattern = compiled.Pattern!;
+        }
+        var rule = new SortRule(Guid.NewGuid(), RuleName.Trim(), pattern,
             extensions, null, "", string.IsNullOrWhiteSpace(RenamePattern) ? null : RenamePattern,
-            0, true) { TargetFolderId = SelectedTarget.Id };
+            0, true) { TargetFolderId = SelectedTarget.Id, NameConditions = conditions };
 
         IsSaving = true;
         try
@@ -75,6 +96,8 @@ public partial class RuleEditorViewModel : ViewModelBase
                 RefreshRules();
                 RuleName = "";
                 FileNamePattern = "";
+                NameConditions.Clear();
+                AddCondition();
                 RenamePattern = "";
             }
         }

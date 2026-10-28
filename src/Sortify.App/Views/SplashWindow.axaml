@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Sortify.App.ViewModels"
+        x:Class="Sortify.App.Views.SplashWindow"
+        x:DataType="vm:SplashViewModel"
+        Title="Sortify startet"
+        Icon="/Assets/Branding/sortify-icon.png"
+        Width="480" Height="320"
+        CanResize="False"
+        WindowDecorations="None"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+    <Design.DataContext>
+        <vm:SplashViewModel />
+    </Design.DataContext>
+    <Border Background="{DynamicResource BrushSurface}"
+            BorderBrush="{DynamicResource BrushBorder}"
+            BorderThickness="1" CornerRadius="8" Padding="24">
+        <Grid RowDefinitions="*,Auto,Auto,Auto" RowSpacing="12">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
+                <Image Source="/Assets/Branding/sortify-icon.png" Width="72" Height="72"
+                       Margin="0,0,0,6" Stretch="Uniform"
+                       AutomationProperties.Name="Sortify-Logo" />
+                <TextBlock Text="Sortify" FontSize="30" FontWeight="SemiBold"
+                           HorizontalAlignment="Center" Foreground="{DynamicResource BrushText}" />
+                <TextBlock Text="Sort Your Data" FontSize="14" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource BrushTextSecondary}" />
+            </StackPanel>
+            <TextBlock x:Name="StatusText" Grid.Row="1" Text="{Binding Status}" FontSize="13"
+                       MinHeight="20" TextWrapping="Wrap"
+                       Foreground="{DynamicResource BrushTextSecondary}" />
+            <ProgressBar Grid.Row="2" Height="4" MinHeight="4" IsIndeterminate="True"
+                         Foreground="{DynamicResource BrushAccent}"
+                         Background="{DynamicResource BrushSurfaceSubtle}"
+                         AutomationProperties.Name="Sortify wird geladen" />
+            <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                <TextBlock Text="{Binding Version}" FontSize="11"
+                           Foreground="{DynamicResource BrushTextSecondary}" />
+                <TextBlock Grid.Column="1" Text="SYD" FontSize="11"
+                           Foreground="{DynamicResource BrushTextSecondary}" />
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

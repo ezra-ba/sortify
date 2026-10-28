@@ -96,6 +96,10 @@ dotnet test
 
 ## Hintergrundbetrieb
 
+Beim normalen Programmstart zeigt Sortify einen kompakten Splashscreen mit Logo, tatsächlicher Build-Version und aktuellem Ladestatus. Er schließt automatisch, sobald die Initialisierung beendet ist; es gibt keine künstliche Mindestanzeigedauer. Bei einem Hintergrundstart mit `--background` oder beim Öffnen einer bereits laufenden Instanz erscheint kein Splashscreen. Startfehler werden im Hauptfenster angezeigt. Wird der Splashscreen während des Ladens geschlossen, wird der Start abgebrochen.
+
+Vorschau: [Helles Theme](assets/screenshots/splashscreen-light.png) · [Dunkles Theme](assets/screenshots/splashscreen-dark.png).
+
 Sortify zeigt unter Windows ein Symbol im Infobereich und unter macOS in der Menüleiste. Das Menü bietet Öffnen, Überwachung pausieren/fortsetzen und Beenden. Beim Schließen bleibt die Anwendung standardmäßig im Tray aktiv; diese Option kann im Tray-Menü deaktiviert werden und wird in der lokalen Einstellungsdatei gespeichert. Beenden stoppt die Überwachung und schließt offene Datei-Popups.
 
 Unter Windows kann im Tray-Menü optional der Start bei der Benutzeranmeldung aktiviert werden. Standardmäßig ist kein Autostart eingetragen. Der Eintrag liegt ausschließlich unter `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Sortify` und wird beim Deaktivieren entfernt. Hierfür Sortify zuerst in einen stabilen Ordner veröffentlichen; den Build-Ordner danach nicht verschieben:

@@ -4,12 +4,12 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using Sortify.App.Services;
 using Sortify.App.ViewModels;
 using Sortify.App.Views;
 using Sortify.Core.Rules;
-using Sortify.Infrastructure.Persistence;
-using Sortify.App.Services;
 using Sortify.Core.Services;
+using Sortify.Infrastructure.Persistence;
 using Sortify.Infrastructure.Startup;
 
 namespace Sortify.App;
@@ -18,6 +18,7 @@ public partial class App : Application
 {
     private DesktopSession? session;
     private TrayMenu? trayMenu;
+    private ApplicationStartup? startup;
     private bool activationRequested;
 
     public void ShowMainWindow()
@@ -36,70 +37,108 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            MainViewModel viewModel;
-            ISettingsService? settingsService = null;
-
-            try
-            {
-                var store = new JsonSettingsStore(
-                    SettingsStoragePath.GetDefaultFilePath(),
-                    new SettingsValidator(new RuleValidator()));
-
-                settingsService = new SettingsService(store);
-
-                viewModel = new MainViewModel(settingsService);
-            }
-            catch (InvalidOperationException exception)
-            {
-                viewModel = new MainViewModel
-                {
-                    SettingsStatus = exception.Message
-                };
-            }
-
-            var window = new MainWindow
-            {
-                DataContext = viewModel
-            };
-
-            // Keep unsupported tray environments accessible instead of hiding the only window.
-            var trayAvailable = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
-            TrayIcon? icon = null;
-            if (trayAvailable)
-            {
-                using var stream = AssetLoader.Open(new Uri("avares://Sortify.App/Assets/Branding/sortify-icon.png"));
-                icon = new TrayIcon { Icon = new WindowIcon(stream), IsVisible = true };
-                TrayIcon.SetIcons(this, new TrayIcons { icon });
-                trayAvailable = icon.NativeMenuExporter is not null;
-                if (!trayAvailable)
-                {
-                    TrayIcon.SetIcons(this, null);
-                    icon.Dispose();
-                    icon = null;
-                }
-            }
-            session = new DesktopSession(viewModel, window, settingsService,
-                new WindowsLoginStartup(Environment.ProcessPath), () => desktop.Shutdown(), trayAvailable);
-            if (icon is not null)
-            {
-                trayMenu = new TrayMenu(icon, session);
-            }
-            window.Opened += (_, _) =>
-            {
-                desktop.MainWindow ??= window;
-            };
+            startup = new ApplicationStartup();
+            var background = desktop.Args?.Contains("--background", StringComparer.OrdinalIgnoreCase) == true;
             desktop.Exit += (_, _) =>
             {
-                session.Dispose();
+                startup.Dispose();
+                session?.Dispose();
                 trayMenu?.Dispose();
                 TrayIcon.SetIcons(this, null);
             };
-            if (activationRequested)
-                session.ShowMainWindow();
-            Dispatcher.UIThread.Post(async () => await session.InitializeAsync(
-                desktop.Args?.Contains("--background", StringComparer.OrdinalIgnoreCase) == true));
+            Dispatcher.UIThread.Post(async () => await startup.RunAsync(background,
+                (reportStatus, token) => InitializeDesktopAsync(desktop, background, reportStatus, token),
+                _ => ShowStartupFailure(desktop),
+                () => desktop.Shutdown()));
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private async Task InitializeDesktopAsync(IClassicDesktopStyleApplicationLifetime desktop,
+        bool background, Action<string> reportStatus, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        reportStatus("Oberfläche wird vorbereitet …");
+        MainViewModel viewModel;
+        ISettingsService? settingsService = null;
+
+        try
+        {
+            var store = new JsonSettingsStore(
+                SettingsStoragePath.GetDefaultFilePath(),
+                new SettingsValidator(new RuleValidator()));
+            settingsService = new SettingsService(store);
+            viewModel = new MainViewModel(settingsService);
+        }
+        catch (InvalidOperationException exception)
+        {
+            viewModel = new MainViewModel { SettingsStatus = exception.Message };
+        }
+
+        var window = new MainWindow { DataContext = viewModel };
+
+        // Keep unsupported tray environments accessible instead of hiding the only window.
+        var trayAvailable = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+        TrayIcon? icon = null;
+        if (trayAvailable)
+        {
+            using var stream = AssetLoader.Open(new Uri("avares://Sortify.App/Assets/Branding/sortify-icon.png"));
+            icon = new TrayIcon { Icon = new WindowIcon(stream), IsVisible = true };
+            TrayIcon.SetIcons(this, new TrayIcons { icon });
+            trayAvailable = icon.NativeMenuExporter is not null;
+            if (!trayAvailable)
+            {
+                TrayIcon.SetIcons(this, null);
+                icon.Dispose();
+                icon = null;
+            }
+        }
+        session = new DesktopSession(viewModel, window, settingsService,
+            new WindowsLoginStartup(Environment.ProcessPath), () => desktop.Shutdown(), trayAvailable);
+        if (icon is not null)
+            trayMenu = new TrayMenu(icon, session);
+
+        window.Opened += (_, _) => desktop.MainWindow ??= window;
+        if (activationRequested)
+            session.ShowMainWindow();
+        await session.InitializeAsync(background, reportStatus, cancellationToken);
+    }
+
+    private void ShowStartupFailure(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        if (session is not null)
+        {
+            session.ShowStartupFailure();
+            return;
+        }
+
+        var close = new Button { Content = "Beenden" };
+        close.Click += (_, _) => desktop.Shutdown();
+        var errorWindow = new Window
+        {
+            Title = "Sortify – Startfehler",
+            Width = 480,
+            SizeToContent = SizeToContent.Height,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            Content = new StackPanel
+            {
+                Margin = new Thickness(24),
+                Spacing = 16,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "Sortify konnte nicht gestartet werden. Bitte die Anwendung beenden und erneut starten.",
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                    },
+                    close
+                }
+            }
+        };
+        errorWindow.Closed += (_, _) => desktop.Shutdown();
+        desktop.MainWindow = errorWindow;
+        errorWindow.Show();
     }
 }

@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" xmlns:views="using:Sortify.App.Views" x:Class="Sortify.App.Views.SettingsWindow" Title="" Width="860" Height="560" MinWidth="720" MinHeight="460" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" xmlns:views="using:Sortify.App.Views" x:Class="Sortify.App.Views.SettingsWindow" Title="" Width="900" Height="560" MinWidth="760" MinHeight="460" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
   <Window.Styles>
     <Style Selector="Button.nav-item">
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -29,13 +29,33 @@
       <Setter Property="Background" Value="{DynamicResource BrushSelectedHover}"/>
     </Style>
     <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="#6E6E73"/><Setter Property="FontSize" Value="13"/></Style>
-    <Style Selector="ToggleButton.darkmode-toggle">
+    <Style Selector="ToggleButton.animated-toggle">
       <Setter Property="Width" Value="46"/><Setter Property="Height" Value="24"/><Setter Property="Padding" Value="0"/>
       <Setter Property="Background" Value="{DynamicResource BrushBorder}"/><Setter Property="BorderBrush" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="Template"><ControlTemplate><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12" ClipToBounds="True"><Canvas HorizontalAlignment="Stretch" VerticalAlignment="Stretch"><Ellipse x:Name="ToggleKnob" Width="18" Height="18" Canvas.Left="2" Canvas.Top="3" Fill="#FFFFFF"/></Canvas></Border></ControlTemplate></Setter>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.18"/>
+        </Transitions>
+      </Setter>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12" ClipToBounds="True">
+            <Canvas HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+              <Ellipse x:Name="TestToggleKnob" Width="18" Height="18" Canvas.Left="2" Canvas.Top="3" Fill="#FFFFFF">
+                <Ellipse.Transitions>
+                  <Transitions>
+                    <DoubleTransition Property="Canvas.Left" Duration="0:0:0.26" Easing="CubicEaseOut"/>
+                  </Transitions>
+                </Ellipse.Transitions>
+              </Ellipse>
+            </Canvas>
+          </Border>
+        </ControlTemplate>
+      </Setter>
     </Style>
-    <Style Selector="ToggleButton.darkmode-toggle:checked"><Setter Property="Background" Value="{DynamicResource BrushAccent}"/><Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/></Style>
-    <Style Selector="ToggleButton.darkmode-toggle:checked /template/ Ellipse#ToggleKnob"><Setter Property="Canvas.Left" Value="26"/></Style>
+    <Style Selector="ToggleButton.animated-toggle:checked"><Setter Property="Background" Value="{DynamicResource BrushAccent}"/><Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/></Style>
+    <Style Selector="ToggleButton.animated-toggle:checked /template/ Ellipse#TestToggleKnob"><Setter Property="Canvas.Left" Value="26"/></Style>
+    <Style Selector="ToggleButton.animated-toggle:focus-visible"><Setter Property="BorderBrush" Value="{DynamicResource BrushFocus}"/><Setter Property="BorderThickness" Value="2"/></Style>
   </Window.Styles>
   <Border BorderThickness="0,1,0,0">
   <Grid RowDefinitions="40,*">
@@ -65,18 +85,47 @@
     <ScrollViewer Padding="38,32">
       <StackPanel Spacing="12">
         <TextBlock x:Name="SectionTitle" FontSize="26" FontWeight="SemiBold" Text="Allgemein"/>
+        <StackPanel x:Name="GeneralSettingsPanel" Spacing="10" Margin="0,18,0,0" IsVisible="True">
+          <Border Padding="14,12" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold" Text="Sortify automatisch starten, wenn dein Computer startet" TextWrapping="Wrap"/>
+              <ToggleButton x:Name="AutoStartToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="False" IsCheckedChanged="GeneralSettingChanged"/>
+            </Grid>
+          </Border>
+          <Border x:Name="StartMinimizedCard" Padding="14,12" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="3" Margin="0,0,16,0">
+                <TextBlock FontSize="16" FontWeight="SemiBold" Text="Sortify minimiert starten" TextWrapping="Wrap"/>
+                <TextBlock Classes="muted" Text="Sortify im Hintergrund starten, damit es dich nicht gleich erschlägt" TextWrapping="Wrap"/>
+              </StackPanel>
+              <ToggleButton x:Name="StartMinimizedToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="False" IsCheckedChanged="GeneralSettingChanged"/>
+            </Grid>
+          </Border>
+          <Border Padding="14,12" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="3" Margin="0,0,16,0">
+                <TextBlock FontSize="16" FontWeight="SemiBold" Text="Sortify in den Infobereich minimieren" TextWrapping="Wrap"/>
+                <TextBlock Classes="muted" Text="Durch Klicken auf X wird Sortify minimiert, statt es vollständig zu schließen" TextWrapping="Wrap"/>
+              </StackPanel>
+              <ToggleButton x:Name="CloseToTrayToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="True" IsCheckedChanged="GeneralSettingChanged"/>
+            </Grid>
+          </Border>
+          <Border Padding="14,12" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="3" Margin="0,0,16,0">
+                <TextBlock FontSize="16" FontWeight="SemiBold" Text="Test-Toggle" TextWrapping="Wrap"/>
+                <TextBlock Classes="muted" Text="Dieser Schalter dient nur zu Testzwecken" TextWrapping="Wrap"/>
+              </StackPanel>
+              <ToggleButton x:Name="TestToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="False"/>
+            </Grid>
+          </Border>
+        </StackPanel>
         <views:RuleEditorView x:Name="RulesEditor" IsVisible="False"/>
         <Border x:Name="AppearanceCard" IsVisible="False" Margin="0,18,0,0" Padding="12,10" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
           <Grid ColumnDefinitions="*,Auto">
             <TextBlock x:Name="AppearanceTitle" VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold" Text="Darkmode"/>
-            <ToggleButton x:Name="DarkModeToggle" Classes="darkmode-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="False" IsCheckedChanged="DarkModeChanged"/>
+            <ToggleButton x:Name="DarkModeToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="False" IsCheckedChanged="DarkModeChanged"/>
           </Grid>
-        </Border>
-        <Border x:Name="PlaceholderPanel" Margin="0,18,0,0" Padding="22" BorderThickness="1" CornerRadius="8">
-          <StackPanel Spacing="10">
-            <TextBlock x:Name="PlaceholderTitle" FontSize="16" FontWeight="SemiBold" Text="Bereich wird vorbereitet"/>
-            <TextBlock Classes="muted" Text="Weitere Optionen können hier ergänzt werden. Die Navigation bleibt dabei bestehen und zeigt die Details des ausgewählten Themas an." TextWrapping="Wrap"/>
-          </StackPanel>
         </Border>
       </StackPanel>
     </ScrollViewer>

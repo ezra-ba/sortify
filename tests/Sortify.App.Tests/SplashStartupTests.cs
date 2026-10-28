@@ -14,15 +14,17 @@ namespace Sortify.App.Tests;
 public sealed class SplashStartupTests
 {
     [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(true, true)]
-    public async Task StartupShowsSplashOnlyForForegroundAndInitializesOnce(bool background, bool activate)
+    [InlineData(false, false, false)]
+    [InlineData(true, true, false)]
+    [InlineData(true, false, false)]
+    [InlineData(true, true, true)]
+    public async Task StartupShowsSplashOnlyForForegroundAndInitializesOnce(
+        bool background, bool startMinimized, bool activate)
     {
         using var headless = HeadlessUnitTestSession.StartNew(typeof(TestApplication));
         await headless.Dispatch(async () =>
         {
-            var store = new ControlledStore();
+            var store = new ControlledStore { StartMinimized = startMinimized };
             var settings = new SettingsService(store);
             var model = new MainViewModel(settings);
             using var startup = new ApplicationStartup();
@@ -69,7 +71,7 @@ public sealed class SplashStartupTests
                 }
                 store.Complete();
                 await run;
-                Assert.Equal(!background || activate, main.IsVisible);
+                Assert.Equal(!background || !startMinimized || activate, main.IsVisible);
                 Assert.False(splash?.IsVisible == true);
                 Assert.True(desktopSession!.IsReady);
                 Assert.Equal(1, store.LoadCalls);
@@ -243,6 +245,7 @@ public sealed class SplashStartupTests
 
     private sealed class ControlledStore : ISettingsStore
     {
+        public bool StartMinimized { get; init; }
         private readonly TaskCompletionSource<SettingsLoadResult> result = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public int LoadCalls { get; private set; }
@@ -256,7 +259,8 @@ public sealed class SplashStartupTests
         }
         public void Complete(bool failed = false) => result.TrySetResult(failed
             ? new SettingsLoadResult(SettingsLoadStatus.Failed, null, "Einstellungen nicht lesbar.")
-            : new SettingsLoadResult(SettingsLoadStatus.Loaded, new AppSettings(Path.GetTempPath(), null, false, []), null));
+            : new SettingsLoadResult(SettingsLoadStatus.Loaded,
+                new AppSettings(Path.GetTempPath(), null, false, []) { StartMinimized = StartMinimized }, null));
         public Task<SettingsSaveResult> SaveAsync(AppSettings settings, CancellationToken cancellationToken = default) =>
             Task.FromResult(new SettingsSaveResult(true, null));
     }

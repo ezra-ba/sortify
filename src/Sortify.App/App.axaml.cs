@@ -69,7 +69,8 @@ public partial class App : Application
                 SettingsStoragePath.GetDefaultFilePath(),
                 new SettingsValidator(new RuleValidator()));
             settingsService = new SettingsService(store);
-            viewModel = new MainViewModel(settingsService);
+            viewModel = new MainViewModel(settingsService,
+                new WindowsLoginStartup(Environment.ProcessPath));
         }
         catch (InvalidOperationException exception)
         {

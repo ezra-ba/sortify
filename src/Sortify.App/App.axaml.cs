@@ -47,7 +47,8 @@ public partial class App : Application
 
                 settingsService = new SettingsService(store);
 
-                viewModel = new MainViewModel(settingsService);
+                viewModel = new MainViewModel(settingsService,
+                    new WindowsLoginStartup(Environment.ProcessPath));
             }
             catch (InvalidOperationException exception)
             {

@@ -42,7 +42,9 @@ public sealed class RuleOverviewWindowTests
                 Layout();
                 var actions = window.FindControl<Grid>("RuleActions")!;
                 Assert.False(actions.IsVisible);
+                Assert.True(window.FindControl<StackPanel>("GeneralSettingsPanel")!.IsVisible);
                 Click(window, window.FindControl<Button>("RulesButton")!);
+                Assert.False(window.FindControl<StackPanel>("GeneralSettingsPanel")!.IsVisible);
                 var view = window.FindControl<RuleEditorView>("RulesEditor")!;
                 var editor = Assert.IsType<RuleEditorViewModel>(view.DataContext);
                 var form = view.FindControl<Border>("RuleEditorForm")!;
@@ -100,6 +102,10 @@ public sealed class RuleOverviewWindowTests
                 Assert.False(form.IsVisible);
                 Assert.True(plus.IsVisible);
                 Click(window, window.FindControl<Button>("AppearanceButton")!);
+                Assert.False(actions.IsVisible);
+                Assert.False(window.FindControl<StackPanel>("GeneralSettingsPanel")!.IsVisible);
+                Click(window, window.FindControl<Button>("GeneralButton")!);
+                Assert.True(window.FindControl<StackPanel>("GeneralSettingsPanel")!.IsVisible);
                 Assert.False(actions.IsVisible);
                 Click(window, window.FindControl<Button>("RulesButton")!);
                 Assert.True(overview.IsVisible);

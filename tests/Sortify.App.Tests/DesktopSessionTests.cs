@@ -23,7 +23,10 @@ public sealed class DesktopSessionTests
         {
             var directory = Path.Combine(Path.GetTempPath(), "sortify-tray-" + Guid.NewGuid());
             Directory.CreateDirectory(directory);
-            var store = new MemoryStore(new AppSettings(directory, null, false, []));
+            var store = new MemoryStore(new AppSettings(directory, null, false, [])
+            {
+                StartMinimized = true
+            });
             var settings = new SettingsService(store);
             var viewModel = new MainViewModel(settings);
             var window = new Window();

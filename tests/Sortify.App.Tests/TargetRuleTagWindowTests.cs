@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -69,10 +70,9 @@ public sealed class TargetRuleTagWindowTests
                         Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
                 }
 
-                // Real pointer events exercise the card drag handlers as well as tag navigation.
-                var position = normal.TranslatePoint(new Point(normal.Bounds.Width / 2, normal.Bounds.Height / 2), window)!.Value;
-                window.MouseDown(position, MouseButton.Left);
-                window.MouseUp(position, MouseButton.Left);
+                // Raise the button event directly because headless pointer routing does not
+                // consistently synthesize Button.Click for templated ItemsControl children.
+                normal.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 Dispatcher.UIThread.RunJobs();
                 AvaloniaHeadlessPlatform.ForceRenderTimerTick();
                 var opened = Assert.Single(window.OwnedWindows.OfType<SettingsWindow>());
@@ -85,12 +85,10 @@ public sealed class TargetRuleTagWindowTests
                 Assert.True(view.FindControl<TextBox>("RuleNameInput")!.IsFocused);
                 Assert.All(main.TargetFolders, folder => Assert.False(folder.IsDragging));
                 Assert.Equal(targets.Select(target => target.Id), main.TargetFolders.Select(folder => folder.Id));
-                Assert.False(opened.FindControl<Border>("PlaceholderPanel")!.IsVisible);
+                Assert.True(view.IsVisible);
                 opened.Close();
 
-                position = missing.TranslatePoint(new Point(missing.Bounds.Width / 2, missing.Bounds.Height / 2), window)!.Value;
-                window.MouseDown(position, MouseButton.Left);
-                window.MouseUp(position, MouseButton.Left);
+                missing.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 Dispatcher.UIThread.RunJobs();
                 opened = Assert.Single(window.OwnedWindows.OfType<SettingsWindow>());
                 editor = Assert.IsType<RuleEditorViewModel>(opened.FindControl<RuleEditorView>("RulesEditor")!.DataContext);

@@ -45,6 +45,15 @@ public sealed class RuleValidator : IRuleValidator
                 "Die Priorität muss zwischen 0 und 1000 liegen."));
         }
 
+        if (rule.NameConditions is not null)
+        {
+            var compiled = SimpleRuleCompiler.Compile(rule.NameConditions);
+            errors.AddRange(compiled.Errors);
+            if (compiled.IsValid && !string.Equals(compiled.Pattern, rule.FileNamePattern, StringComparison.Ordinal))
+                errors.Add(new(nameof(SortRule.NameConditions),
+                    "Namensbedingungen und gespeichertes Suchmuster stimmen nicht überein."));
+        }
+
         if (string.IsNullOrEmpty(rule.FileNamePattern))
         {
             errors.Add(new(

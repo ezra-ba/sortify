@@ -2,7 +2,7 @@
 ## Feature Ideas
 - [ ] Background Ausführung soll für Linux und Mac auch funktionieren
 - [ ] Settings View
-	- [ ] Dark Mode
+	- [x] Dark Mode
 	- [ ] Launch with LogIn
 	- [ ] Include File Origin (download page) into suggestion
 - [ ] Mehrere Target Ordner auswählen und anlegen

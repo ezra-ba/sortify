@@ -28,9 +28,9 @@
   </UserControl.Styles>
   <StackPanel Spacing="16">
     <TextBlock Classes="muted" Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap"/>
-    <Border Classes="rule-card" Padding="20">
+    <Border x:Name="RuleEditorForm" Classes="rule-card" Padding="20">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
-        <TextBlock Classes="heading" Text="Neue Sortierregel" FontSize="18"/>
+        <TextBlock Classes="heading" Text="{Binding EditorTitle}" FontSize="18"/>
         <TextBlock Classes="field-label" Text="Regelname"/>
         <TextBox Classes="motion" x:Name="RuleNameInput" Text="{Binding RuleName, Mode=TwoWay}" PlaceholderText="Zum Beispiel: Rechnungen"/>
         <TextBlock Classes="field-label" Text="Target-Ordner"/>
@@ -40,7 +40,7 @@
         <TextBlock Classes="field-label" Text="Dateiname ohne Endung"/>
         <CheckBox Content="Erweitert: regulären Ausdruck verwenden" IsChecked="{Binding IsAdvancedMode, Mode=TwoWay}"/>
         <StackPanel IsVisible="{Binding !IsAdvancedMode}" Spacing="10">
-          <TextBlock Classes="muted" Text="Alle Bedingungen müssen passen. Suchtext wird wörtlich geprüft; Groß-/Kleinschreibung wird ignoriert." TextWrapping="Wrap"/>
+          <TextBlock Classes="muted" Text="Alle Bedingungen müssen passen. Suchtext wird wörtlich geprüft; Groß-/Kleinschreibung wird ignoriert. „Beliebiger Name“ kann nur allein verwendet werden." TextWrapping="Wrap"/>
           <ItemsControl ItemsSource="{Binding NameConditions}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:FileNameConditionViewModel">
@@ -70,7 +70,8 @@
         <TextBlock Classes="field-label" Text="Dateinamen-Vorgabe (optional)"/>
         <TextBox Classes="motion" x:Name="RuleRenameInput" Text="{Binding RenamePattern, Mode=TwoWay}" PlaceholderText="Originalname behalten"/>
         <TextBlock Classes="muted" Text="Leer = Originalname. Beispiel: Rechnung_{name}{ext}. Bei eigener Vorgabe muss {ext} genau einmal am Ende stehen." TextWrapping="Wrap"/>
-        <Button Classes="primary motion" x:Name="CreateRuleButton" Content="Regel anlegen" Command="{Binding CreateRuleCommand}" HorizontalAlignment="Left"/>
+        <Button Classes="primary motion" x:Name="CreateRuleButton" Content="{Binding SaveButtonText}" Command="{Binding CreateRuleCommand}" HorizontalAlignment="Left"/>
+        <Button Classes="secondary motion" Content="Bearbeiten abbrechen" Command="{Binding CancelEditCommand}" IsVisible="{Binding IsEditing}" HorizontalAlignment="Left"/>
       </StackPanel>
     </Border>
     <TextBlock x:Name="RuleResultMessage" Text="{Binding Message}" Foreground="{Binding MessageColor}" TextWrapping="Wrap"/>
@@ -79,11 +80,29 @@
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="vm:RuleListItem">
           <Border Classes="rule-item" Padding="12" Margin="0,0,0,8">
-            <StackPanel Spacing="4"><TextBlock Classes="heading" Text="{Binding Label}" TextWrapping="Wrap"/><TextBlock Classes="muted" Text="{Binding Conditions}" TextWrapping="Wrap"/></StackPanel>
+            <StackPanel Spacing="8">
+              <TextBlock Classes="heading" Text="{Binding Label}" TextWrapping="Wrap"/>
+              <TextBlock Classes="muted" Text="{Binding Conditions}" TextWrapping="Wrap"/>
+              <StackPanel Orientation="Horizontal" Spacing="8" IsEnabled="{Binding !$parent[UserControl].DataContext.IsSaving}">
+                <Button Classes="secondary motion" Content="Bearbeiten" Command="{Binding $parent[UserControl].DataContext.EditRuleCommand}" CommandParameter="{Binding}"/>
+                <Button Classes="secondary motion" Content="Entfernen" Command="{Binding $parent[UserControl].DataContext.RequestDeleteCommand}" CommandParameter="{Binding}"/>
+              </StackPanel>
+            </StackPanel>
           </Border>
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
+    <Border Classes="rule-card" Padding="16" IsVisible="{Binding IsDeletePending}">
+      <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
+        <TextBlock Classes="heading" Text="Regel wirklich entfernen?"/>
+        <TextBlock Text="{Binding PendingDeleteName}" TextWrapping="Wrap"/>
+        <TextBlock Classes="muted" Text="Die Regel wird gelöscht. Dateien und Target-Ordner bleiben erhalten." TextWrapping="Wrap"/>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Classes="primary motion" Content="Entfernen bestätigen" Command="{Binding ConfirmDeleteCommand}"/>
+          <Button Classes="secondary motion" Content="Abbrechen" Command="{Binding CancelDeleteCommand}"/>
+        </StackPanel>
+      </StackPanel>
+    </Border>
     <Expander Header="Ziel einer vorhandenen Regel zuordnen" HorizontalAlignment="Stretch" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="{DynamicResource RadiusCard}" Padding="14">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
         <TextBlock Classes="muted" Text="Hier kannst du insbesondere Altregeln ohne Target-ID reparieren. Andere Regelfelder bleiben erhalten." TextWrapping="Wrap"/>

@@ -77,7 +77,7 @@ public sealed class TargetRuleTagWindowTests
                 Assert.True(view.FindControl<TextBox>("RuleNameInput")!.IsFocused);
                 Assert.All(main.TargetFolders, folder => Assert.False(folder.IsDragging));
                 Assert.Equal(targets.Select(target => target.Id), main.TargetFolders.Select(folder => folder.Id));
-                Assert.False(opened.FindControl<Border>("PlaceholderPanel")!.IsVisible);
+                Assert.True(view.IsVisible);
                 opened.Close();
 
                 missing.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));

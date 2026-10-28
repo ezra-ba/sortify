@@ -28,7 +28,7 @@
   </UserControl.Styles>
   <StackPanel Spacing="16">
     <TextBlock Classes="muted" Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap"/>
-    <Border Classes="rule-card" Padding="20">
+    <Border x:Name="RuleEditorForm" Classes="rule-card" Padding="20">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
         <TextBlock Classes="heading" Text="{Binding EditorTitle}" FontSize="18"/>
         <TextBlock Classes="field-label" Text="Regelname"/>

@@ -44,7 +44,7 @@ Release-Build und Tests prüfen die Eingaben, Validierungsfehler ohne Schreibzug
 
 ## Bearbeiten und Entfernen (#65)
 
-Bei einer gespeicherten Regel öffnet „Bearbeiten“ das Formular mit der vorhandenen Definition. Einfache Regeln stellen sämtliche Bedingungsbuttons und Originalsuchtexte wieder her. Bestehende Regex-Regeln öffnen im erweiterten Modus. „Änderungen speichern“ erhält ID und nicht bearbeitete Felder. „Bearbeiten abbrechen“ verändert den gespeicherten Stand nicht.
+Bei einer gespeicherten Regel öffnet „Bearbeiten“ das Formular mit der vorhandenen Definition. Die Ansicht springt unmittelbar zur Maske und setzt den Fokus in das Namensfeld; das gilt auch beim Wechsel zwischen zwei Regeln während einer Bearbeitung. Einfache Regeln stellen sämtliche Bedingungsbuttons und Originalsuchtexte wieder her. Bestehende Regex-Regeln öffnen im erweiterten Modus. „Änderungen speichern“ erhält ID und nicht bearbeitete Felder. „Bearbeiten abbrechen“ verändert den gespeicherten Stand nicht.
 
 „Entfernen“ zeigt zunächst den Regelnamen und eine ausdrückliche Bestätigung. Erst „Entfernen bestätigen“ speichert die Löschung; „Abbrechen“ verändert nichts. Dateien und Target-Ordner werden dabei nicht gelöscht. Ein Speicherfehler erhält die Regel, den Entwurf beziehungsweise die offene Löschbestätigung.
 

@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Threading;
@@ -105,6 +106,63 @@ public sealed class RuleEditorWindowTests
             }
             return true;
         }, CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task EditingRuleFromBottomScrollsToFormAndFocusesNameIncludingSecondEdit()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(TestApplication));
+        await session.Dispatch(async () =>
+        {
+            var target = new TargetFolder(Guid.NewGuid(), Path.GetTempPath(), "School");
+            var rules = Enumerable.Range(1, 12).Select(index => new SortRule(
+                Guid.NewGuid(), "Regel " + index, "^rechnung", [".pdf"], null, "", null, 0, true)
+                { TargetFolderId = target.Id }).ToArray();
+            var settings = new AppSettings(Path.GetTempPath(), null, false, rules) { TargetFolders = [target] };
+            var main = new MainViewModel(new SettingsService(new ScrollTestStore(settings)));
+            await main.InitializeSettingsAsync();
+            var window = new SettingsWindow { DataContext = main, Height = 560 };
+            try
+            {
+                window.OpenRulesForTarget(main.TargetFolders[0]);
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+                var view = window.FindControl<RuleEditorView>("RulesEditor")!;
+                var scroll = view.GetVisualAncestors().OfType<ScrollViewer>().First();
+                var name = view.FindControl<TextBox>("RuleNameInput")!;
+                var form = view.FindControl<Border>("RuleEditorForm")!;
+                foreach (var rule in new[] { rules[11], rules[4] })
+                {
+                    scroll.ScrollToEnd();
+                    Dispatcher.UIThread.RunJobs();
+                    AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+                    Assert.True(scroll.Offset.Y > 200);
+                    var button = view.GetVisualDescendants().OfType<Button>().Single(button =>
+                        Equals(button.Content, "Bearbeiten") && button.CommandParameter is RuleListItem item && item.Id == rule.Id);
+                    Assert.NotNull(button.Command);
+                    button.Command.Execute(button.CommandParameter);
+                    Dispatcher.UIThread.RunJobs();
+                    AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+                    Assert.Equal(rule.Name, name.Text);
+                    Assert.True(name.IsFocused);
+                    Assert.True(scroll.Offset.Y < 200);
+                    var formPosition = form.TranslatePoint(default, scroll);
+                    Assert.NotNull(formPosition);
+                    Assert.InRange(formPosition.Value.Y, -1, scroll.Viewport.Height / 2);
+                }
+            }
+            finally { window.Close(); }
+            return true;
+        }, CancellationToken.None);
+    }
+
+    private sealed class ScrollTestStore(AppSettings settings) : ISettingsStore
+    {
+        public Task<SettingsLoadResult> LoadAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(new SettingsLoadResult(SettingsLoadStatus.Loaded, settings, null));
+        public Task<SettingsSaveResult> SaveAsync(AppSettings updated, CancellationToken cancellationToken = default)
+            => throw new InvalidOperationException("Opening the editor must not save settings.");
     }
 
     private sealed class Moves(string source) : IFileMoveService

@@ -8,12 +8,16 @@ using Sortify.Infrastructure.FileSystem;
 
 namespace Sortify.App.Services;
 
-public sealed class DownloadMonitorController(MainViewModel viewModel) : IDisposable
+public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMoveService fileMoveService,
+    IRuleEngine ruleEngine, FolderMonitor monitor) : IDisposable
 {
-    private readonly IFileMoveService fileMoveService =
-    new FileMoveService();
-    private readonly IRuleEngine ruleEngine = new RuleEngine(new RuleValidator(), new RuleTargetValidator());
-    private readonly FolderMonitor monitor = new();
+    // Compatibility constructor for existing UI tests and design-time callers.
+    public DownloadMonitorController(MainViewModel viewModel)
+        : this(viewModel, new FileMoveService(),
+            new RuleEngine(new RuleValidator(), new RuleTargetValidator()), new FolderMonitor())
+    {
+    }
+
     private readonly List<FileSuggestionWindow> popups = [];
     private int session;
     private bool disposed;

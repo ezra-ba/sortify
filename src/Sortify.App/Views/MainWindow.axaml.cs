@@ -8,19 +8,27 @@ using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using Sortify.App.ViewModels;
 using System.Runtime.InteropServices;
+using Sortify.Core.Services;
+using Sortify.App.Services;
 
 namespace Sortify.App.Views;
 
 public partial class MainWindow : Window
 {
+    private readonly IActivityLog activityLog;
     private TargetFolderViewModel? _draggedTargetFolder;
     private Avalonia.Point _dragStart;
     private bool _hasDragged;
     private Button? _pressedTargetButton;
     private Avalonia.Point _dragOffset;
 
-    public MainWindow()
+    public MainWindow() : this(null)
     {
+    }
+
+    public MainWindow(IActivityLog? activityLog = null)
+    {
+        this.activityLog = activityLog ?? new NullActivityLog();
         InitializeComponent();
         Opened += ApplyNativeTitleBarColor;
         if (OperatingSystem.IsWindows())
@@ -62,7 +70,7 @@ public partial class MainWindow : Window
     private void OpenTargetRules(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not MainViewModel { SelectedTargetFolder: { } target }) return;
-        var settings = new SettingsWindow { DataContext = DataContext };
+        var settings = new SettingsWindow(activityLog) { DataContext = DataContext };
         settings.OpenRulesForTarget(target);
         settings.Show(this);
     }
@@ -75,7 +83,7 @@ public partial class MainWindow : Window
         var target = main.TargetFolders.FirstOrDefault(folder => folder.Id == tag.TargetId);
         if (target is null) return;
         main.SelectTargetFolder(target);
-        var settings = new SettingsWindow { DataContext = main };
+        var settings = new SettingsWindow(activityLog) { DataContext = main };
         settings.Show(this);
         if (tag.RuleId is { } ruleId) settings.OpenRuleForEditing(ruleId);
         else settings.OpenRulesForTarget(target);
@@ -84,7 +92,7 @@ public partial class MainWindow : Window
 
     private void OpenSettings(object? sender, RoutedEventArgs e)
     {
-        new SettingsWindow { DataContext = DataContext }.Show(this);
+        new SettingsWindow(activityLog) { DataContext = DataContext }.Show(this);
     }
 
     private async void SelectWatchedFolder(

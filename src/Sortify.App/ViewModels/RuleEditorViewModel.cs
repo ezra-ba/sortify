@@ -13,6 +13,10 @@ public partial class RuleEditorViewModel : ViewModelBase
     private SortRule? editingRule;
     private SortRule? pendingDeleteRule;
     public bool IsEditing => editingRule is not null;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanEditRuleFields))]
+    public partial bool IsRuleActive { get; set; } = true;
+    public bool CanEditRuleFields => !IsSaving && (!IsEditing || IsRuleActive);
     public string EditorTitle => IsEditing ? "Sortierregel bearbeiten" : "Neue Sortierregel";
     public string SaveButtonText => IsEditing ? "Änderungen speichern" : "Regel anlegen";
     [ObservableProperty]
@@ -43,7 +47,9 @@ public partial class RuleEditorViewModel : ViewModelBase
     [ObservableProperty] public partial TargetFolderViewModel? RepairTarget { get; set; }
     [ObservableProperty] public partial string Message { get; set; } = "";
     [ObservableProperty] public partial string MessageColor { get; set; } = "#B42318";
-    [ObservableProperty] public partial bool IsSaving { get; set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanEditRuleFields))]
+    public partial bool IsSaving { get; set; }
 
     public void RefreshRules()
     {
@@ -58,7 +64,7 @@ public partial class RuleEditorViewModel : ViewModelBase
                     target is null ? "Zielzuordnung fehlt" : target.Nickname,
                     (rule.NameConditions is null ? "Regex: " + rule.FileNamePattern
                         : string.Join(" und ", rule.NameConditions.Select(RuleExplanationFormatter.Describe)))
-                    + " · " + string.Join(", ", rule.AllowedExtensions)));
+                    + " · " + string.Join(", ", rule.AllowedExtensions)) { IsEnabled = rule.IsEnabled });
             }
         }
         SelectedExistingRule = ExistingRules.FirstOrDefault(rule => rule.Id == selectedId);
@@ -68,6 +74,23 @@ public partial class RuleEditorViewModel : ViewModelBase
     private async Task CreateRuleAsync()
     {
         if (IsSaving) return;
+        if (editingRule is { } inactiveOriginal && !IsRuleActive)
+        {
+            // Disabled fields never overwrite the saved definition, including an unsaved draft.
+            IsSaving = true;
+            try
+            {
+                var deactivated = await main.SetRuleEnabledAsync(inactiveOriginal, false);
+                ShowResult(deactivated);
+                if (deactivated.IsSuccess)
+                {
+                    RefreshRules();
+                    ResetEditor();
+                }
+            }
+            finally { IsSaving = false; }
+            return;
+        }
         if (SelectedTarget is null || !TargetFolders.Contains(SelectedTarget))
         {
             ShowResult(new(false, "Bitte einen vorhandenen Target-Ordner auswählen."));
@@ -96,7 +119,7 @@ public partial class RuleEditorViewModel : ViewModelBase
         {
             Name = RuleName.Trim(), FileNamePattern = pattern, AllowedExtensions = extensions,
             RenamePattern = string.IsNullOrWhiteSpace(RenamePattern) ? null : RenamePattern,
-            TargetFolderId = SelectedTarget.Id, NameConditions = conditions
+            TargetFolderId = SelectedTarget.Id, NameConditions = conditions, IsEnabled = true
         };
 
         IsSaving = true;
@@ -113,6 +136,20 @@ public partial class RuleEditorViewModel : ViewModelBase
         finally { IsSaving = false; }
     }
 
+    public bool OpenRuleForEditing(Guid ruleId)
+    {
+        if (IsSaving) return false;
+        RefreshRules();
+        var item = ExistingRules.FirstOrDefault(rule => rule.Id == ruleId);
+        if (item is null)
+        {
+            ShowResult(new(false, "Die ausgewählte Regel ist nicht mehr vorhanden."));
+            return false;
+        }
+        EditRule(item);
+        return true;
+    }
+
     [RelayCommand]
     private void EditRule(RuleListItem item)
     {
@@ -125,6 +162,7 @@ public partial class RuleEditorViewModel : ViewModelBase
         }
         CancelDelete();
         editingRule = rule;
+        IsRuleActive = rule.IsEnabled;
         RuleName = rule.Name;
         FileNamePattern = rule.FileNamePattern;
         Extensions = string.Join(", ", rule.AllowedExtensions);
@@ -149,6 +187,7 @@ public partial class RuleEditorViewModel : ViewModelBase
     private void ResetEditor()
     {
         editingRule = null;
+        IsRuleActive = true;
         RuleName = "";
         FileNamePattern = "";
         RenamePattern = "";
@@ -161,6 +200,7 @@ public partial class RuleEditorViewModel : ViewModelBase
     private void NotifyEditorMode()
     {
         OnPropertyChanged(nameof(IsEditing));
+        OnPropertyChanged(nameof(CanEditRuleFields));
         OnPropertyChanged(nameof(EditorTitle));
         OnPropertyChanged(nameof(SaveButtonText));
     }
@@ -233,5 +273,7 @@ public partial class RuleEditorViewModel : ViewModelBase
 
 public sealed record RuleListItem(Guid Id, string Name, string TargetName, string Conditions)
 {
+    public bool IsEnabled { get; init; } = true;
+    public bool IsInactive => !IsEnabled;
     public string Label => Name + " → " + TargetName;
 }

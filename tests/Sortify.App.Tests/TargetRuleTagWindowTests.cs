@@ -50,8 +50,16 @@ public sealed class TargetRuleTagWindowTests
                 var duplicate = buttons.Single(button => button.DataContext is TargetRuleTagViewModel tag && tag.RuleId == rules[2].Id);
                 var missing = buttons.Single(button => button.DataContext is TargetRuleTagViewModel tag && tag.IsMissing && tag.TargetId == targets[1].Id);
                 Assert.Empty(normal.GetVisualAncestors().OfType<Button>());
+                var tagName = normal.GetVisualDescendants().OfType<TextBlock>().Single(text => text.Text == rules[0].Name);
+                var nameCenter = tagName.TranslatePoint(new Point(tagName.Bounds.Width / 2, tagName.Bounds.Height / 2), normal)!.Value;
+                Assert.InRange(nameCenter.X - normal.Bounds.Width / 2, -0.5, 0.5);
                 Assert.NotEqual(((ISolidColorBrush)normal.Background!).Color, ((ISolidColorBrush)duplicate.Background!).Color);
                 Assert.NotEqual(((ISolidColorBrush)missing.Background!).Color, ((ISolidColorBrush)duplicate.Background!).Color);
+                Assert.Equal(((ISolidColorBrush)normal.Background!).Color, ((ISolidColorBrush)missing.Background!).Color);
+                Assert.Equal(36d, missing.Bounds.Width);
+                Assert.Equal(missing.Bounds.Width, missing.Bounds.Height);
+                Assert.Equal(new CornerRadius(12), missing.CornerRadius);
+                Assert.Single(missing.GetVisualDescendants().OfType<Avalonia.Controls.Shapes.Path>(), path => path.IsVisible);
                 Assert.Equal(theme, window.ActualThemeVariant);
                 Assert.Equal(Color.Parse(dark ? "#382C54" : "#F0ECFF"), ((ISolidColorBrush)normal.Background!).Color);
                 using (var frame = window.CaptureRenderedFrame())
@@ -87,6 +95,7 @@ public sealed class TargetRuleTagWindowTests
                 opened = Assert.Single(window.OwnedWindows.OfType<SettingsWindow>());
                 editor = Assert.IsType<RuleEditorViewModel>(opened.FindControl<RuleEditorView>("RulesEditor")!.DataContext);
                 Assert.False(editor.IsEditing);
+                Assert.True(editor.IsFormVisible);
                 Assert.Equal(targets[1].Id, editor.SelectedTarget?.Id);
                 opened.Close();
 

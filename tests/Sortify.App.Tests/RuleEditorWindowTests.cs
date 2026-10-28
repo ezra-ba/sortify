@@ -129,11 +129,18 @@ public sealed class RuleEditorWindowTests
                 Dispatcher.UIThread.RunJobs();
                 AvaloniaHeadlessPlatform.ForceRenderTimerTick();
                 var view = window.FindControl<RuleEditorView>("RulesEditor")!;
+                var editor = Assert.IsType<RuleEditorViewModel>(view.DataContext);
+                editor.ShowOverviewCommand.Execute(null);
+                Dispatcher.UIThread.RunJobs();
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick();
                 var scroll = view.GetVisualAncestors().OfType<ScrollViewer>().First();
                 var name = view.FindControl<TextBox>("RuleNameInput")!;
                 var form = view.FindControl<Border>("RuleEditorForm")!;
                 foreach (var rule in new[] { rules[11], rules[4] })
                 {
+                    editor.ShowOverviewCommand.Execute(null);
+                    Dispatcher.UIThread.RunJobs();
+                    AvaloniaHeadlessPlatform.ForceRenderTimerTick();
                     scroll.ScrollToEnd();
                     Dispatcher.UIThread.RunJobs();
                     AvaloniaHeadlessPlatform.ForceRenderTimerTick();

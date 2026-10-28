@@ -1,10 +1,10 @@
 # Eigene Sortierregeln anlegen
 
-Stand: 28. Oktober 2026. Die ursprüngliche Regelanlage aus #27 ist in master integriert. Die Erweiterungen #41 (einfache Bedingungen) und #65 (Bearbeiten/Entfernen) liegen auf aufeinander aufbauenden Feature-Branches und sind noch nicht in master integriert.
+Stand: 28. Oktober 2026. Regelanlage (#27), einfache Bedingungen (#41), Bearbeiten/Entfernen (#65) und Regel-Tags mit Aktivstatus (#70) sind in master integriert. Die getrennten Ansichten aus #74 liegen auf einem neuen Feature-Branch und sind noch nicht integriert.
 
 ## Bedienung
 
-Unter „Einstellungen → Sortierregeln“ können neue Regeln angelegt und gespeicherte Regeln angezeigt werden. Alternativ im Hauptfenster einen Target-Ordner auswählen und „Regel für Target-Ordner anlegen“ öffnen. Dieser Einstieg belegt das gewählte Ziel vor, speichert aber noch keine Regel.
+„Einstellungen → Sortierregeln“ zeigt zunächst die vorhandenen Regeln beziehungsweise „Neue Regel erstellen“, wenn noch keine existiert. Der Plus-Button rechts an der Überschrift öffnet die Neuanlage, „Bearbeiten“ nur das Formular der gewählten Regel. Nach Speichern oder Abbrechen geht es zurück zur Übersicht. Siehe [rule-overview.md](rule-overview.md). Alternativ im Hauptfenster einen Target-Ordner auswählen und „Regel für Target-Ordner anlegen“ öffnen. Dieser Einstieg belegt das gewählte Ziel vor, speichert aber noch keine Regel.
 
 Für eine neue Regel sind Name, Target-Ordner, Dateinamenmuster und mindestens eine erlaubte Dateiendung erforderlich. Die Umbenennungsvorgabe ist optional: Leer bedeutet ausdrücklich, den ursprünglichen Dateinamen beizubehalten. Eine eigene Vorgabe verwendet die vorhandenen Platzhalter `{name}` und `{ext}`; `{ext}` muss genau einmal am Ende stehen.
 
@@ -14,7 +14,7 @@ Beispiel:
 | --- | --- |
 | Regelname | Rechnungen |
 | Target-Ordner | Ein zuvor hinzugefügter Ordner für Rechnungen |
-| Dateinamenmuster | `^rechnung` |
+| Namensbedingung | Beginnt mit: `rechnung` |
 | Erlaubte Dateiendungen | `.pdf` |
 | Dateinamen-Vorgabe | `sortiert_{name}{ext}` |
 
@@ -34,13 +34,13 @@ Unter „Ziel einer vorhandenen Regel zuordnen“ lassen sich eine gespeicherte 
 
 `RuleEditorViewModel` übernimmt Formularzustand und Rückmeldungen. `RuleEditorView` enthält die gebundene Darstellung; SettingsWindow und MainWindow öffnen beziehungsweise navigieren zur Maske.
 
-Die vereinfachten Bedingungen „enthält“, „beginnt mit“ und „endet mit“ samt eigenem Speicherformat sind im Arbeitsstand von #41 implementiert. Die Umsetzung von #41 ergänzt nun die Buttons und eine gemeinsame Übersetzung für die vorhandene Engine; der aktuelle Stand ist separat dokumentiert. Der Arbeitsstand von #65 ergänzt Bearbeiten und ausdrücklich bestätigtes Entfernen. Priorität, Aktivstatus und relative Pfadbedingung werden beim Bearbeiten erhalten; die Maske bietet dafür derzeit keine eigenen Eingaben. Die Target-Reparatur aus #46 ist ausdrücklich verfügbar.
+Die vereinfachten Bedingungen „enthält“, „beginnt mit“ und „endet mit“ samt eigenem Speicherformat sind im Arbeitsstand von #41 implementiert. Die Umsetzung von #41 ergänzt nun die Buttons und eine gemeinsame Übersetzung für die vorhandene Engine; der aktuelle Stand ist separat dokumentiert. Der Arbeitsstand von #65 ergänzt Bearbeiten und ausdrücklich bestätigtes Entfernen. Priorität und relative Pfadbedingung werden beim Bearbeiten erhalten; der Aktivstatus wird über „Regel aktiv“ gesteuert. Die Target-Reparatur aus #46 ist ausdrücklich verfügbar.
 
-Die Target-ID-Grundlagen und #27 sind bereits integriert. Der aktuelle #65-Branch baut auf #41 auf; zuerst #41, dann #65 integrieren. Es wurden keine GitHub-Zuständigkeiten automatisch geändert und keine Teammitglieder benachrichtigt.
+Die Target-ID-Grundlagen sowie #27, #41 und #65 sind bereits integriert. Der aktuelle #74-Branch baut auf dem aktuellen master auf. Es wurden keine GitHub-Zuständigkeiten automatisch geändert und keine Teammitglieder benachrichtigt.
 
 ## Verifikation
 
-Release-Build und Tests prüfen die Eingaben, Validierungsfehler ohne Schreibzugriff, erhaltene Entwürfe bei Speicherfehlern, das Ergänzen vorhandener Regeln, die gebundene Oberfläche und die Persistenz nach erneutem Laden. Ein Headless-UI-Test prüft außerdem die Reparatur einer Altregel und den anschließenden Popup-Vorschlag mit einem Test-Verschiebedienst. Am 27. Oktober 2026 hat der Benutzer den beschriebenen manuellen Ablauf unter Linux als erfolgreich bestätigt: Regelanlage, Erhalt nach vollständigem Neustart, regelbasierter Ziel- und Dateinamenvorschlag sowie bestätigtes Einsortieren. Windows und macOS wurden dafür noch nicht manuell geprüft. Der letzte Release-Build war ohne Fehler und Warnungen; alle 352 Tests bestanden.
+Release-Build und Tests prüfen die Eingaben, Validierungsfehler ohne Schreibzugriff, erhaltene Entwürfe bei Speicherfehlern, das Ergänzen vorhandener Regeln, die gebundene Oberfläche und die Persistenz nach erneutem Laden. Ein Headless-UI-Test prüft außerdem die Reparatur einer Altregel und den anschließenden Popup-Vorschlag mit einem Test-Verschiebedienst. Am 27. Oktober 2026 hat der Benutzer den beschriebenen manuellen Ablauf unter Linux als erfolgreich bestätigt: Regelanlage, Erhalt nach vollständigem Neustart, regelbasierter Ziel- und Dateinamenvorschlag sowie bestätigtes Einsortieren. Windows und macOS wurden dafür noch nicht manuell geprüft. Dieser damalige Prüfstand hatte einen warnungsfreien Release-Build und 352 bestandene Tests. Für den aktuellen #74-Arbeitsstand bestehen 404 Tests; Details siehe [rule-overview.md](rule-overview.md).
 
 ## Bearbeiten und Entfernen (#65)
 

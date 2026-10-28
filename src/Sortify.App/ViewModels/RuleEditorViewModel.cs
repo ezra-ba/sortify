@@ -14,6 +14,17 @@ public partial class RuleEditorViewModel : ViewModelBase
     private SortRule? pendingDeleteRule;
     public bool IsEditing => editingRule is not null;
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsOverview))]
+    [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
+    [NotifyPropertyChangedFor(nameof(ShowRuleList))]
+    public partial bool IsFormVisible { get; set; }
+    public bool IsOverview => !IsFormVisible;
+    public bool HasRules => ExistingRules.Count > 0;
+    public bool ShowEmptyState => IsOverview && !HasRules;
+    public bool ShowRuleList => IsOverview && HasRules;
+    public string RuleCountLabel => ExistingRules.Count == 1 ? "1 Regel" : $"{ExistingRules.Count} Regeln";
+    public bool HasMessage => !string.IsNullOrWhiteSpace(Message);
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanEditRuleFields))]
     public partial bool IsRuleActive { get; set; } = true;
     public bool CanEditRuleFields => !IsSaving && (!IsEditing || IsRuleActive);
@@ -45,7 +56,9 @@ public partial class RuleEditorViewModel : ViewModelBase
     [ObservableProperty] public partial TargetFolderViewModel? SelectedTarget { get; set; }
     [ObservableProperty] public partial RuleListItem? SelectedExistingRule { get; set; }
     [ObservableProperty] public partial TargetFolderViewModel? RepairTarget { get; set; }
-    [ObservableProperty] public partial string Message { get; set; } = "";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasMessage))]
+    public partial string Message { get; set; } = "";
     [ObservableProperty] public partial string MessageColor { get; set; } = "#B42318";
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanEditRuleFields))]
@@ -68,6 +81,35 @@ public partial class RuleEditorViewModel : ViewModelBase
             }
         }
         SelectedExistingRule = ExistingRules.FirstOrDefault(rule => rule.Id == selectedId);
+        OnPropertyChanged(nameof(HasRules));
+        OnPropertyChanged(nameof(ShowEmptyState));
+        OnPropertyChanged(nameof(ShowRuleList));
+        OnPropertyChanged(nameof(RuleCountLabel));
+    }
+
+    [RelayCommand]
+    private void ShowOverview()
+    {
+        if (IsSaving) return;
+        CancelDelete();
+        ResetEditor();
+        RefreshRules();
+        Message = "";
+    }
+
+    [RelayCommand]
+    private void BeginCreate()
+    {
+        if (IsSaving) return;
+        ShowOverview();
+        IsFormVisible = true;
+    }
+
+    public void BeginCreateForTarget(TargetFolderViewModel? target)
+    {
+        if (IsSaving) return;
+        BeginCreate();
+        SelectedTarget = target;
     }
 
     [RelayCommand]
@@ -175,18 +217,22 @@ public partial class RuleEditorViewModel : ViewModelBase
                 NameConditions.Add(new(row => NameConditions.Remove(row)) { Kind = condition.Kind, Text = condition.Text });
         else AddCondition();
         Message = "";
+        IsFormVisible = true;
         NotifyEditorMode();
     }
 
     [RelayCommand]
     private void CancelEdit()
     {
-        if (!IsSaving) ResetEditor();
+        ShowOverview();
     }
 
     private void ResetEditor()
     {
         editingRule = null;
+        IsFormVisible = false;
+        SelectedTarget = null;
+        Extensions = ".pdf";
         IsRuleActive = true;
         RuleName = "";
         FileNamePattern = "";

@@ -7,11 +7,11 @@ Arbeitsstand für #70, 28. Oktober 2026.
 Die Target-Karten zeigen rechts die Namen der zugeordneten Sortierregeln als klickbare, abgerundete Tags. Die Zuordnung erfolgt ausschließlich über stabile Target-IDs. Namen oder Pfade werden nicht als Ersatz für fehlende Referenzen verwendet.
 
 - Violett: zugeordnete Regel.
-- Dezent rot: „Keine Regel“. Das Target ist gültig und kann weiterhin manuell oder als Standardziel verwendet werden; es hat lediglich keine eigene Regel.
+- Violetter, quadratischer Plus-Button mit weichen Ecken: Das Target hat keine eigene Regel. Ein Klick öffnet die Neuanlage mit vorbelegtem Target. Das Target bleibt manuell und als Standardziel verwendbar. Diese Darstellung ersetzt im #74-Arbeitsstand die frühere rote Kennzeichnung „Keine Regel“.
 - Gelb/Amber mit Ausrufezeichen: aktive Regeln mit gleichen Erkennungsbedingungen und gleicher Priorität sind mehreren Targets zugeordnet. Eine kurze Erklärung steht direkt in der Karte; der Tooltip nennt die weiteren Ziele.
 - Grau: eine vorhandene, deaktivierte Regel. Sie bleibt anklickbar, erzeugt aber keine aktive Konfliktwarnung.
 
-Ein Klick auf einen Regeltag öffnet Einstellungen → Sortierregeln und lädt exakt diese Regel über ihre ID zur Bearbeitung. Die Ansicht springt zur Maske und fokussiert das Namensfeld. „Keine Regel“ öffnet die Neuanlage mit vorbelegtem Target. Eine nicht mehr vorhandene Regel wird ausdrücklich gemeldet; es wird keine ähnlich benannte Regel geöffnet.
+Ein Klick auf einen Regeltag öffnet Einstellungen → Sortierregeln und lädt exakt diese Regel über ihre ID zur Bearbeitung. Die Ansicht springt zur Maske und fokussiert das Namensfeld. Der Plus-Button öffnet die Neuanlage mit vorbelegtem Target. Eine nicht mehr vorhandene Regel wird ausdrücklich gemeldet; es wird keine ähnlich benannte Regel geöffnet.
 
 Tags sind eigenständige Buttons neben dem Ordnerbutton, keine ineinander verschachtelten Buttons. Sie lassen sich mit Tastatur bedienen und besitzen zugängliche Beschriftungen. Tag-Klicks starten keine Ordner-Verschiebegeste. Der Kartenkörper behält Auswahl und Drag-and-drop. Lange Namen werden im Tag gekürzt und stehen vollständig im Tooltip; mehrere Tags umbrechen innerhalb ihres rechten Bereichs. Die Standardziel-Markierung bleibt separat sichtbar.
 
@@ -47,7 +47,7 @@ Release-Build ohne Fehler oder Warnungen. 399 Tests erfolgreich, darunter:
 - Keine Konfliktwarnung bei unterschiedlicher Priorität, anderen Bedingungen, deaktivierten Regeln, ungültigen Regeln oder nur einem Ziel.
 - Unmittelbare Tag-Aktualisierung nach Anlegen, Umbenennen, Entfernen und Neuzuordnung; Erhalt bei Speicherfehlern.
 - Light-/Darkmode mit verschiedenen Tagfarben und direkten Mausklicks zur richtigen Regel einschließlich Fokus.
-- „Keine Regel“ als Einstieg zur Neuanlage, keine verschachtelten Buttons und erhaltene Drag-and-drop-Ordnersortierung.
+- Plus-Button als Einstieg zur Neuanlage, keine verschachtelten Buttons und erhaltene Drag-and-drop-Ordnersortierung.
 
 Die manuelle Prüfung in der laufenden Anwendung steht noch aus. Die Neugestaltung der gesamten Regelübersicht und andere Plattformkorrekturen sind separate Aufgaben.
 

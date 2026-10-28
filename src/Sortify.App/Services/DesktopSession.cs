@@ -41,9 +41,13 @@ public sealed class DesktopSession : IDisposable
         window.Closing += OnClosing;
     }
 
-    public async Task InitializeAsync(bool background)
+    public async Task InitializeAsync(bool background, Action<string>? reportStatus = null,
+        CancellationToken cancellationToken = default)
     {
-        await viewModel.InitializeSettingsAsync();
+        cancellationToken.ThrowIfCancellationRequested();
+        reportStatus?.Invoke("Einstellungen werden geladen …");
+        await viewModel.InitializeSettingsAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
         if (disposed)
             return;
         if (settings?.Current is { } loadedSettings && Application.Current is { } application)
@@ -53,9 +57,11 @@ public sealed class DesktopSession : IDisposable
                 : ThemeVariant.Light;
         }
         initialized = true;
+        reportStatus?.Invoke("Ordnerüberwachung wird gestartet …");
         RestartMonitoring();
         try
         {
+            reportStatus?.Invoke("Autostart-Einstellungen werden geprüft …");
             LoginStartupEnabled = loginStartup.IsEnabled;
         }
         catch (Exception error) when (IsPreferenceError(error))
@@ -67,6 +73,17 @@ public sealed class DesktopSession : IDisposable
         var startMinimized = settings?.Current?.StartMinimized == true;
         if (!background || !startMinimized || showRequested || !TrayAvailable || !monitor.IsMonitoring)
             ShowMainWindow();
+    }
+
+    public void ShowStartupFailure()
+    {
+        if (disposed)
+            return;
+        monitor.Dispose();
+        initialized = true;
+        viewModel.SettingsStatus = "Sortify konnte nicht vollständig gestartet werden. Bitte die Anwendung beenden und erneut starten.";
+        StateChanged?.Invoke();
+        ShowMainWindow();
     }
 
     public void ShowMainWindow()

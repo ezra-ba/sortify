@@ -41,6 +41,12 @@ public sealed class DesktopSessionTests
             {
                 await session.InitializeAsync(background: true);
                 Assert.False(window.IsVisible);
+                Assert.True(session.IsInBackground);
+                session.ShowMainWindow();
+                window.Close();
+                Assert.False(window.IsVisible);
+                Assert.True(session.IsReady);
+                Assert.True(session.IsInBackground);
                 Assert.Equal(directory, viewModel.CurrentSettings!.WatchedFolderPath);
                 await File.WriteAllTextAsync(Path.Combine(directory, "first.pdf"), "unchanged");
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -49,6 +55,15 @@ public sealed class DesktopSessionTests
                 Assert.True(popup.IsVisible);
                 Assert.Null(popup.Owner);
                 Assert.False(window.IsVisible);
+                session.SetTrayAvailability(false);
+                Assert.True(window.IsVisible);
+                Assert.False(session.IsInBackground);
+                Assert.False(session.TrayAvailable);
+                Assert.True(popup.IsVisible);
+                session.SetTrayAvailability(true);
+                window.Close();
+                Assert.False(window.IsVisible);
+                Assert.True(session.IsInBackground);
                 session.TogglePause();
                 Assert.True(session.IsPaused);
                 Assert.False(popup.IsVisible);
@@ -62,6 +77,9 @@ public sealed class DesktopSessionTests
                     await Task.Delay(25, timeout.Token);
                 session.Exit();
                 Assert.False(popup.IsVisible);
+                session.SetTrayAvailability(false);
+                session.ShowMainWindow();
+                Assert.False(window.IsVisible);
             }
             finally
             {

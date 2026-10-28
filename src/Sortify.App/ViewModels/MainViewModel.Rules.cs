@@ -33,6 +33,19 @@ public partial class MainViewModel
         }, "Sortierregel aktualisiert.");
     }
 
+    public Task<SettingsSaveResult> SetRuleEnabledAsync(SortRule original, bool enabled)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        return ChangeRuleAsync(current =>
+        {
+            RequireUnchangedRule(original, current);
+            var updated = original with { IsEnabled = enabled };
+            // Deactivation remains possible even when the referenced target was removed.
+            if (enabled) ValidateRule(updated, current);
+            return current with { Rules = current.Rules.Select(rule => rule.Id == original.Id ? updated : rule).ToArray() };
+        }, enabled ? "Sortierregel aktiviert." : "Sortierregel deaktiviert.");
+    }
+
     public Task<SettingsSaveResult> RemoveRuleAsync(SortRule original)
     {
         ArgumentNullException.ThrowIfNull(original);

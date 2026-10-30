@@ -78,6 +78,8 @@
             <Button x:Name="AiButton" Classes="nav-item" Click="SelectSection" Tag="KI-Unterstützung" Content="KI-Unterstützung"/>
             <TextBlock x:Name="AppearanceHeader" Text="DARSTELLUNG" FontSize="11" FontWeight="SemiBold" Margin="10,18,0,7"/>
             <Button x:Name="AppearanceButton" Classes="nav-item" Click="SelectSection" Tag="Darstellung" Content="◐   Darstellung"/>
+            <TextBlock Text="DIAGNOSE" FontSize="11" FontWeight="SemiBold" Margin="10,18,0,7"/>
+            <Button x:Name="ActivityLogButton" Classes="nav-item" Click="SelectSection" Tag="Aktivitätsprotokoll" Content="≡   Aktivitätsprotokoll"/>
           </StackPanel>
         </ScrollViewer>
       </Grid>
@@ -159,6 +161,34 @@
             <ToggleButton x:Name="DarkModeToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="False" IsCheckedChanged="DarkModeChanged"/>
           </Grid>
         </Border>
+        <StackPanel x:Name="ActivityLogPanel" x:DataType="vm:ActivityLogViewModel" IsVisible="False" Spacing="10" Margin="0,18,0,0">
+          <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+            <Button Content="Aktualisieren" Command="{Binding LoadCommand}" Padding="14,7"/>
+            <TextBlock Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding StatusMessage}" Classes="muted"/>
+          </Grid>
+          <TextBlock Text="{Binding ReadError}" Foreground="#B42318" IsVisible="{Binding HasReadError}" TextWrapping="Wrap"/>
+          <TextBlock Text="{Binding SkippedEntries, StringFormat='{} {0} beschädigte Einträge wurden übersprungen.'}" Foreground="#B45309" IsVisible="{Binding HasSkippedEntries}"/>
+          <TextBlock Text="Aktivitätsprotokoll wird geladen …" IsVisible="{Binding IsLoading}" Classes="muted"/>
+          <TextBlock Text="Noch keine Aktivitäten protokolliert." IsVisible="{Binding HasNoEntries}" Classes="muted"/>
+          <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasEntries}">
+            <ItemsControl ItemsSource="{Binding Entries}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ActivityLogItem">
+                  <Border Padding="10,8" Margin="0,0,0,6" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="8">
+                    <StackPanel Spacing="2">
+                      <TextBlock Text="{Binding Message}" FontSize="14"/>
+                      <TextBlock Text="{Binding EventName}" FontFamily="Consolas" FontSize="12" Foreground="{DynamicResource BrushTextSecondary}"/>
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding TimestampUtc, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" FontSize="11" Foreground="{DynamicResource BrushTextSecondary}"/>
+                        <TextBlock Text="{Binding Level}" FontSize="11" Foreground="{DynamicResource BrushTextSecondary}"/>
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </StackPanel>
       </StackPanel>
     </ScrollViewer>
     </Grid>

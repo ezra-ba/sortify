@@ -66,7 +66,7 @@ public partial class MainViewModel : ViewModelBase
 
     public string DefaultTargetFolderButtonText =>
     SelectedTargetFolder?.IsDefault == true
-        ? "Standard aufheben"
+        ? "Standard entfernen"
         : "Als Standard festlegen";
     private readonly ISettingsService? settingsService;
     private readonly ILoginStartup? loginStartup;
@@ -113,6 +113,12 @@ public partial class MainViewModel : ViewModelBase
         if (settingsService is null)
             return new SettingsSaveResult(false, "Die Einstellungen sind nicht verfügbar.");
 
+        if (autoStart && loginStartup is { IsSupported: false })
+        {
+            SettingsStatus = "Autostart ist mit dieser App-Ausführung oder auf diesem Betriebssystem nicht verfügbar.";
+            return new SettingsSaveResult(false, SettingsStatus);
+        }
+
         if (loginStartup is { IsSupported: true })
         {
             try
@@ -123,7 +129,8 @@ public partial class MainViewModel : ViewModelBase
                 or System.Security.SecurityException or ArgumentException
                 or PlatformNotSupportedException)
             {
-                return new SettingsSaveResult(false, "Autostart konnte nicht geändert werden: " + error.Message);
+                SettingsStatus = "Autostart konnte nicht geändert werden: " + error.Message;
+                return new SettingsSaveResult(false, SettingsStatus);
             }
         }
 

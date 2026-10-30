@@ -7,15 +7,25 @@ using Avalonia.Styling;
 using Avalonia.Media;
 using System.Runtime.InteropServices;
 using Sortify.Core.Models;
+using Sortify.Core.Services;
+using Sortify.App.Services;
 
 namespace Sortify.App.Views;
 
 public partial class SettingsWindow : Window
 {
     private bool loadingAiSettings;
-    public SettingsWindow()
+    private readonly ActivityLogViewModel activityLog;
+
+    public SettingsWindow() : this(null)
     {
+    }
+
+    public SettingsWindow(IActivityLog? log = null)
+    {
+        activityLog = new ActivityLogViewModel(log ?? new NullActivityLog());
         InitializeComponent();
+        ActivityLogPanel.DataContext = activityLog;
         Opened += ApplyNativeTitleBarColor;
         Opened += (_, _) =>
         {
@@ -30,6 +40,7 @@ public partial class SettingsWindow : Window
                 CloseToTrayToggle.IsChecked = main.CurrentSettings?.CloseToTray != false;
                 LoadAiSettings(main);
             }
+            _ = activityLog.LoadAsync();
         };
     }
 
@@ -77,7 +88,7 @@ public partial class SettingsWindow : Window
     {
         if (sender is not Button { Tag: string section }) return;
 
-        foreach (var button in new[] { GeneralButton, WatchedButton, RulesButton, AppearanceButton, AiButton })
+        foreach (var button in new[] { GeneralButton, WatchedButton, RulesButton, AppearanceButton, AiButton, ActivityLogButton })
             button.Classes.Set("selected", ReferenceEquals(button, sender));
 
         var rulesSelected = section == "Sortierregeln";
@@ -96,6 +107,7 @@ public partial class SettingsWindow : Window
         SectionTitle.Text = section;
         var appearanceSelected = section == "Darstellung";
         AppearanceCard.IsVisible = appearanceSelected;
+        ActivityLogPanel.IsVisible = section == "Aktivitätsprotokoll";
     }
 
     private async void DarkModeChanged(object? sender, RoutedEventArgs e)

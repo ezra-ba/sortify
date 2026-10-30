@@ -16,6 +16,9 @@ public sealed class SettingsValidator
     {
         var errors = new List<string>();
 
+        if (!Enum.IsDefined(settings.AiMode))
+            errors.Add("Der KI-Modus ist ungültig.");
+
         ValidateFolderPath(
             settings.WatchedFolderPath,
             "Eingangsordner",

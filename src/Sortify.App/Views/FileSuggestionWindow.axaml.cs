@@ -9,6 +9,11 @@ namespace Sortify.App.Views;
 
 public partial class FileSuggestionWindow : Window
 {
+    private void AdoptAiSuggestion_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is FileSuggestionViewModel model)
+            model.AdoptAiSuggestion();
+    }
     private async void ConfirmButton_Click(
     object? sender,
     RoutedEventArgs e)

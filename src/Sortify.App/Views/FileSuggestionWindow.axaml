@@ -148,6 +148,13 @@
            TextWrapping="Wrap"
            FontSize="12"/>
 
+            <ProgressBar Height="3" MinHeight="3" IsIndeterminate="True" IsVisible="{Binding IsAiBusy}"/>
+            <TextBlock Text="{Binding AiStatus}" TextWrapping="Wrap" Classes="muted"/>
+            <TextBlock Text="{Binding AiAlternativeSummary}" TextWrapping="Wrap"
+                       IsVisible="{Binding HasAiAlternative}" Classes="muted"/>
+            <Button Content="KI-Vorschlag übernehmen" Classes="secondary motion"
+                    IsVisible="{Binding HasAiAlternative}" HorizontalAlignment="Left" Click="AdoptAiSuggestion_Click"/>
+
             <Button Content="Datei erneut prüfen"
                     Classes="secondary motion"
                     HorizontalAlignment="Left"

@@ -6,11 +6,13 @@ using Avalonia.Interactivity;
 using Avalonia.Styling;
 using Avalonia.Media;
 using System.Runtime.InteropServices;
+using Sortify.Core.Models;
 
 namespace Sortify.App.Views;
 
 public partial class SettingsWindow : Window
 {
+    private bool loadingAiSettings;
     public SettingsWindow()
     {
         InitializeComponent();
@@ -26,6 +28,7 @@ public partial class SettingsWindow : Window
                 StartMinimizedToggle.IsEnabled = AutoStartToggle.IsChecked == true;
                 StartMinimizedCard.Opacity = AutoStartToggle.IsChecked == true ? 1d : 0.45d;
                 CloseToTrayToggle.IsChecked = main.CurrentSettings?.CloseToTray != false;
+                LoadAiSettings(main);
             }
         };
     }
@@ -74,7 +77,7 @@ public partial class SettingsWindow : Window
     {
         if (sender is not Button { Tag: string section }) return;
 
-        foreach (var button in new[] { GeneralButton, WatchedButton, RulesButton, AppearanceButton })
+        foreach (var button in new[] { GeneralButton, WatchedButton, RulesButton, AppearanceButton, AiButton })
             button.Classes.Set("selected", ReferenceEquals(button, sender));
 
         var rulesSelected = section == "Sortierregeln";
@@ -82,6 +85,9 @@ public partial class SettingsWindow : Window
         RuleActions.IsVisible = rulesSelected;
         var generalSelected = section == "Allgemein";
         GeneralSettingsPanel.IsVisible = generalSelected;
+        AiSettingsPanel.IsVisible = section == "KI-Unterstützung";
+        if (AiSettingsPanel.IsVisible && DataContext is MainViewModel main)
+            LoadAiSettings(main);
         if (rulesSelected)
         {
             EnsureRuleEditor();
@@ -123,6 +129,40 @@ public partial class SettingsWindow : Window
             AutoStartToggle.IsChecked == true,
             StartMinimizedToggle.IsChecked == true,
             CloseToTrayToggle.IsChecked == true);
+    }
+
+    private void LoadAiSettings(MainViewModel main)
+    {
+        loadingAiSettings = true;
+        try
+        {
+            AiModeSelector.SelectedIndex = (int)(main.CurrentSettings?.AiMode ?? AiSuggestionMode.Disabled);
+            AiConsentCheck.IsChecked = main.CurrentSettings?.AiMetadataConsent == true;
+            AiKeyStatus.Text = string.IsNullOrWhiteSpace(Sortify.App.Services.NvidiaApiKey.Read())
+                ? "API-Schlüssel fehlt: NVIDIA_API_KEY als Benutzervariable setzen."
+                : "API-Schlüssel über NVIDIA_API_KEY verfügbar.";
+        }
+        finally { loadingAiSettings = false; }
+    }
+
+    private async void AiModeChanged(object? sender, SelectionChangedEventArgs e) => await SaveAiSettingsAsync();
+    private async void AiConsentChanged(object? sender, RoutedEventArgs e) => await SaveAiSettingsAsync();
+
+    private async Task SaveAiSettingsAsync()
+    {
+        if (loadingAiSettings || !IsInitialized || !IsVisible || DataContext is not MainViewModel main
+            || AiModeSelector.SelectedIndex < 0)
+            return;
+        AiSettingsPanel.IsEnabled = false;
+        try
+        {
+            var result = await main.SaveAiSettingsAsync((AiSuggestionMode)AiModeSelector.SelectedIndex,
+                AiConsentCheck.IsChecked == true);
+            AiSaveStatus.Text = result.IsSuccess ? "Gespeichert." : result.ErrorMessage;
+            if (!result.IsSuccess)
+                LoadAiSettings(main);
+        }
+        finally { AiSettingsPanel.IsEnabled = true; }
     }
 
 }

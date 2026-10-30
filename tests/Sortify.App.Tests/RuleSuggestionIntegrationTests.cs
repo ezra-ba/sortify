@@ -70,6 +70,45 @@ public sealed class RuleSuggestionIntegrationTests
         Assert.Equal(Path.Combine(second.Path, "manual.pdf"), service.Request?.TargetPath);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task LateAiReplyPreservesManualEditsAndNeverMovesFile(bool cancel)
+    {
+        var target = new TargetFolder(Guid.NewGuid(), Path.GetTempPath(), "Schule");
+        var settings = new AppSettings(Path.GetTempPath(), null, false, []) {
+            TargetFolders = [target], DefaultTargetFolderId = target.Id,
+            AiMode = AiSuggestionMode.Fallback, AiMetadataConsent = true };
+        var cards = new ObservableCollection<TargetFolderViewModel> { new(target.Id, target.Nickname, target.Path, true) };
+        var source = Path.Combine(Path.GetTempPath(), "invoice.pdf");
+        var move = new MoveService(source);
+        var ai = new PendingAiService();
+        var model = new FileSuggestionViewModel(cards, source, move,
+            new RuleEngine(new RuleValidator(), new RuleTargetValidator()), () => settings, ai);
+        var pending = model.InitializeFileOperationAsync();
+        Assert.True(model.IsAiBusy);
+        model.NewFileName = "manual";
+        if (cancel) model.CancelAiSuggestion();
+        ai.Completion.SetResult(new(new(target.Id, "AI.pdf", "Testvorschlag", []), "Verfügbar"));
+        await pending;
+        Assert.Equal("manual", model.NewFileName);
+        Assert.Equal(0, move.MoveCount);
+        Assert.Equal(!cancel, model.HasAiAlternative);
+        if (!cancel)
+        {
+            model.AdoptAiSuggestion();
+            Assert.Equal("AI", model.NewFileName);
+            Assert.Equal(0, move.MoveCount);
+        }
+    }
+
+    private sealed class PendingAiService : IAiSuggestionService
+    {
+        public TaskCompletionSource<AiSuggestionResult> Completion { get; } = new();
+        public Task<AiSuggestionResult> SuggestAsync(AiSuggestionRequest request, CancellationToken cancellationToken = default)
+            => Completion.Task;
+    }
+
     private sealed class MoveService(string source) : IFileMoveService
     {
         public int MoveCount { get; private set; }

@@ -75,6 +75,7 @@
             <Button x:Name="WatchedButton" Classes="nav-item" Click="SelectSection" Tag="Überwachungsordner" Content="◉   Überwachungsordner"/>
             <TextBlock x:Name="SortingHeader" Text="SORTIERUNG" FontSize="11" FontWeight="SemiBold" Margin="10,18,0,7"/>
             <Button x:Name="RulesButton" Classes="nav-item" Click="SelectSection" Tag="Sortierregeln" Content="≡   Sortierregeln"/>
+            <Button x:Name="AiButton" Classes="nav-item" Click="SelectSection" Tag="KI-Unterstützung" Content="KI-Unterstützung"/>
             <TextBlock x:Name="AppearanceHeader" Text="DARSTELLUNG" FontSize="11" FontWeight="SemiBold" Margin="10,18,0,7"/>
             <Button x:Name="AppearanceButton" Classes="nav-item" Click="SelectSection" Tag="Darstellung" Content="◐   Darstellung"/>
           </StackPanel>
@@ -132,6 +133,26 @@
           </Border>
         </StackPanel>
         <views:RuleEditorView x:Name="RulesEditor" IsVisible="False"/>
+        <StackPanel x:Name="AiSettingsPanel" Spacing="16" Margin="0,18,0,0" IsVisible="False">
+          <TextBlock FontSize="16" FontWeight="SemiBold" Text="NVIDIA Nemotron"/>
+          <TextBlock Classes="muted" Text="nvidia/nemotron-3.5-super-vl-120b-a12b" TextWrapping="Wrap"/>
+          <TextBlock Text="KI-Modus"/>
+          <ComboBox x:Name="AiModeSelector" HorizontalAlignment="Stretch" SelectedIndex="0"
+                    SelectionChanged="AiModeChanged">
+            <ComboBoxItem Content="Aus – nur lokale Regeln"/>
+            <ComboBoxItem Content="KI als Fallback ohne eindeutigen Regeltreffer"/>
+            <ComboBoxItem Content="KI ergänzend zu lokalen Regeln"/>
+          </ComboBox>
+          <CheckBox x:Name="AiConsentCheck" IsCheckedChanged="AiConsentChanged"
+                    HorizontalContentAlignment="Stretch">
+            <TextBlock TextWrapping="Wrap"
+              Text="Ich erlaube die Übertragung von Dateiname, Dateityp, Größe, Änderungszeit, allen Regeldefinitionen sowie Ziel-IDs und Ziel-Spitznamen an NVIDIA."/>
+          </CheckBox>
+          <TextBlock Classes="muted" TextWrapping="Wrap"
+            Text="Diese Angaben können sensible Informationen enthalten. Dateiinhalte und absolute Ordnerpfade werden nicht als Dateifelder übertragen."/>
+          <TextBlock x:Name="AiKeyStatus" Classes="muted" TextWrapping="Wrap"/>
+          <TextBlock x:Name="AiSaveStatus" TextWrapping="Wrap"/>
+        </StackPanel>
         <Border x:Name="AppearanceCard" IsVisible="False" Margin="0,18,0,0" Padding="12,10" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
           <Grid ColumnDefinitions="*,Auto">
             <TextBlock x:Name="AppearanceTitle" VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold" Text="Darkmode"/>

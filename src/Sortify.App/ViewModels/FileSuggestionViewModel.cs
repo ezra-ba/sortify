@@ -13,21 +13,48 @@ public partial class FileSuggestionViewModel : ViewModelBase
     private readonly IFileMoveService? fileMoveService;
     private readonly IRuleEngine? ruleEngine;
     private readonly Func<AppSettings?>? settingsProvider;
+    private readonly IAiSuggestionService? aiService;
+    private AiSuggestionRequest? aiRequest;
+    private CancellationTokenSource? aiCancellation;
+    private int editRevision;
+    private int aiRevision;
     private bool suggestionEvaluated;
     private FileSourceSnapshot? sourceSnapshot;
     private CancellationTokenSource? inspectionCancellation;
+
+    [ObservableProperty]
+    public partial bool IsAiBusy { get; set; }
+
+    [ObservableProperty]
+    public partial string AiStatus { get; set; } = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAiAlternative))]
+    [NotifyPropertyChangedFor(nameof(AiAlternativeSummary))]
+    public partial AiFileSuggestion? AiAlternative { get; set; }
+
+    public bool HasAiAlternative => AiAlternative is not null && CanEdit;
+
+    public string AiAlternativeSummary => AiAlternative is { } suggestion
+        ? $"{suggestion.FileName} → {TargetFolders.FirstOrDefault(folder => folder.Id == suggestion.TargetFolderId)?.Nickname}"
+        : "";
+
+    partial void OnSelectedTargetFolderChanged(TargetFolderViewModel? value) => editRevision++;
+    partial void OnNewFileNameChanged(string value) => editRevision++;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanConfirmMove))]
     [NotifyPropertyChangedFor(nameof(CanEdit))]
     [NotifyPropertyChangedFor(nameof(CanCancel))]
     [NotifyPropertyChangedFor(nameof(CanRefreshSource))]
+    [NotifyPropertyChangedFor(nameof(HasAiAlternative))]
     public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanConfirmMove))]
     [NotifyPropertyChangedFor(nameof(CanEdit))]
     [NotifyPropertyChangedFor(nameof(CanRefreshSource))]
+    [NotifyPropertyChangedFor(nameof(HasAiAlternative))]
     public partial bool IsMoveCompleted { get; set; }
 
     [ObservableProperty]
@@ -72,11 +99,13 @@ public partial class FileSuggestionViewModel : ViewModelBase
         string path,
         IFileMoveService? fileMoveService = null,
         IRuleEngine? ruleEngine = null,
-        Func<AppSettings?>? settingsProvider = null) : this(targetFolders)
+        Func<AppSettings?>? settingsProvider = null,
+        IAiSuggestionService? aiService = null) : this(targetFolders)
     {
         this.fileMoveService = fileMoveService;
         this.ruleEngine = ruleEngine;
         this.settingsProvider = settingsProvider;
+        this.aiService = aiService;
         SourcePath = path;
         DetectedFileName = Path.GetFileName(path);
         FileExtension = Path.GetExtension(path);
@@ -172,6 +201,9 @@ public partial class FileSuggestionViewModel : ViewModelBase
             OnPropertyChanged(nameof(CanConfirmMove));
             OnPropertyChanged(nameof(CanRefreshSource));
         }
+
+        if (aiRequest is not null && !cancellation.IsCancellationRequested)
+            await LoadAiSuggestionAsync(aiRequest);
     }
 
     private void ApplyRuleSuggestion(FileSourceSnapshot snapshot)
@@ -195,6 +227,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
             snapshot.Length,
             snapshot.LastWriteTimeUtc);
         var result = ruleEngine!.Evaluate(file, settings.Rules, settings.TargetFolders);
+        aiRequest = new AiSuggestionRequest(file, settings, result);
         if (result.Status == RuleEvaluationStatus.Matched && result.Candidates.Count == 1)
         {
             var candidate = result.Candidates[0];
@@ -232,6 +265,75 @@ public partial class FileSuggestionViewModel : ViewModelBase
     public void CancelSourceInspection()
     {
         inspectionCancellation?.Cancel();
+        CancelAiSuggestion();
+    }
+
+    public void CancelAiSuggestion()
+    {
+        aiRevision++;
+        aiCancellation?.Cancel();
+        AiAlternative = null;
+        AiStatus = "";
+        IsAiBusy = false;
+    }
+
+    private async Task LoadAiSuggestionAsync(AiSuggestionRequest request)
+    {
+        if (aiService is null || !AiSuggestionPolicy.ShouldRequest(request.Settings, request.LocalResult))
+            return;
+        var revision = ++aiRevision;
+        var originalEditRevision = editRevision;
+        using var cancellation = new CancellationTokenSource();
+        aiCancellation = cancellation;
+        IsAiBusy = true;
+        AiStatus = "KI-Vorschlag wird angefragt …";
+        try
+        {
+            var result = await aiService.SuggestAsync(request, cancellation.Token);
+            var current = settingsProvider?.Invoke();
+            if (cancellation.IsCancellationRequested || revision != aiRevision || IsMoveCompleted || current is null
+                || current.AiMode != request.Settings.AiMode || !current.AiMetadataConsent
+                || !ReferenceEquals(current.Rules, request.Settings.Rules)
+                || !ReferenceEquals(current.TargetFolders, request.Settings.TargetFolders)
+                || current.DefaultTargetFolderId != request.Settings.DefaultTargetFolderId)
+                return;
+            AiStatus = result.Message;
+            if (result.Suggestion is not { } suggestion
+                || !TargetFolders.Any(folder => folder.Id == suggestion.TargetFolderId))
+                return;
+            AiAlternative = suggestion;
+            if (!AiSuggestionPolicy.HasLocalMatch(request.LocalResult) && originalEditRevision == editRevision)
+                AdoptAiSuggestion();
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+        }
+        catch (Exception)
+        {
+            if (revision == aiRevision)
+                AiStatus = "Der KI-Vorschlag ist nicht verfügbar. Der lokale Vorschlag bleibt erhalten.";
+        }
+        finally
+        {
+            if (ReferenceEquals(aiCancellation, cancellation))
+                aiCancellation = null;
+            if (revision == aiRevision)
+                IsAiBusy = false;
+        }
+    }
+
+    public void AdoptAiSuggestion()
+    {
+        if (!CanEdit || AiAlternative is not { } suggestion)
+            return;
+        var target = TargetFolders.FirstOrDefault(folder => folder.Id == suggestion.TargetFolderId);
+        if (target is null)
+            return;
+        SelectedTargetFolder = target;
+        NewFileName = Path.GetFileNameWithoutExtension(suggestion.FileName);
+        SuggestionExplanation = "KI-Vorschlag: " + suggestion.Reason;
+        AiAlternative = null;
+        AiStatus = "KI-Vorschlag übernommen. Die Datei wird erst nach Bestätigung geändert.";
     }
 
     public async Task<bool> ConfirmMoveAsync()
@@ -244,6 +346,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
         }
 
         // Genau die beim Klick angezeigten Werte übernehmen.
+        CancelAiSuggestion();
         var request = new FileMoveRequest(
             sourceSnapshot.SourcePath,
             FilePathPreview,
@@ -274,6 +377,8 @@ public partial class FileSuggestionViewModel : ViewModelBase
             {
                 // Keine stillschweigende neue Bestätigung für veränderte Daten.
                 sourceSnapshot = null;
+                suggestionEvaluated = false;
+                aiRequest = null;
                 OperationMessage +=
                     " Bitte „Datei erneut prüfen“ wählen und anschließend erneut bestätigen.";
 

@@ -19,4 +19,8 @@ public sealed record AppSettings(
 
     public bool StartMinimized { get; init; }
 
+    public AiSuggestionMode AiMode { get; init; }
+
+    public bool AiMetadataConsent { get; init; }
+
 }

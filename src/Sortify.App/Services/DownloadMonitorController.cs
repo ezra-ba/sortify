@@ -5,11 +5,16 @@ using Sortify.Infrastructure.Monitoring;
 using Sortify.Core.Services;
 using Sortify.Core.Rules;
 using Sortify.Infrastructure.FileSystem;
+using Sortify.Infrastructure.Ai;
 
 namespace Sortify.App.Services;
 
 public sealed class DownloadMonitorController(MainViewModel viewModel) : IDisposable
 {
+    private static readonly HttpClient AiHttpClient = new(new HttpClientHandler { AllowAutoRedirect = false })
+        { Timeout = Timeout.InfiniteTimeSpan };
+    private readonly IAiSuggestionService aiService = new NvidiaAiSuggestionService(AiHttpClient,
+        NvidiaApiKey.Read);
     private readonly IFileMoveService fileMoveService =
     new FileMoveService();
     private readonly IRuleEngine ruleEngine = new RuleEngine(new RuleValidator(), new RuleTargetValidator());
@@ -49,12 +54,19 @@ public sealed class DownloadMonitorController(MainViewModel viewModel) : IDispos
                             path,
                             fileMoveService,
                             ruleEngine,
-                            () => viewModel.CurrentSettings))
+                            () => viewModel.CurrentSettings,
+                            aiService))
                 {
                     Topmost = true
                 };
                 popups.Add(popup);
-                popup.Closed += (_, _) => popups.Remove(popup);
+                var popupModel = (FileSuggestionViewModel)popup.DataContext!;
+                viewModel.AiConfigurationChanged += popupModel.CancelAiSuggestion;
+                popup.Closed += (_, _) =>
+                {
+                    viewModel.AiConfigurationChanged -= popupModel.CancelAiSuggestion;
+                    popups.Remove(popup);
+                };
                 popup.Show();
             }), error => Dispatcher.UIThread.Post(() =>
             {

@@ -44,7 +44,11 @@ Für die erste verwendbare Version sind folgende Kernfunktionen vorgesehen:
 - Einstellungen lokal speichern,
 - Fehler verständlich anzeigen und bestehende Dateien vor unbeabsichtigtem Überschreiben schützen.
 
-## Mögliche Erweiterungen
+## Optionale KI-Unterstützung
+
+In den Einstellungen kann NVIDIA Nemotron ergänzende Sortiervorschläge liefern: entweder bei fehlendem eindeutigem Regeltreffer oder zusätzlich zu lokalen Regeln. Standardmäßig ist die Funktion aus. Sie benötigt eine ausdrückliche Zustimmung zur Übertragung der Metadaten und einen eigenen API-Schlüssel in `NVIDIA_API_KEY`. Dateioperationen erfordern weiterhin eine Bestätigung. Einrichtung, übertragene Daten und lokale Tests: [KI-Sortiervorschläge](docs/ai-suggestions.md).
+
+## Weitere mögliche Erweiterungen
 
 - Verlauf ausgeführter und abgelehnter Vorschläge,
 - Rückgängig-Funktion,

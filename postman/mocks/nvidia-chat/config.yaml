@@ -1,0 +1,10 @@
+version: 1
+id: c087c92a-c280-4b1f-86fd-7ec897c3fcfa
+name: nvidia-chat
+slug: nvidia-chat
+protocol: http
+port: 4500
+scenarios:
+  - name: default
+    path: ./scenarios.js
+    default: true

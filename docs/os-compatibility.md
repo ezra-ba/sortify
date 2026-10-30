@@ -45,7 +45,7 @@ Der aktuelle Linux-Ausschluss in `App.axaml.cs` ist absichtlich noch unveränder
 | --- | --- | --- | --- |
 | Tray im aktuellen App-Code | wird versucht; Nutzer berichtet funktionsfähig | ausdrücklich ausgeschlossen | wird versucht; real nicht bestätigt |
 | Schließen bei nutzbarem Tray | bestehende gemeinsame Sitzungslogik | dieselbe Logik möglich, Anbindung fehlt | dieselbe Logik vorhanden, real prüfen |
-| Autostart aktuell | Windows-Registry-Dienst | Windows-Dienst meldet nicht unterstützt | Windows-Dienst meldet nicht unterstützt |
+| Autostart mit #86 | Windows-Registry-Dienst | Linux-XDG-Dienst über Factory; bewusste Aktivierung nötig | ausdrücklich noch nicht unterstützt |
 | Überwachung/Dateioperationen | .NET-Backend; bestehende Tests | .NET-Backend hier getestet | .NET-Backend vorhanden; real prüfen |
 | Icon-Position | Infobereich | abhängig von Desktop/Erweiterung | Menüleiste, nicht zwingend unten rechts |
 
@@ -81,3 +81,7 @@ Der begonnene, noch ungetestete Autostart-Entwurf ist lokal im Git-Stash mit der
 ## Verifikation dieses Backend-Stands
 
 Release-Build ohne Warnungen/Fehler. Vollständige Testsuite: 422 erfolgreich (240 Core, 107 Infrastructure, 75 App). Drei neue Core-Tests und der erweiterte bestehende Sitzungstest sichern die Änderung ab. Die gegenüber dem letzten Logging-Stand zusätzlichen App-Tests stammen aus dem bereits integrierten Splashscreen-PR. `git diff --check` ist sauber. Reale Tray-/Desktop-Abnahme unter Linux, Windows und macOS steht weiterhin aus.
+
+## Folgearbeit #86
+
+Linux-Autostart ist inzwischen separat implementiert und in der App-Komposition über eine OS-Factory angebunden. Anleitung und Grenzen: [linux-autostart.md](linux-autostart.md). Die native Tray-Anbindung bleibt unabhängig davon offen; ein Autostart ohne nutzbaren Tray öffnet das Hauptfenster. Der ältere vollständige Autostart-Stash bleibt zur Referenz erhalten, insbesondere sein ungetesteter macOS-Entwurf wird nicht ausgeliefert.

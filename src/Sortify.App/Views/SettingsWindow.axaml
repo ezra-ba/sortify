@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" xmlns:views="using:Sortify.App.Views" xmlns:vm="using:Sortify.App.ViewModels" x:Class="Sortify.App.Views.SettingsWindow" Title="" Width="900" Height="560" MinWidth="760" MinHeight="460" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:platform="using:Avalonia.Controls" xmlns:views="using:Sortify.App.Views" xmlns:vm="using:Sortify.App.ViewModels" x:Class="Sortify.App.Views.SettingsWindow" x:DataType="vm:MainViewModel" Title="" Width="900" Height="560" MinWidth="760" MinHeight="460" WindowStartupLocation="CenterOwner" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="40">
   <Window.Styles>
     <Style Selector="Button.nav-item">
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -79,6 +79,7 @@
             <Button x:Name="AppearanceButton" Classes="nav-item" Click="SelectSection" Tag="Darstellung" Content="◐   Darstellung"/>
             <TextBlock Text="DIAGNOSE" FontSize="11" FontWeight="SemiBold" Margin="10,18,0,7"/>
             <Button x:Name="ActivityLogButton" Classes="nav-item" Click="SelectSection" Tag="Aktivitätsprotokoll" Content="≡   Aktivitätsprotokoll"/>
+            <Button x:Name="StatisticsButton" Classes="nav-item" Click="SelectSection" Tag="Download-Statistik" Content="▥   Download-Statistik"/>
           </StackPanel>
         </ScrollViewer>
       </Grid>
@@ -168,6 +169,7 @@
             </ItemsControl>
           </ScrollViewer>
         </StackPanel>
+        <views:DownloadStatisticsView x:Name="StatisticsPanel" IsVisible="False" DataContext="{Binding DownloadStatistics}" Margin="-38,0,-38,0"/>
       </StackPanel>
     </ScrollViewer>
     </Grid>

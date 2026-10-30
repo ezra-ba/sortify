@@ -15,6 +15,9 @@ namespace Sortify.App.Views;
 
 public partial class MainWindow : Window
 {
+    private Border DragPreviewControl => this.FindControl<Border>("DragPreview")!;
+    private TextBlock DragPreviewNicknameControl => this.FindControl<TextBlock>("DragPreviewNickname")!;
+    private TextBlock DragPreviewPathControl => this.FindControl<TextBlock>("DragPreviewPath")!;
     private readonly IActivityLog activityLog;
     private TargetFolderViewModel? _draggedTargetFolder;
     private Avalonia.Point _dragStart;
@@ -329,21 +332,21 @@ public partial class MainWindow : Window
     private void ShowDragPreview(TargetFolderViewModel folder, Avalonia.Point position)
     {
         if (_pressedTargetButton is { Bounds.Width: > 0 } sourceButton)
-            DragPreview.Width = sourceButton.Bounds.Width;
+            DragPreviewControl.Width = sourceButton.Bounds.Width;
 
         var canvasPosition = position;
-        if (DragPreview.Parent is Visual canvas &&
+        if (DragPreviewControl.Parent is Visual canvas &&
             this.TranslatePoint(position, canvas) is Point translatedPosition)
         {
             canvasPosition = translatedPosition;
         }
 
-        DragPreviewNickname.Text = folder.Nickname;
-        DragPreviewPath.Text = folder.Path;
-        DragPreview.DataContext = folder;
-        DragPreview.IsVisible = true;
-        Canvas.SetLeft(DragPreview, canvasPosition.X - _dragOffset.X);
-        Canvas.SetTop(DragPreview, canvasPosition.Y - _dragOffset.Y);
+        DragPreviewNicknameControl.Text = folder.Nickname;
+        DragPreviewPathControl.Text = folder.Path;
+        DragPreviewControl.DataContext = folder;
+        DragPreviewControl.IsVisible = true;
+        Canvas.SetLeft(DragPreviewControl, canvasPosition.X - _dragOffset.X);
+        Canvas.SetTop(DragPreviewControl, canvasPosition.Y - _dragOffset.Y);
     }
 
     private void ResetDrag()
@@ -355,7 +358,7 @@ public partial class MainWindow : Window
         _draggedTargetFolder = null;
         _dragOffset = new Point();
         _hasDragged = false;
-        DragPreview.DataContext = null;
-        DragPreview.IsVisible = false;
+        DragPreviewControl.DataContext = null;
+        DragPreviewControl.IsVisible = false;
     }
 }

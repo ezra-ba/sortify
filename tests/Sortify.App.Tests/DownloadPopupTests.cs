@@ -1,3 +1,7 @@
+using Sortify.Infrastructure.Logging;
+using Sortify.Infrastructure.FileSystem;
+using Sortify.Infrastructure.Monitoring;
+using Sortify.Core.Rules;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
@@ -30,7 +34,9 @@ public sealed class DownloadPopupTests
             var model = new MainViewModel();
             model.TargetFolders.Add(new TargetFolderViewModel("School",
                 Path.Combine(Path.GetPathRoot(root)!, "Sortify", "School"), true));
-            using var controller = new DownloadMonitorController(model);
+            var log = new JsonActivityLog(Path.Combine(root, "logs"));
+            using var controller = new DownloadMonitorController(model, new FileMoveService(),
+                new RuleEngine(new RuleValidator(), new RuleTargetValidator()), new FolderMonitor(log), log);
             FileSuggestionWindow? openedPopup = null;
             using var subscription = Window.WindowOpenedEvent.AddClassHandler<Window>((window, _) =>
             {
@@ -63,7 +69,14 @@ public sealed class DownloadPopupTests
                         Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
                 }
 
+                Assert.Empty(log.ReadRecent().Entries);
+                popup.Close();
+                Assert.False(popup.IsVisible);
+                var entry = Assert.Single(log.ReadRecent().Entries);
+                Assert.Equal("FileMove.Cancelled", entry.EventName);
+                Assert.Contains("questions.final.DOCX", entry.Message);
                 controller.Restart(null);
+                Assert.Single(log.ReadRecent().Entries);
                 Assert.False(popup.IsVisible);
                 Assert.Empty(owner.OwnedWindows);
                 Assert.Equal("unchanged", await File.ReadAllTextAsync(file));

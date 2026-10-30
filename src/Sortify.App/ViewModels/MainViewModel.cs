@@ -12,6 +12,8 @@ namespace Sortify.App.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    public DownloadStatisticsViewModel DownloadStatistics { get; } = new();
+
     [ObservableProperty]
     public partial bool IsSavingSettings { get; set; }
 

@@ -85,7 +85,7 @@ public partial class SettingsWindow : Window
     {
         if (sender is not Button { Tag: string section }) return;
 
-        foreach (var button in new[] { GeneralButton, WatchedButton, RulesButton, AppearanceButton, ActivityLogButton })
+        foreach (var button in new[] { GeneralButton, WatchedButton, RulesButton, AppearanceButton, ActivityLogButton, StatisticsButton })
             button.Classes.Set("selected", ReferenceEquals(button, sender));
 
         var rulesSelected = section == "Sortierregeln";
@@ -102,6 +102,7 @@ public partial class SettingsWindow : Window
         var appearanceSelected = section == "Darstellung";
         AppearanceCard.IsVisible = appearanceSelected;
         ActivityLogPanel.IsVisible = section == "Aktivitätsprotokoll";
+        StatisticsPanel.IsVisible = section == "Download-Statistik";
     }
 
     private async void DarkModeChanged(object? sender, RoutedEventArgs e)

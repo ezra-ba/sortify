@@ -154,6 +154,7 @@
 		</Border>
 		<Grid Grid.Row="1">
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled" IsEnabled="{Binding !IsSavingSettings}">
+		<Grid>
 		<StackPanel Margin="44,34" Spacing="26">
 			<Border Classes="surface-card" Padding="24" BorderThickness="1" CornerRadius="12">
 				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="22">
@@ -261,6 +262,7 @@
 				</Border>
 			</Grid>
 		</StackPanel>
+		</Grid>
 	</ScrollViewer>
 		<Canvas IsHitTestVisible="False">
 							<Border x:Name="DragPreview" x:CompileBindings="False" Width="420" Padding="16" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushAccent}" BorderThickness="1" CornerRadius="6" Opacity="0.96" IsVisible="False">

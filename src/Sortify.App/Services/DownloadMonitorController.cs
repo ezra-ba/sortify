@@ -1,3 +1,4 @@
+using Sortify.Infrastructure.Logging;
 using Avalonia.Threading;
 using Sortify.App.ViewModels;
 using Sortify.App.Views;
@@ -9,7 +10,7 @@ using Sortify.Infrastructure.FileSystem;
 namespace Sortify.App.Services;
 
 public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMoveService fileMoveService,
-    IRuleEngine ruleEngine, FolderMonitor monitor) : IDisposable
+    IRuleEngine ruleEngine, FolderMonitor monitor, IActivityLog? log = null) : IDisposable
 {
     // Compatibility constructor for existing UI tests and design-time callers.
     public DownloadMonitorController(MainViewModel viewModel)
@@ -47,18 +48,23 @@ public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMove
             {
                 if (disposed || session != currentSession)
                     return;
+                var activity = log is null ? null : new LoggedFileMoveService(fileMoveService, log);
                 var popup = new FileSuggestionWindow(
                     new FileSuggestionViewModel(
                         viewModel.TargetFolders,
                             path,
-                            fileMoveService,
+                            activity ?? fileMoveService,
                             ruleEngine,
                             () => viewModel.CurrentSettings))
                 {
                     Topmost = true
                 };
                 popups.Add(popup);
-                popup.Closed += (_, _) => popups.Remove(popup);
+                popup.Closed += (_, _) =>
+                {
+                    activity?.RecordDismissal(path);
+                    popups.Remove(popup);
+                };
                 popup.Show();
             }), error => Dispatcher.UIThread.Post(() =>
             {

@@ -83,7 +83,7 @@ public sealed class ActivityLogTests : IDisposable
     }
 
     [Fact]
-    public async Task FileMoveLogsSuccessAndRejectionWithoutChangingSafetyOrLeakingPaths()
+    public async Task FileMoveLogsOnlyOutcomesWithFileAndTarget()
     {
         Directory.CreateDirectory(root);
         var source = Path.Combine(root, "private-invoice.txt");
@@ -100,11 +100,16 @@ public sealed class ActivityLogTests : IDisposable
         Assert.False(File.Exists(source));
         var entries = log.ReadRecent().Entries;
         Assert.Equal(new[] { "FileMove.Succeeded", "FileMove.NotConfirmed" }, entries.Select(entry => entry.EventName));
-        Assert.DoesNotContain(root, File.ReadAllText(Path.Combine(Logs, "activity.jsonl")));
+        Assert.Contains("private-invoice.txt", entries[0].Message);
+        Assert.Contains(root, entries[0].Message);
+        Assert.Contains("sorted.txt", entries[0].Message);
+        Assert.Contains("private-invoice.txt", entries[1].Message);
+        service.RecordDismissal(source);
+        Assert.Equal(2, log.ReadRecent().Entries.Count);
         var inspection = new LoggedFileMoveService(new FileMoveService(
             TimeSpan.FromMilliseconds(20), TimeSpan.FromMilliseconds(5), TimeSpan.FromSeconds(1)), log);
         Assert.NotNull((await inspection.InspectSourceAsync(target)).Snapshot);
-        Assert.Equal("FileSource.Ready", log.ReadRecent().Entries[0].EventName);
+        Assert.Equal(2, log.ReadRecent().Entries.Count);
     }
 
     [Fact]
@@ -124,7 +129,7 @@ public sealed class ActivityLogTests : IDisposable
     }
 
     [Fact]
-    public async Task SettingsLogsFailuresAndSuccessfulReloadWithoutExposingSettings()
+    public async Task SettingsRemainSilentOnSuccessAndFailure()
     {
         Directory.CreateDirectory(root);
         var log = new JsonActivityLog(Logs);
@@ -135,12 +140,11 @@ public sealed class ActivityLogTests : IDisposable
         Assert.Equal(SettingsLoadStatus.Loaded, (await service.LoadAsync()).Status);
         File.WriteAllText(Path.Combine(root, "settings.json"), "{broken");
         Assert.Equal(SettingsLoadStatus.Failed, (await service.LoadAsync()).Status);
-        Assert.Equal(LogLevel.Error, log.ReadRecent().Entries[0].Level);
-        Assert.Equal(4, log.ReadRecent().Entries.Count);
+        Assert.Empty(log.ReadRecent().Entries);
         File.Delete(Path.Combine(root, "settings.json"));
         Directory.CreateDirectory(Path.Combine(root, "settings.json"));
         Assert.False((await service.SaveAsync(new AppSettings(null, null, false, []))).IsSuccess);
-        Assert.Equal("Settings.Save.Failed", log.ReadRecent().Entries[0].EventName);
+        Assert.Empty(log.ReadRecent().Entries);
         Directory.Delete(Path.Combine(root, "settings.json"));
         var throwing = new LoggedSettingsStore(new JsonSettingsStore(Path.Combine(root, "settings.json"),
             new SettingsValidator(new RuleValidator())), new ThrowingLog());
@@ -148,7 +152,7 @@ public sealed class ActivityLogTests : IDisposable
     }
 
     [Fact]
-    public async Task MonitorLogsLifecycleDetectionAndFailedStart()
+    public async Task MonitorRemainsSilentIncludingFailedStart()
     {
         Directory.CreateDirectory(root);
         var log = new JsonActivityLog(Logs);
@@ -158,14 +162,13 @@ public sealed class ActivityLogTests : IDisposable
         File.WriteAllText(Path.Combine(root, "new.pdf"), "content");
         await detected.Task.WaitAsync(TimeSpan.FromSeconds(5));
         monitor.Dispose();
-        Assert.Contains(log.ReadRecent().Entries, entry => entry.EventName == "Monitor.FileDetected");
-        Assert.Contains(log.ReadRecent().Entries, entry => entry.EventName == "Monitor.Stopped");
+        Assert.Empty(log.ReadRecent().Entries);
         Assert.Throws<ArgumentException>(() => monitor.Start(Path.Combine(root, "missing"), _ => { }, _ => { }));
-        Assert.Equal("Monitor.StartFailed", log.ReadRecent().Entries[0].EventName);
+        Assert.Empty(log.ReadRecent().Entries);
     }
 
     [Fact]
-    public void RuleEvaluationPreservesResultAndLogsNoMatchEvenWhenReplacementLoggerFails()
+    public void RuleEvaluationRemainsSilentAndPreservesResult()
     {
         var log = new JsonActivityLog(Logs);
         var engine = new RuleEngine(new RuleValidator(), new RuleTargetValidator());
@@ -174,8 +177,21 @@ public sealed class ActivityLogTests : IDisposable
         var result = new LoggedRuleEngine(engine, log).Evaluate(file, [], []);
         Assert.Equal(expected.Status, result.Status);
         Assert.Equal(expected.Candidates, result.Candidates);
-        Assert.Equal("Rules.NoMatch", Assert.Single(log.ReadRecent().Entries).EventName);
+        Assert.Empty(log.ReadRecent().Entries);
         Assert.Equal(expected.Status, new LoggedRuleEngine(engine, new ThrowingLog()).Evaluate(file, [], []).Status);
+    }
+
+    [Fact]
+    public void DismissalWithoutMoveIsRecordedOnceWithFileName()
+    {
+        var log = new JsonActivityLog(Logs);
+        var service = new LoggedFileMoveService(new FileMoveService(), log);
+        var source = Path.Combine(root, "not-moved.pdf");
+        service.RecordDismissal(source);
+        service.RecordDismissal(source);
+        var entry = Assert.Single(log.ReadRecent().Entries);
+        Assert.Equal("FileMove.Cancelled", entry.EventName);
+        Assert.Contains("not-moved.pdf", entry.Message);
     }
 
     public void Dispose()

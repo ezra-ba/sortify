@@ -70,9 +70,9 @@ public partial class App : Application
 
         try
         {
-            var store = new LoggedSettingsStore(new JsonSettingsStore(
+            var store = new JsonSettingsStore(
                 SettingsStoragePath.GetDefaultFilePath(),
-                new SettingsValidator(new RuleValidator())), log);
+                new SettingsValidator(new RuleValidator()));
             settingsService = new SettingsService(store);
             viewModel = new MainViewModel(settingsService,
                 loginStartup);
@@ -82,10 +82,9 @@ public partial class App : Application
             viewModel = new MainViewModel { SettingsStatus = exception.Message };
         }
 
-        var moves = (IFileMoveService)new LoggedFileMoveService(new FileMoveService(), log);
-        var engine = (IRuleEngine)new LoggedRuleEngine(
-            new RuleEngine(new RuleValidator(), new RuleTargetValidator()), log);
-        var monitor = new FolderMonitor(log);
+        var moves = (IFileMoveService)new FileMoveService();
+        var engine = (IRuleEngine)new RuleEngine(new RuleValidator(), new RuleTargetValidator());
+        var monitor = new FolderMonitor();
         var window = new MainWindow(log) { DataContext = viewModel };
 
         // Keep unsupported tray environments accessible instead of hiding the only window.
@@ -106,7 +105,7 @@ public partial class App : Application
         }
         session = new DesktopSession(viewModel, window, settingsService,
             loginStartup, () => desktop.Shutdown(), trayAvailable,
-            moves, engine, monitor);
+            moves, engine, monitor, log);
         if (icon is not null)
             trayMenu = new TrayMenu(icon, session);
 

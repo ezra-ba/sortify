@@ -34,7 +34,7 @@ public sealed class DesktopSession : IDisposable
 
     public DesktopSession(MainViewModel viewModel, Window window, ISettingsService? settings,
         ILoginStartup loginStartup, Action shutdown, bool trayAvailable,
-        IFileMoveService? fileMoveService = null, IRuleEngine? ruleEngine = null, FolderMonitor? monitor = null)
+        IFileMoveService? fileMoveService = null, IRuleEngine? ruleEngine = null, FolderMonitor? monitor = null, IActivityLog? log = null)
     {
         this.viewModel = viewModel;
         this.window = window;
@@ -46,7 +46,7 @@ public sealed class DesktopSession : IDisposable
         this.monitor = new DownloadMonitorController(viewModel,
             fileMoveService ?? new FileMoveService(),
             ruleEngine ?? new RuleEngine(new RuleValidator(), new RuleTargetValidator()),
-            monitor ?? new FolderMonitor());
+            monitor ?? new FolderMonitor(), log);
         viewModel.MonitoringFolderConfigured += RestartMonitoring;
         window.Closing += OnClosing;
     }

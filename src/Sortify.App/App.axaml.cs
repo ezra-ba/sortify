@@ -66,6 +66,7 @@ public partial class App : Application
         MainViewModel viewModel;
         IActivityLog log = new JsonActivityLog(JsonActivityLog.GetDefaultDirectory());
         ISettingsService? settingsService = null;
+        var loginStartup = LoginStartupFactory.Create(Environment.ProcessPath);
 
         try
         {
@@ -74,7 +75,7 @@ public partial class App : Application
                 new SettingsValidator(new RuleValidator())), log);
             settingsService = new SettingsService(store);
             viewModel = new MainViewModel(settingsService,
-                new WindowsLoginStartup(Environment.ProcessPath));
+                loginStartup);
         }
         catch (InvalidOperationException exception)
         {
@@ -104,7 +105,7 @@ public partial class App : Application
             }
         }
         session = new DesktopSession(viewModel, window, settingsService,
-            new WindowsLoginStartup(Environment.ProcessPath), () => desktop.Shutdown(), trayAvailable,
+            loginStartup, () => desktop.Shutdown(), trayAvailable,
             moves, engine, monitor);
         if (icon is not null)
             trayMenu = new TrayMenu(icon, session);

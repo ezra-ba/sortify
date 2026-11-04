@@ -152,11 +152,8 @@
 				<Border Grid.Column="1"/>
 			</Grid>
 		</Border>
-		<Grid Grid.Row="1">
-	<ScrollViewer HorizontalScrollBarVisibility="Disabled" IsEnabled="{Binding !IsSavingSettings}">
-		<Grid>
-		<StackPanel Margin="44,34" Spacing="26">
-			<Border Classes="surface-card" Padding="24" BorderThickness="1" CornerRadius="12">
+		<Grid Grid.Row="1" Margin="44,34" RowDefinitions="Auto,*" IsEnabled="{Binding !IsSavingSettings}">
+			<Border Grid.Row="0" Classes="surface-card" Padding="24" BorderThickness="1" CornerRadius="12">
 				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="22">
 					<Border Width="42" Height="42" CornerRadius="21">
 						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Text="◉"/>
@@ -171,9 +168,9 @@
 					<Button Grid.Column="2" Classes="secondary motion" Content="Ordner wechseln" Click="SelectWatchedFolder"/>
 				</Grid>
 			</Border>
-			<Grid ColumnDefinitions="*,300" ColumnSpacing="22">
+			<Grid Grid.Row="1" Margin="0,26,0,0" ColumnDefinitions="*,300" ColumnSpacing="22">
 				<Border Classes="surface-card" Padding="24" BorderThickness="1" CornerRadius="12">
-					<StackPanel Spacing="18">
+					<Grid RowDefinitions="Auto,*" RowSpacing="18">
 						<Grid ColumnDefinitions="*,Auto">
 							<StackPanel Spacing="4">
 								<TextBlock FontSize="19" FontWeight="SemiBold" Text="Target-Ordner"/>
@@ -181,6 +178,7 @@
 							</StackPanel>
 							<TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="12" Text="{Binding TargetFolders.Count, StringFormat='{}{0} Ziele'}"/>
 						</Grid>
+                        <ScrollViewer Grid.Row="1" Padding="0,0,10,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <ItemsControl ItemsSource="{Binding TargetFolders}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TargetFolderViewModel">
@@ -245,8 +243,9 @@
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-					</StackPanel>
+						</ItemsControl>
+						</ScrollViewer>
+					</Grid>
 				</Border>
 				<Border Classes="surface-card" Grid.Column="1" Padding="22" BorderThickness="1" CornerRadius="12">
 					<StackPanel Spacing="14">
@@ -261,9 +260,7 @@
 					</StackPanel>
 				</Border>
 			</Grid>
-		</StackPanel>
 		</Grid>
-	</ScrollViewer>
 		<Canvas IsHitTestVisible="False">
 							<Border x:Name="DragPreview" x:CompileBindings="False" Width="420" Padding="16" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushAccent}" BorderThickness="1" CornerRadius="6" Opacity="0.96" IsVisible="False">
 								<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
@@ -302,6 +299,5 @@
 			</Border>
 		</Canvas>
 		</Grid>
-	</Grid>
 	</Border>
 </Window>

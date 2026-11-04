@@ -128,6 +128,24 @@ public sealed class RuleEngineTests
         Assert.Contains(result.Diagnostics,
             diagnostic => diagnostic.FieldName == nameof(SortRule.Priority));
     }
+    [Theory]
+    [InlineData(".doc", ".docx")]
+    [InlineData(".xls", ".xlsx")]
+    [InlineData(".ppt", ".pptx")]
+    public void OfficeVersionsCanBeSelectedIndependently(string legacy, string modern)
+    {
+        foreach (var (selected, excluded) in new[] { (legacy, modern), (modern, legacy) })
+        {
+            var rule = CreateRule() with { AllowedExtensions = [selected] };
+            var matched = engine.Evaluate(CreateFile(selected.ToUpperInvariant()), [rule], TestTargets);
+            Assert.Equal(RuleEvaluationStatus.Matched, matched.Status);
+            Assert.Empty(matched.Diagnostics);
+            var other = engine.Evaluate(CreateFile(excluded), [rule], TestTargets);
+            Assert.Equal(RuleEvaluationStatus.NoMatch, other.Status);
+            Assert.Empty(other.Candidates);
+        }
+    }
+
     [Fact]
     public void EvaluateReturnsMatchingRule()
     {

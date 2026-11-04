@@ -50,17 +50,19 @@ Relative Pfade werden für die Regelprüfung einheitlich mit `/` als Trenner dar
 
 ### 3.1 Freigabeliste und Kategorien
 
-Die folgende Zuordnung ist der vorgeschlagene Umfang. Eine Endung bedeutet ausschließlich „zur Sortierung zugelassen“, nicht „Inhalt ist ungefährlich“. Sortify führt Dateien nicht aus.
+Die folgende Zuordnung ist die implementierte Freigabeliste (43 Endungen). Eine Endung bedeutet ausschließlich „zur Sortierung zugelassen“, nicht „Inhalt ist ungefährlich“. Sortify führt Dateien nicht aus.
 
 | Kategorie | Zugelassene Endungen |
 |---|---|
-| Dokumente | `.pdf`, `.docx`, `.odt`, `.rtf`, `.txt` |
-| Tabellen | `.xlsx`, `.ods`, `.csv`, `.tsv` |
-| Präsentationen | `.pptx`, `.odp` |
-| Bilder | `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.bmp`, `.tif`, `.tiff` |
-| Audio | `.mp3`, `.wav`, `.flac`, `.aac`, `.ogg`, `.m4a` |
+| Dokumente | `.pdf`, `.doc`, `.docx`, `.pages`, `.odt`, `.rtf`, `.txt` |
+| Tabellen | `.xls`, `.xlsx`, `.numbers`, `.ods`, `.csv`, `.tsv` |
+| Präsentationen | `.ppt`, `.pptx`, `.key`, `.odp` |
+| Bilder | `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.bmp`, `.tif`, `.tiff`, `.heic`, `.heif`, `.psd`, `.svg` |
+| Audio | `.mp3`, `.wav`, `.flac`, `.aac`, `.ogg`, `.m4a`, `.aiff`, `.alac` |
 | Videos | `.mp4`, `.mkv`, `.mov`, `.avi`, `.webm` |
 | E-Books | `.epub` |
+
+Jede Endung ist unabhängig auswählbar: Eine Regel darf beispielsweise ausschließlich `.doc` enthalten, ohne `.docx` anzugeben; ebenso `.xls`/`.xlsx` und `.ppt`/`.pptx`. Bestehende Regeln werden nicht automatisch um weitere Formate erweitert. Die Freigabe gilt für einzelne Dateien; als Verzeichnis gespeicherte Dateipakete erhalten dadurch keine Unterstützung für Ordner-Verschiebungen.
 
 Alle anderen Endungen, insbesondere `.exe`, `.zip`, `.winmd`, `.sh`, `.docm`, `.xlsm` und `.pptm`, sowie Dateien ohne Endung werden ignoriert. `rechnung.pdf.exe` wird aufgrund der letzten Endung `.exe` nicht zugelassen. Großgeschriebene Endungen wie `.PDF` werden erkannt.
 

@@ -50,11 +50,11 @@ Relative Pfade werden für die Regelprüfung einheitlich mit `/` als Trenner dar
 
 ### 3.1 Freigabeliste und Kategorien
 
-Die folgende Zuordnung ist die implementierte Freigabeliste (43 Endungen). Eine Endung bedeutet ausschließlich „zur Sortierung zugelassen“, nicht „Inhalt ist ungefährlich“. Sortify führt Dateien nicht aus.
+Die folgende Zuordnung ist die implementierte Freigabeliste (44 Endungen). Eine Endung bedeutet ausschließlich „zur Sortierung zugelassen“, nicht „Inhalt ist ungefährlich“. Sortify führt Dateien nicht aus.
 
 | Kategorie | Zugelassene Endungen |
 |---|---|
-| Dokumente | `.pdf`, `.doc`, `.docx`, `.pages`, `.odt`, `.rtf`, `.txt` |
+| Dokumente | `.pdf`, `.doc`, `.docx`, `.pages`, `.odt`, `.rtf`, `.txt`, `.md` |
 | Tabellen | `.xls`, `.xlsx`, `.numbers`, `.ods`, `.csv`, `.tsv` |
 | Präsentationen | `.ppt`, `.pptx`, `.key`, `.odp` |
 | Bilder | `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.bmp`, `.tif`, `.tiff`, `.heic`, `.heif`, `.psd`, `.svg` |

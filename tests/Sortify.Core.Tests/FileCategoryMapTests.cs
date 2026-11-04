@@ -12,6 +12,7 @@ public sealed class FileCategoryMapTests
     [InlineData(".odt", "Dokumente")]
     [InlineData(".rtf", "Dokumente")]
     [InlineData(".txt", "Dokumente")]
+    [InlineData(".md", "Dokumente")]
     [InlineData(".xlsx", "Tabellen")]
     [InlineData(".xls", "Tabellen")]
     [InlineData(".numbers", "Tabellen")]

@@ -12,6 +12,7 @@ public static class FileCategoryMap
             [".odt"] = "Dokumente",
             [".rtf"] = "Dokumente",
             [".txt"] = "Dokumente",
+            [".md"] = "Dokumente",
 
             [".xlsx"] = "Tabellen",
             [".xls"] = "Tabellen",

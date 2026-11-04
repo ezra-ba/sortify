@@ -7,16 +7,23 @@ public static class FileCategoryMap
         {
             [".pdf"] = "Dokumente",
             [".docx"] = "Dokumente",
+            [".doc"] = "Dokumente",
+            [".pages"] = "Dokumente",
             [".odt"] = "Dokumente",
             [".rtf"] = "Dokumente",
             [".txt"] = "Dokumente",
+            [".md"] = "Dokumente",
 
             [".xlsx"] = "Tabellen",
+            [".xls"] = "Tabellen",
+            [".numbers"] = "Tabellen",
             [".ods"] = "Tabellen",
             [".csv"] = "Tabellen",
             [".tsv"] = "Tabellen",
 
             [".pptx"] = "Präsentationen",
+            [".ppt"] = "Präsentationen",
+            [".key"] = "Präsentationen",
             [".odp"] = "Präsentationen",
 
             [".jpg"] = "Bilder",
@@ -27,6 +34,10 @@ public static class FileCategoryMap
             [".bmp"] = "Bilder",
             [".tif"] = "Bilder",
             [".tiff"] = "Bilder",
+            [".heic"] = "Bilder",
+            [".heif"] = "Bilder",
+            [".psd"] = "Bilder",
+            [".svg"] = "Bilder",
 
             [".mp3"] = "Audio",
             [".wav"] = "Audio",
@@ -34,6 +45,8 @@ public static class FileCategoryMap
             [".aac"] = "Audio",
             [".ogg"] = "Audio",
             [".m4a"] = "Audio",
+            [".aiff"] = "Audio",
+            [".alac"] = "Audio",
 
             [".mp4"] = "Videos",
             [".mkv"] = "Videos",

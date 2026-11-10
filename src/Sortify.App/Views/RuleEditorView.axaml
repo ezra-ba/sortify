@@ -36,6 +36,7 @@
   <Grid>
   <StackPanel Spacing="16">
     <TextBlock Classes="muted" IsVisible="{Binding IsOverview}" Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap"/>
+    <TextBlock x:Name="RuleResultMessage" Text="{Binding Message}" Foreground="{Binding MessageColor}" IsVisible="{Binding IsMessageVisible}" TextWrapping="Wrap"/>
     <Border x:Name="EmptyRulesPanel" Classes="rule-card" Padding="32" IsVisible="{Binding ShowEmptyState}">
       <StackPanel Spacing="16" HorizontalAlignment="Center" MaxWidth="480" Margin="0,12">
         <Border Width="56" Height="56" CornerRadius="28" Background="{DynamicResource BrushSurfaceSubtle}" HorizontalAlignment="Center">
@@ -56,7 +57,7 @@
         <TextBlock Classes="heading" Text="{Binding EditorTitle}" FontSize="18"/>
         <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsEditing}">
           <TextBlock Text="Regel aktiv" VerticalAlignment="Center"/>
-          <ToggleButton x:Name="RuleActiveToggle" Classes="animated-toggle"
+          <ToggleButton x:Name="RuleActiveCheckBox" Classes="animated-toggle"
                         IsChecked="{Binding IsRuleActive, Mode=TwoWay}"
                         AutomationProperties.Name="Regel aktiv"/>
         </StackPanel>
@@ -175,6 +176,17 @@
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
+    <Border Classes="rule-card" Padding="16" IsVisible="{Binding IsDeletePending}">
+      <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
+        <TextBlock Classes="heading" Text="Regel wirklich entfernen?"/>
+        <TextBlock Text="{Binding PendingDeleteName}" TextWrapping="Wrap"/>
+        <TextBlock Classes="muted" Text="Die Regel wird gelöscht. Dateien und Target-Ordner bleiben erhalten." TextWrapping="Wrap"/>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Classes="primary motion" Content="Entfernen bestätigen" Command="{Binding ConfirmDeleteCommand}"/>
+          <Button Classes="secondary motion" Content="Abbrechen" Command="{Binding CancelDeleteCommand}"/>
+        </StackPanel>
+      </StackPanel>
+    </Border>
     <Expander Header="Ziel einer vorhandenen Regel zuordnen" HorizontalAlignment="Stretch" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="{DynamicResource RadiusCard}" Padding="14">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
         <TextBlock Classes="muted" Text="Hier kannst du insbesondere Altregeln ohne Target-ID reparieren. Andere Regelfelder bleiben erhalten." TextWrapping="Wrap"/>
@@ -191,3 +203,4 @@
   </StackPanel>
   </Grid>
 </UserControl>
+

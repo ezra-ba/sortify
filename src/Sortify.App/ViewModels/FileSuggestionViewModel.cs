@@ -14,6 +14,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
     private readonly IRuleEngine? ruleEngine;
     private readonly Func<AppSettings?>? settingsProvider;
     private bool suggestionEvaluated;
+    private bool hasAutomaticTarget;
     private FileSourceSnapshot? sourceSnapshot;
     private CancellationTokenSource? inspectionCancellation;
 
@@ -80,7 +81,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
         SourcePath = path;
         DetectedFileName = Path.GetFileName(path);
         FileExtension = Path.GetExtension(path);
-        NewFileName = Path.GetFileNameWithoutExtension(path);
+        NewFileName = PortableNameValidator.SanitizeFileStem(Path.GetFileNameWithoutExtension(path));
         SuggestionExplanation = "Neue Datei erkannt.";
     }
 
@@ -125,7 +126,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
     public string FilePathPreview => SelectedTargetFolder is null || string.IsNullOrWhiteSpace(NewFileName)
         ? string.Empty
         : Path.Combine(SelectedTargetFolder.Path, NewFileName + FileExtension);
-    public async Task InitializeFileOperationAsync()
+    public async Task InitializeFileOperationAsync(CancellationToken cancellationToken = default)
     {
         if (IsBusy || IsMoveCompleted || sourceSnapshot is not null)
             return;
@@ -136,7 +137,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
             return;
         }
 
-        using var cancellation = new CancellationTokenSource();
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         inspectionCancellation = cancellation;
         IsPreparingSource = true;
         IsBusy = true;
@@ -204,6 +205,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
                 string.Equals(Path.GetExtension(candidate.FileName), FileExtension, StringComparison.Ordinal))
             {
                 SelectedTargetFolder = target;
+                hasAutomaticTarget = result.Diagnostics.Count == 0;
                 NewFileName = Path.GetFileNameWithoutExtension(candidate.FileName);
                 SuggestionExplanation = candidate.Reasons.Count > 0
                     ? string.Join(Environment.NewLine, candidate.Reasons.Select(RuleExplanationFormatter.Describe))
@@ -225,7 +227,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
             ? "Mehrere Regelvorschläge möglich."
             : "Keine eindeutige passende Regel gefunden.";
         SuggestionExplanation = reason + (SelectedTargetFolder is null
-            ? " Bitte einen Zielordner auswählen."
+            ? " Kein Standardordner eingerichtet. Bitte einen Zielordner auswählen."
             : " Der Standardordner wird vorgeschlagen.");
     }
 
@@ -234,7 +236,25 @@ public partial class FileSuggestionViewModel : ViewModelBase
         inspectionCancellation?.Cancel();
     }
 
-    public async Task<bool> ConfirmMoveAsync()
+    public Task<bool> TryAutoSortAsync(CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested || !hasAutomaticTarget ||
+            settingsProvider?.Invoke() is not { AutoSort: true, WatchedFolderPath: { } watchedFolder } ||
+            SelectedTargetFolder is not { } target)
+            return Task.FromResult(false);
+
+        // Moving into the watched folder can trigger another suggestion, for example after a rename.
+        if (string.Equals(Path.TrimEndingDirectorySeparator(Path.GetFullPath(watchedFolder)),
+            Path.TrimEndingDirectorySeparator(Path.GetFullPath(target.Path)), StringComparison.OrdinalIgnoreCase))
+        {
+            SuggestionExplanation = "Der Zielordner ist der Überwachungsordner. Bitte ein Ziel manuell bestätigen.";
+            return Task.FromResult(false);
+        }
+
+        return ConfirmMoveAsync(cancellationToken);
+    }
+
+    public async Task<bool> ConfirmMoveAsync(CancellationToken cancellationToken = default)
     {
         if (!CanConfirmMove ||
             fileMoveService is null ||
@@ -243,7 +263,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
             return false;
         }
 
-        // Genau die beim Klick angezeigten Werte übernehmen.
+        // Den geprüften Quellzustand und die ausgewählte Zieladresse übernehmen.
         var request = new FileMoveRequest(
             sourceSnapshot.SourcePath,
             FilePathPreview,
@@ -255,7 +275,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
 
         try
         {
-            var result = await fileMoveService.MoveAsync(request);
+            var result = await fileMoveService.MoveAsync(request, cancellationToken);
 
             if (result.Status == FileMoveStatus.Succeeded)
             {

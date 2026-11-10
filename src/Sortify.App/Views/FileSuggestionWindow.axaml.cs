@@ -51,6 +51,7 @@ public partial class FileSuggestionWindow : Window
     }
 
     private CancellationTokenSource? _shakeCancellation;
+    private bool initializeOnOpen = true;
 
     public FileSuggestionWindow()
     {
@@ -60,7 +61,7 @@ public partial class FileSuggestionWindow : Window
         LayoutUpdated += FileSuggestionWindow_LayoutUpdated;
         Opened += async (_, _) =>
             {
-                if (DataContext is FileSuggestionViewModel viewModel)
+                if (initializeOnOpen && DataContext is FileSuggestionViewModel viewModel)
                 {
                     await viewModel.InitializeFileOperationAsync();
                 }
@@ -133,8 +134,9 @@ public partial class FileSuggestionWindow : Window
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool SetWindowPos(IntPtr windowHandle, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
 
-    public FileSuggestionWindow(FileSuggestionViewModel viewModel) : this()
+    public FileSuggestionWindow(FileSuggestionViewModel viewModel, bool initializeOnOpen = true) : this()
     {
+        this.initializeOnOpen = initializeOnOpen;
         DataContext = viewModel;
     }
 

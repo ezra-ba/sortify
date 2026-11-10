@@ -58,7 +58,7 @@ public partial class RuleEditorView : UserControl
             }
 
             if (editor.CanEditRuleFields) RuleNameInput.Focus();
-            else RuleActiveCheckBox.Focus();
+            else RuleActiveToggle.Focus();
             if (scroll is not null) scroll.Offset = new Vector(scroll.Offset.X, 0);
             else RuleEditorForm.BringIntoView();
         }, DispatcherPriority.Loaded);

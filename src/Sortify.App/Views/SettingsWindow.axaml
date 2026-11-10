@@ -138,15 +138,6 @@
               <TextBlock x:Name="AutoSortError" Grid.Row="1" Grid.ColumnSpan="2" TextWrapping="Wrap" IsVisible="False"/>
             </Grid>
           </Border>
-          <Border Padding="14,12" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
-            <Grid ColumnDefinitions="*,Auto">
-              <StackPanel Spacing="3" Margin="0,0,16,0">
-                <TextBlock FontSize="16" FontWeight="SemiBold" Text="Test-Toggle" TextWrapping="Wrap"/>
-                <TextBlock Classes="muted" Text="Dieser Schalter dient nur zu Testzwecken" TextWrapping="Wrap"/>
-              </StackPanel>
-              <ToggleButton x:Name="TestToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center" IsChecked="False"/>
-            </Grid>
-          </Border>
         </StackPanel>
         <views:RuleEditorView x:Name="RulesEditor" IsVisible="False"/>
         <Border x:Name="AppearanceCard" IsVisible="False" Margin="0,18,0,0" Padding="12,10" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">

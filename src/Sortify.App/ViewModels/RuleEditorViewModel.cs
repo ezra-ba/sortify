@@ -9,9 +9,12 @@ namespace Sortify.App.ViewModels;
 
 public partial class RuleEditorViewModel : ViewModelBase
 {
+    public static IReadOnlyList<string> AvailableFileExtensions { get; } =
+        [".pdf", ".docx", ".doc", ".pages", ".odt", ".rtf", ".txt", ".md", ".xlsx", ".xls", ".numbers", ".ods", ".csv", ".tsv", ".pptx", ".ppt", ".key", ".odp", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".heic", ".heif", ".psd", ".svg", ".mp3", ".wav", ".flac", ".aac", ".ogg", ".m4a", ".aiff", ".alac", ".mp4", ".mkv", ".mov", ".avi", ".webm", ".epub"];
     private readonly MainViewModel main;
     private SortRule? editingRule;
     private SortRule? pendingDeleteRule;
+    private int messageVersion;
     public bool IsEditing => editingRule is not null;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOverview))]
@@ -40,10 +43,14 @@ public partial class RuleEditorViewModel : ViewModelBase
         this.main = main;
         RefreshRules();
         AddCondition();
+        ExtensionSelections.Add(new(this) { SelectedExtension = ".pdf" });
     }
 
     public ObservableCollection<TargetFolderViewModel> TargetFolders => main.TargetFolders;
     public ObservableCollection<FileNameConditionViewModel> NameConditions { get; } = [];
+    public ObservableCollection<ExtensionSelectionViewModel> ExtensionSelections { get; } = [];
+    public IEnumerable<string> AvailableExtensions => AvailableFileExtensions.Where(extension => !ExtensionSelections.Any(selection =>
+        string.Equals(selection.SelectedExtension, extension, StringComparison.OrdinalIgnoreCase)));
     [ObservableProperty] public partial bool IsAdvancedMode { get; set; }
     [RelayCommand] private void AddCondition() => NameConditions.Add(new(condition => NameConditions.Remove(condition)));
 
@@ -52,6 +59,37 @@ public partial class RuleEditorViewModel : ViewModelBase
     [ObservableProperty] public partial string RuleName { get; set; } = "";
     [ObservableProperty] public partial string FileNamePattern { get; set; } = "";
     [ObservableProperty] public partial string Extensions { get; set; } = ".pdf";
+
+    [RelayCommand]
+    private void AddExtension()
+    {
+        var selection = new ExtensionSelectionViewModel(this);
+        ExtensionSelections.Add(selection);
+        RefreshExtensionOptions();
+        OnPropertyChanged(nameof(AvailableExtensions));
+        selection.NotifyOptionsChanged();
+    }
+
+    [RelayCommand]
+    private void RemoveExtension(ExtensionSelectionViewModel selection)
+    {
+        ExtensionSelections.Remove(selection);
+        RefreshExtensionOptions();
+        OnPropertyChanged(nameof(AvailableExtensions));
+        UpdateExtensions();
+    }
+
+    internal void ExtensionChanged()
+    {
+        OnPropertyChanged(nameof(AvailableExtensions));
+        RefreshExtensionOptions();
+        UpdateExtensions();
+    }
+    private void RefreshExtensionOptions()
+    {
+        foreach (var item in ExtensionSelections) item.NotifyOptionsChanged();
+    }
+    private void UpdateExtensions() => Extensions = string.Join(", ", ExtensionSelections.Where(item => item.SelectedExtension is not null).Select(item => item.SelectedExtension));
     [ObservableProperty] public partial string RenamePattern { get; set; } = "";
     [ObservableProperty] public partial TargetFolderViewModel? SelectedTarget { get; set; }
     [ObservableProperty] public partial RuleListItem? SelectedExistingRule { get; set; }
@@ -59,6 +97,8 @@ public partial class RuleEditorViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasMessage))]
     public partial string Message { get; set; } = "";
+    [ObservableProperty]
+    public partial bool IsMessageVisible { get; set; }
     [ObservableProperty] public partial string MessageColor { get; set; } = "#B42318";
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanEditRuleFields))]
@@ -208,6 +248,9 @@ public partial class RuleEditorViewModel : ViewModelBase
         RuleName = rule.Name;
         FileNamePattern = rule.FileNamePattern;
         Extensions = string.Join(", ", rule.AllowedExtensions);
+        ExtensionSelections.Clear();
+        foreach (var extension in rule.AllowedExtensions) ExtensionSelections.Add(new(this) { SelectedExtension = extension });
+        OnPropertyChanged(nameof(AvailableExtensions));
         RenamePattern = rule.RenamePattern ?? "";
         SelectedTarget = TargetFolders.FirstOrDefault(target => target.Id == rule.TargetFolderId);
         IsAdvancedMode = rule.NameConditions is null;
@@ -233,6 +276,9 @@ public partial class RuleEditorViewModel : ViewModelBase
         IsFormVisible = false;
         SelectedTarget = null;
         Extensions = ".pdf";
+        ExtensionSelections.Clear();
+        ExtensionSelections.Add(new(this) { SelectedExtension = ".pdf" });
+        OnPropertyChanged(nameof(AvailableExtensions));
         IsRuleActive = true;
         RuleName = "";
         FileNamePattern = "";
@@ -314,8 +360,48 @@ public partial class RuleEditorViewModel : ViewModelBase
     {
         Message = result.IsSuccess ? main.SettingsStatus : result.ErrorMessage ?? "Speichern fehlgeschlagen.";
         MessageColor = result.IsSuccess ? "#15803D" : "#B42318";
+        IsMessageVisible = true;
+        var version = ++messageVersion;
+        _ = HideMessageAfterDelayAsync(version);
+    }
+
+    private async Task HideMessageAfterDelayAsync(int version)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(3));
+        if (version == messageVersion)
+        {
+            IsMessageVisible = false;
+            await Task.Delay(220);
+            if (version == messageVersion) Message = "";
+        }
     }
 }
+
+public partial class ExtensionSelectionViewModel(RuleEditorViewModel editor) : ObservableObject
+{
+    public IRelayCommand AddExtensionCommand => editor.AddExtensionCommand;
+    public IRelayCommand<ExtensionSelectionViewModel> RemoveExtensionCommand => editor.RemoveExtensionCommand;
+    public IEnumerable<ExtensionOptionViewModel> Options => RuleEditorViewModel.AvailableFileExtensions
+        .Where(extension => string.Equals(extension, SelectedExtension, StringComparison.OrdinalIgnoreCase)
+            || !editor.ExtensionSelections.Any(item => item != this
+                && string.Equals(item.SelectedExtension, extension, StringComparison.OrdinalIgnoreCase)))
+        .Select(extension => new ExtensionOptionViewModel(extension));
+    public bool IsLast => editor.ExtensionSelections.LastOrDefault() == this;
+
+    [ObservableProperty]
+    public partial string? SelectedExtension { get; set; }
+
+    partial void OnSelectedExtensionChanged(string? value)
+    {
+        editor.ExtensionChanged();
+        foreach (var item in editor.ExtensionSelections) item.NotifyLastChanged();
+    }
+
+    public void NotifyLastChanged() => OnPropertyChanged(nameof(IsLast));
+    public void NotifyOptionsChanged() => OnPropertyChanged(nameof(Options));
+}
+
+public sealed record ExtensionOptionViewModel(string Value);
 
 public sealed record RuleListItem(Guid Id, string Name, string TargetName, string Conditions)
 {

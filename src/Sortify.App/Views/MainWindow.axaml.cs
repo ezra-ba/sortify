@@ -24,6 +24,7 @@ public partial class MainWindow : Window
     private bool _hasDragged;
     private Button? _pressedTargetButton;
     private Avalonia.Point _dragOffset;
+    private SettingsWindow? settingsWindow;
 
     public MainWindow() : this(null)
     {
@@ -73,9 +74,9 @@ public partial class MainWindow : Window
     private void OpenTargetRules(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not MainViewModel { SelectedTargetFolder: { } target }) return;
-        var settings = new SettingsWindow(activityLog) { DataContext = DataContext };
+        var settings = GetSettingsWindow();
         settings.OpenRulesForTarget(target);
-        settings.Show(this);
+        ShowSettingsWindow(settings);
     }
 
     private void OpenRuleTag(object? sender, RoutedEventArgs e)
@@ -86,8 +87,8 @@ public partial class MainWindow : Window
         var target = main.TargetFolders.FirstOrDefault(folder => folder.Id == tag.TargetId);
         if (target is null) return;
         main.SelectTargetFolder(target);
-        var settings = new SettingsWindow(activityLog) { DataContext = main };
-        settings.Show(this);
+        var settings = GetSettingsWindow();
+        ShowSettingsWindow(settings);
         if (tag.RuleId is { } ruleId) settings.OpenRuleForEditing(ruleId);
         else settings.OpenRulesForTarget(target);
         e.Handled = true;
@@ -95,7 +96,25 @@ public partial class MainWindow : Window
 
     private void OpenSettings(object? sender, RoutedEventArgs e)
     {
-        new SettingsWindow(activityLog) { DataContext = DataContext }.Show(this);
+        ShowSettingsWindow(GetSettingsWindow());
+    }
+
+    private SettingsWindow GetSettingsWindow()
+    {
+        if (settingsWindow is { } existing)
+            return existing;
+
+        settingsWindow = new SettingsWindow(activityLog) { DataContext = DataContext };
+        settingsWindow.Closed += (_, _) => settingsWindow = null;
+        return settingsWindow;
+    }
+
+    private void ShowSettingsWindow(SettingsWindow settings)
+    {
+        if (!settings.IsVisible)
+            settings.Show();
+        else
+            settings.Activate();
     }
 
     private async void SelectWatchedFolder(

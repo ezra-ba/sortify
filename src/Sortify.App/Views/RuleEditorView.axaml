@@ -57,9 +57,9 @@
         <TextBlock Classes="heading" Text="{Binding EditorTitle}" FontSize="18"/>
         <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsEditing}">
           <TextBlock Text="Regel aktiv" VerticalAlignment="Center"/>
-          <ToggleButton x:Name="RuleActiveCheckBox" Classes="animated-toggle"
-                        IsChecked="{Binding IsRuleActive, Mode=TwoWay}"
-                        AutomationProperties.Name="Regel aktiv"/>
+          <CheckBox x:Name="RuleActiveCheckBox"
+                    IsChecked="{Binding IsRuleActive, Mode=TwoWay}"
+                    AutomationProperties.Name="Regel aktiv"/>
         </StackPanel>
         <TextBlock Classes="muted" Text="Neue Regeln sind automatisch aktiv." IsVisible="{Binding !IsEditing}"/>
         <TextBlock Classes="muted" Text="Diese Regel ist inaktiv und wird nicht ausgeführt. Zum Bearbeiten wieder aktivieren. Der Status wird mit „Änderungen speichern“ übernommen."

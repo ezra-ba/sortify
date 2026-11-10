@@ -5,6 +5,7 @@ using Sortify.App.ViewModels;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
 using Avalonia.Media;
+using Avalonia.Threading;
 using System.Runtime.InteropServices;
 using Sortify.Core.Services;
 using Sortify.App.Services;
@@ -15,6 +16,7 @@ public partial class SettingsWindow : Window
 {
     private readonly ActivityLogViewModel activityLog;
     private bool updatingAutoSortToggle;
+    private RuleEditorViewModel? observedRuleEditor;
 
     public SettingsWindow() : this(null)
     {
@@ -26,9 +28,11 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         ActivityLogPanel.DataContext = activityLog;
         Opened += ApplyNativeTitleBarColor;
+        Opened += (_, _) => Dispatcher.UIThread.Post(() => Opacity = 1, DispatcherPriority.Render);
         Opened += (_, _) =>
         {
             EnsureRuleEditor();
+            ObserveRuleEditor();
             if (DataContext is MainViewModel main)
             {
                 UpdateAutoSortToggle(main.CurrentSettings?.AutoSort == true);
@@ -41,6 +45,59 @@ public partial class SettingsWindow : Window
             }
             _ = activityLog.LoadAsync();
         };
+    }
+
+    private void ObserveRuleEditor()
+    {
+        if (RulesEditor.DataContext is not RuleEditorViewModel editor) return;
+        if (ReferenceEquals(observedRuleEditor, editor)) return;
+        if (observedRuleEditor is not null) observedRuleEditor.PropertyChanged -= RuleEditorPropertyChanged;
+        observedRuleEditor = editor;
+        editor.PropertyChanged += RuleEditorPropertyChanged;
+    }
+
+    private void RuleEditorPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (sender is not RuleEditorViewModel editor) return;
+        if (e.PropertyName == nameof(RuleEditorViewModel.IsDeletePending))
+        {
+            if (editor.IsDeletePending)
+            {
+                DeleteConfirmationOverlay.IsVisible = true;
+                DeleteConfirmationOverlay.Opacity = 0;
+                Dispatcher.UIThread.Post(() => DeleteConfirmationOverlay.Opacity = 1, DispatcherPriority.Render);
+            }
+            else
+            {
+                DeleteConfirmationOverlay.Opacity = 0;
+                _ = HideDeleteOverlayAfterFadeAsync(editor);
+            }
+            return;
+        }
+        if (e.PropertyName != nameof(RuleEditorViewModel.IsMessageVisible)) return;
+        if (editor.IsMessageVisible)
+        {
+            RuleMessageBanner.IsVisible = true;
+            ((TranslateTransform)RuleMessageBanner.RenderTransform!).Y = -28;
+            Dispatcher.UIThread.Post(() => ((TranslateTransform)RuleMessageBanner.RenderTransform!).Y = 0, DispatcherPriority.Render);
+        }
+        else
+        {
+            ((TranslateTransform)RuleMessageBanner.RenderTransform!).Y = -28;
+            _ = HideRuleMessageBannerAsync(editor);
+        }
+    }
+
+    private async Task HideDeleteOverlayAfterFadeAsync(RuleEditorViewModel editor)
+    {
+        await Task.Delay(200);
+        if (!editor.IsDeletePending) DeleteConfirmationOverlay.IsVisible = false;
+    }
+
+    private async Task HideRuleMessageBannerAsync(RuleEditorViewModel editor)
+    {
+        await Task.Delay(200);
+        if (!editor.IsMessageVisible) RuleMessageBanner.IsVisible = false;
     }
 
     private void ApplyNativeTitleBarColor(object? sender, EventArgs e)

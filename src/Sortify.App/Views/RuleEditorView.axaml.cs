@@ -36,8 +36,10 @@ public partial class RuleEditorView : UserControl
 
     private void EditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not RuleEditorViewModel editor ||
-            e.PropertyName is not (nameof(RuleEditorViewModel.IsEditing) or nameof(RuleEditorViewModel.IsFormVisible)))
+        if (sender is not RuleEditorViewModel editor)
+            return;
+
+        if (e.PropertyName is not (nameof(RuleEditorViewModel.IsEditing) or nameof(RuleEditorViewModel.IsFormVisible)))
             return;
         var showForm = editor.IsFormVisible;
 
@@ -61,4 +63,6 @@ public partial class RuleEditorView : UserControl
             else RuleEditorForm.BringIntoView();
         }, DispatcherPriority.Loaded);
     }
+
 }
+

@@ -21,14 +21,16 @@ public sealed class NvidiaAiSuggestionService : IAiSuggestionService
     };
     private readonly HttpClient client;
     private readonly Func<string?> getKey;
+    private readonly Func<string> getInstructions;
     private readonly Uri endpoint;
     private readonly TimeSpan timeout;
 
     public NvidiaAiSuggestionService(HttpClient client, Func<string?> getKey,
-        Uri? endpoint = null, TimeSpan? timeout = null)
+        Uri? endpoint = null, TimeSpan? timeout = null, Func<string>? getInstructions = null)
     {
         this.client = client;
         this.getKey = getKey;
+        this.getInstructions = getInstructions ?? (() => "");
         this.endpoint = endpoint ?? Endpoint;
         this.timeout = timeout ?? TimeSpan.FromSeconds(25);
         if (this.endpoint != Endpoint && !(this.endpoint.IsLoopback && this.endpoint.Scheme == "http"))
@@ -55,9 +57,19 @@ public sealed class NvidiaAiSuggestionService : IAiSuggestionService
             // Bound concurrent traffic and include queue time in the deadline. No automatic retries.
             await Requests.WaitAsync(deadline.Token).ConfigureAwait(false);
             entered = true;
+            if (request.Settings.AiShareContextDirectory
+                && (string.IsNullOrWhiteSpace(request.Settings.AiContextDirectoryPath)
+                    || !Directory.Exists(request.Settings.AiContextDirectoryPath)))
+                return new(null, "Der KI-Kontextordner ist nicht erreichbar. Der lokale Vorschlag bleibt verfügbar.");
             var payload = JsonSerializer.SerializeToUtf8Bytes(new
             {
-                model = AiPromptBuilder.Model, messages = AiPromptBuilder.Build(request),
+                model = AiPromptBuilder.Model, messages = AiPromptBuilder.Build(request, getInstructions(),
+                    request.Settings.AiShareTargetTrees
+                        ? TargetTreeReader.Capture(request.Settings.TargetFolders, deadline.Token) : null,
+                    request.Settings.AiShareContextDirectory
+                        ? TargetTreeReader.CaptureContextDirectory(request.Settings.AiContextDirectoryPath!,
+                            request.File.FileNameWithoutExtension + request.File.Extension, deadline.Token)
+                        : null),
                 temperature = 0.2, top_p = 0.95, max_tokens = 2048,
                 chat_template_kwargs = new { enable_thinking = false }, stream = false
             }, JsonOptions);
@@ -103,6 +115,10 @@ public sealed class NvidiaAiSuggestionService : IAiSuggestionService
         {
             return new(null, "Die KI-Antwort oder Konfiguration ist ungültig. Der lokale Vorschlag bleibt verfügbar.");
         }
+        catch (InvalidDataException)
+        {
+            return new(null, "Die Sortify-Anweisung ist zu lang. Es wurden keine Daten übertragen.");
+        }
         catch (Exception error) when (error is HttpRequestException or IOException)
         {
             return new(null, "Der KI-Dienst ist nicht erreichbar. Der lokale Vorschlag bleibt verfügbar.");
@@ -125,7 +141,7 @@ public sealed class NvidiaAiSuggestionService : IAiSuggestionService
         if (reply.Status == "uncertain" && reply.TargetFolderId is null && reply.ProposedFileName is null
             && reply.AppliedRuleIds.Length == 0)
             return new(null, "KI: Keine ausreichend begründete Zuordnung. Bitte manuell prüfen.");
-        if (reply.Status != "suggested" || reply.TargetFolderId is not { } targetId
+        if (reply.Status is not ("suggested" or "uncertain") || reply.TargetFolderId is not { } targetId
             || !request.Settings.TargetFolders.Any(target => target.Id == targetId)
             || string.IsNullOrEmpty(reply.ProposedFileName)
             || reply.ProposedFileName.Length > 255
@@ -139,7 +155,9 @@ public sealed class NvidiaAiSuggestionService : IAiSuggestionService
         if (reply.AppliedRuleIds.Any(id => !matchedRuleIds.Contains(id)
             || !request.Settings.Rules.Any(rule => rule.Id == id && rule.IsEnabled)))
             return new(null, "Die KI nennt keine tatsächlich passende aktive Regel. Der Vorschlag wurde verworfen.");
-        return new(new(targetId, reply.ProposedFileName, reply.Reason.Trim(), reply.AppliedRuleIds), "KI-Vorschlag verfügbar.");
+        var needsReview = reply.Status == "uncertain";
+        return new(new(targetId, reply.ProposedFileName, reply.Reason.Trim(), reply.AppliedRuleIds, needsReview),
+            needsReview ? "Unsicherer KI-Vorschlag: bitte vor Übernahme prüfen." : "KI-Vorschlag verfügbar.");
     }
 
     private sealed record Reply(string Status, Guid? TargetFolderId, string? ProposedFileName,

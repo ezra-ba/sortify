@@ -102,6 +102,28 @@ public sealed class RuleSuggestionIntegrationTests
         }
     }
 
+    [Fact]
+    public async Task UncertainAiReplyPreselectsWithoutMovingFile()
+    {
+        var target = new TargetFolder(Guid.NewGuid(), Path.GetTempPath(), "Schule");
+        var settings = new AppSettings(Path.GetTempPath(), null, false, []) {
+            TargetFolders = [target], AiMode = AiSuggestionMode.Fallback, AiMetadataConsent = true };
+        var cards = new ObservableCollection<TargetFolderViewModel> { new(target.Id, target.Nickname, target.Path, false) };
+        var source = Path.Combine(Path.GetTempPath(), "invoice.pdf");
+        var ai = new PendingAiService();
+        var move = new MoveService(source);
+        var model = new FileSuggestionViewModel(cards, source, move,
+            new RuleEngine(new RuleValidator(), new RuleTargetValidator()), () => settings, ai);
+        var pending = model.InitializeFileOperationAsync();
+        ai.Completion.SetResult(new(new(target.Id, "proposal.pdf", "Möglicherweise Schule", [], true), "Bitte prüfen"));
+        await pending;
+        Assert.False(model.HasAiAlternative);
+        Assert.Equal(target.Id, model.SelectedTargetFolder?.Id);
+        Assert.Equal("proposal", model.NewFileName);
+        Assert.Contains("Unsicherer KI-Vorschlag", model.SuggestionExplanation);
+        Assert.Equal(0, move.MoveCount);
+    }
+
     private sealed class PendingAiService : IAiSuggestionService
     {
         public TaskCompletionSource<AiSuggestionResult> Completion { get; } = new();

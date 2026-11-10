@@ -14,7 +14,18 @@ http.createServer(async (req, res) => {
       res.writeHead(400); return res.end();
     }
     const context = JSON.parse(body.messages.at(-1).content);
+    if (context.sortifyInstructions !== 'Schulfächer bevorzugen.') {
+      res.writeHead(400); return res.end('Missing Sortify instruction');
+    }
     const name = context.file.name;
+    if (name === 'tree.pdf' && (!context.targetFileTrees?.[0]?.relativeEntries?.includes('school/notes.pdf')
+        || JSON.stringify(context.targetFileTrees).includes('sortify-tree-'))) {
+      res.writeHead(400); return res.end('Invalid target tree');
+    }
+    if (name === 'context.pdf' && (!context.contextDirectoryTree?.relativeEntries?.includes('school/4/lesson.pdf')
+        || JSON.stringify(context.contextDirectoryTree).includes('sortify-context-'))) {
+      res.writeHead(400); return res.end('Invalid context directory');
+    }
     const status = { 'unauthorized.pdf': 401, 'limited.pdf': 429, 'server.pdf': 500 }[name];
     if (status) { res.writeHead(status); return res.end(); }
     if (name === 'timeout.pdf' || name === 'cancel.pdf')

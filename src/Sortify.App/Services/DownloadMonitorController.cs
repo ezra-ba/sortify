@@ -15,7 +15,7 @@ public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMove
     private static readonly HttpClient AiHttpClient = new(new HttpClientHandler { AllowAutoRedirect = false })
         { Timeout = Timeout.InfiniteTimeSpan };
     private readonly IAiSuggestionService aiService = new NvidiaAiSuggestionService(AiHttpClient,
-        NvidiaApiKey.Read);
+        NvidiaApiKey.Read, getInstructions: new AiInstructionsStore(AiInstructionsStore.GetDefaultPath()).Read);
     // Compatibility constructor for existing UI tests and design-time callers.
     public DownloadMonitorController(MainViewModel viewModel)
         : this(viewModel, new FileMoveService(),

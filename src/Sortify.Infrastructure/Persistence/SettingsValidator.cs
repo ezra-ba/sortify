@@ -19,6 +19,10 @@ public sealed class SettingsValidator
         if (!Enum.IsDefined(settings.AiMode))
             errors.Add("Der KI-Modus ist ungültig.");
 
+        ValidateFolderPath(settings.AiContextDirectoryPath, "KI-Kontextverzeichnis", errors);
+        if (settings.AiShareContextDirectory && string.IsNullOrWhiteSpace(settings.AiContextDirectoryPath))
+            errors.Add("Für den KI-Verzeichniskontext muss ein Ordner ausgewählt sein.");
+
         ValidateFolderPath(
             settings.WatchedFolderPath,
             "Eingangsordner",

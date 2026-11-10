@@ -148,10 +148,32 @@
           <CheckBox x:Name="AiConsentCheck" IsCheckedChanged="AiConsentChanged"
                     HorizontalContentAlignment="Stretch">
             <TextBlock TextWrapping="Wrap"
-              Text="Ich erlaube die Übertragung von Dateiname, Dateityp, Größe, Änderungszeit, allen Regeldefinitionen sowie Ziel-IDs und Ziel-Spitznamen an NVIDIA."/>
+              Text="Ich erlaube die Übertragung von Dateiname, Dateityp, Größe, Änderungszeit, allen Regeldefinitionen, Ziel-IDs, Ziel-Spitznamen und meiner Sortify-Anweisung an NVIDIA."/>
           </CheckBox>
+          <CheckBox x:Name="AiTargetTreeCheck" IsCheckedChanged="AiConsentChanged"
+                    HorizontalContentAlignment="Stretch">
+            <TextBlock TextWrapping="Wrap"
+              Text="Optional: Namen der Unterordner und Dateien in meinen Zielordnern an NVIDIA übertragen. Sortify liest dafür nur eine begrenzte Verzeichnisübersicht, keine Dateiinhalte."/>
+          </CheckBox>
+          <TextBlock FontSize="16" FontWeight="SemiBold" Text="Weiteres Verzeichnis für KI-Kontext"/>
+          <TextBlock Classes="muted" TextWrapping="Wrap"
+            Text="Wähle zum Beispiel C:\Vault. Sortify kann die Namen darin rekursiv lesen. Das Modell erhält pro Anfrage nur eine begrenzte Übersicht und keinen direkten Dateisystemzugriff."/>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox x:Name="AiContextDirectoryInput" Grid.Column="0" PlaceholderText="C:\Vault"/>
+            <Button Grid.Column="1" Content="Ordner wählen" Click="ChooseAiContextDirectory"/>
+          </Grid>
+          <CheckBox x:Name="AiContextDirectoryCheck" IsCheckedChanged="AiConsentChanged"
+                    Content="Optional: Namen aus diesem Verzeichnis an NVIDIA übertragen"/>
+          <Button Content="Verzeichnis speichern" Click="SaveAiContextDirectory" HorizontalAlignment="Left"/>
           <TextBlock Classes="muted" TextWrapping="Wrap"
             Text="Diese Angaben können sensible Informationen enthalten. Dateiinhalte und absolute Ordnerpfade werden nicht als Dateifelder übertragen."/>
+          <TextBlock FontSize="16" FontWeight="SemiBold" Text="Deine Sortify-Anweisung (agents.md)"/>
+          <TextBlock Classes="muted" TextWrapping="Wrap"
+            Text="Beschreibe, wie Sortify Dateien vorschlagen soll, etwa Fachkürzel, bevorzugte Zielordner und Regeln für Dateinamen. Dieser Text wird bei KI-Anfragen an NVIDIA übertragen."/>
+          <TextBox x:Name="AiInstructionsInput" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="130"
+                   MaxLength="4000" PlaceholderText="Beispiel: Schulunterlagen mit INF im Namen gehören zu Informatik. Forschungs-PDFs nur bei eindeutigem Buchtitel vorschlagen."/>
+          <Button Content="Anweisung speichern" Click="SaveAiInstructions" HorizontalAlignment="Left"/>
+          <TextBlock x:Name="AiInstructionsStatus" Classes="muted" TextWrapping="Wrap"/>
           <TextBlock x:Name="AiKeyStatus" Classes="muted" TextWrapping="Wrap"/>
           <TextBlock x:Name="AiSaveStatus" TextWrapping="Wrap"/>
         </StackPanel>

@@ -9,12 +9,15 @@ using System.Runtime.InteropServices;
 using Sortify.Core.Models;
 using Sortify.Core.Services;
 using Sortify.App.Services;
+using Sortify.Infrastructure.Ai;
+using Avalonia.Platform.Storage;
 
 namespace Sortify.App.Views;
 
 public partial class SettingsWindow : Window
 {
     private bool loadingAiSettings;
+    private readonly AiInstructionsStore aiInstructions = new(AiInstructionsStore.GetDefaultPath());
     private readonly ActivityLogViewModel activityLog;
 
     public SettingsWindow() : this(null)
@@ -98,7 +101,10 @@ public partial class SettingsWindow : Window
         GeneralSettingsPanel.IsVisible = generalSelected;
         AiSettingsPanel.IsVisible = section == "KI-Unterstützung";
         if (AiSettingsPanel.IsVisible && DataContext is MainViewModel main)
+        {
             LoadAiSettings(main);
+            LoadAiInstructions();
+        }
         if (rulesSelected)
         {
             EnsureRuleEditor();
@@ -150,6 +156,9 @@ public partial class SettingsWindow : Window
         {
             AiModeSelector.SelectedIndex = (int)(main.CurrentSettings?.AiMode ?? AiSuggestionMode.Disabled);
             AiConsentCheck.IsChecked = main.CurrentSettings?.AiMetadataConsent == true;
+            AiTargetTreeCheck.IsChecked = main.CurrentSettings?.AiShareTargetTrees == true;
+            AiContextDirectoryInput.Text = main.CurrentSettings?.AiContextDirectoryPath ?? "";
+            AiContextDirectoryCheck.IsChecked = main.CurrentSettings?.AiShareContextDirectory == true;
             AiKeyStatus.Text = string.IsNullOrWhiteSpace(Sortify.App.Services.NvidiaApiKey.Read())
                 ? "API-Schlüssel fehlt: NVIDIA_API_KEY als Benutzervariable setzen."
                 : "API-Schlüssel über NVIDIA_API_KEY verfügbar.";
@@ -157,8 +166,53 @@ public partial class SettingsWindow : Window
         finally { loadingAiSettings = false; }
     }
 
+    private void LoadAiInstructions()
+    {
+        try
+        {
+            AiInstructionsInput.Text = aiInstructions.Read();
+            AiInstructionsStatus.Text = "Gespeichert unter: " + AiInstructionsStore.GetDefaultPath();
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            AiInstructionsStatus.Text = "Anweisung konnte nicht geladen werden: " + error.Message;
+        }
+    }
+
+    private async void SaveAiInstructions(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await aiInstructions.SaveAsync(AiInstructionsInput.Text ?? "");
+            AiInstructionsStatus.Text = "Anweisung gespeichert. Künftige KI-Vorschläge berücksichtigen sie.";
+            if (DataContext is MainViewModel main) main.NotifyAiInstructionsChanged();
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            AiInstructionsStatus.Text = "Anweisung konnte nicht gespeichert werden: " + error.Message;
+        }
+    }
+
     private async void AiModeChanged(object? sender, SelectionChangedEventArgs e) => await SaveAiSettingsAsync();
     private async void AiConsentChanged(object? sender, RoutedEventArgs e) => await SaveAiSettingsAsync();
+    private async void SaveAiContextDirectory(object? sender, RoutedEventArgs e) => await SaveAiSettingsAsync();
+
+    private async void ChooseAiContextDirectory(object? sender, RoutedEventArgs e)
+    {
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            AllowMultiple = false, Title = "KI-Kontextverzeichnis auswählen"
+        });
+        if (folders.Count == 0) return;
+        var path = folders[0].TryGetLocalPath();
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            AiSaveStatus.Text = "Bitte einen lokalen Ordner wählen.";
+            return;
+        }
+        AiContextDirectoryInput.Text = path;
+        await SaveAiSettingsAsync();
+    }
 
     private async Task SaveAiSettingsAsync()
     {
@@ -169,7 +223,8 @@ public partial class SettingsWindow : Window
         try
         {
             var result = await main.SaveAiSettingsAsync((AiSuggestionMode)AiModeSelector.SelectedIndex,
-                AiConsentCheck.IsChecked == true);
+                AiConsentCheck.IsChecked == true, AiTargetTreeCheck.IsChecked == true,
+                AiContextDirectoryCheck.IsChecked == true, AiContextDirectoryInput.Text);
             AiSaveStatus.Text = result.IsSuccess ? "Gespeichert." : result.ErrorMessage;
             if (!result.IsSuccess)
                 LoadAiSettings(main);

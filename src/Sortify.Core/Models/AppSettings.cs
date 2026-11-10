@@ -23,4 +23,10 @@ public sealed record AppSettings(
 
     public bool AiMetadataConsent { get; init; }
 
+    public bool AiShareTargetTrees { get; init; }
+
+    public string? AiContextDirectoryPath { get; init; }
+
+    public bool AiShareContextDirectory { get; init; }
+
 }

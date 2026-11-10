@@ -36,7 +36,7 @@ public partial class FileSuggestionViewModel : ViewModelBase
     public bool HasAiAlternative => AiAlternative is not null && CanEdit;
 
     public string AiAlternativeSummary => AiAlternative is { } suggestion
-        ? $"{suggestion.FileName} → {TargetFolders.FirstOrDefault(folder => folder.Id == suggestion.TargetFolderId)?.Nickname}"
+        ? $"{(suggestion.NeedsReview ? "Unsicher – bitte prüfen: " : "")}{suggestion.FileName} → {TargetFolders.FirstOrDefault(folder => folder.Id == suggestion.TargetFolderId)?.Nickname}. {suggestion.Reason}"
         : "";
 
     partial void OnSelectedTargetFolderChanged(TargetFolderViewModel? value) => editRevision++;
@@ -279,8 +279,21 @@ public partial class FileSuggestionViewModel : ViewModelBase
 
     private async Task LoadAiSuggestionAsync(AiSuggestionRequest request)
     {
-        if (aiService is null || !AiSuggestionPolicy.ShouldRequest(request.Settings, request.LocalResult))
+        if (aiService is null)
+        {
+            AiStatus = "KI-Dienst nicht verfügbar.";
             return;
+        }
+        if (!AiSuggestionPolicy.ShouldRequest(request.Settings, request.LocalResult))
+        {
+            AiStatus = !request.Settings.AiMetadataConsent ? "KI deaktiviert: Übertragung nicht erlaubt."
+                : request.Settings.AiMode == AiSuggestionMode.Disabled ? "KI-Modus ist ausgeschaltet."
+                : request.Settings.TargetFolders.Count == 0 ? "KI benötigt mindestens einen Zielordner."
+                : request.Settings.AiMode == AiSuggestionMode.Fallback && AiSuggestionPolicy.HasLocalMatch(request.LocalResult)
+                    ? "Eindeutige lokale Regel gefunden; KI-Fallback nicht erforderlich."
+                    : "KI für diese Datei nicht verfügbar: Regelprüfung fehlgeschlagen.";
+            return;
+        }
         var revision = ++aiRevision;
         var originalEditRevision = editRevision;
         using var cancellation = new CancellationTokenSource();
@@ -302,7 +315,8 @@ public partial class FileSuggestionViewModel : ViewModelBase
                 || !TargetFolders.Any(folder => folder.Id == suggestion.TargetFolderId))
                 return;
             AiAlternative = suggestion;
-            if (!AiSuggestionPolicy.HasLocalMatch(request.LocalResult) && originalEditRevision == editRevision)
+            if (!AiSuggestionPolicy.HasLocalMatch(request.LocalResult)
+                && originalEditRevision == editRevision)
                 AdoptAiSuggestion();
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
@@ -331,9 +345,12 @@ public partial class FileSuggestionViewModel : ViewModelBase
             return;
         SelectedTargetFolder = target;
         NewFileName = Path.GetFileNameWithoutExtension(suggestion.FileName);
-        SuggestionExplanation = "KI-Vorschlag: " + suggestion.Reason;
+        SuggestionExplanation = (suggestion.NeedsReview ? "Unsicherer KI-Vorschlag – bitte prüfen: "
+            : "KI-Vorschlag: ") + suggestion.Reason;
         AiAlternative = null;
-        AiStatus = "KI-Vorschlag übernommen. Die Datei wird erst nach Bestätigung geändert.";
+        AiStatus = suggestion.NeedsReview
+            ? "KI-Vorschlag vorausgewählt. Ziel und Dateiname prüfen; erst Bestätigung verschiebt die Datei."
+            : "KI-Vorschlag übernommen. Die Datei wird erst nach Bestätigung geändert.";
     }
 
     public async Task<bool> ConfirmMoveAsync()

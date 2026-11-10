@@ -128,6 +128,17 @@
             </Grid>
           </Border>
           <Border Padding="14,12" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+              <StackPanel Spacing="3" Margin="0,0,16,0">
+                <TextBlock FontSize="16" FontWeight="SemiBold" Text="Automatisch sortieren" TextWrapping="Wrap"/>
+                <TextBlock Classes="muted" Text="Neue Dateien bei eindeutigem Ziel ohne Nachfrage verschieben." TextWrapping="Wrap"/>
+              </StackPanel>
+              <ToggleButton x:Name="AutoSortToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center"
+                            AutomationProperties.Name="Automatisch sortieren" IsCheckedChanged="AutoSortChanged"/>
+              <TextBlock x:Name="AutoSortError" Grid.Row="1" Grid.ColumnSpan="2" TextWrapping="Wrap" IsVisible="False"/>
+            </Grid>
+          </Border>
+          <Border Padding="14,12" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
             <Grid ColumnDefinitions="*,Auto">
               <StackPanel Spacing="3" Margin="0,0,16,0">
                 <TextBlock FontSize="16" FontWeight="SemiBold" Text="Test-Toggle" TextWrapping="Wrap"/>

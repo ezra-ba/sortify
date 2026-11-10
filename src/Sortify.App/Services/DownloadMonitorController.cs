@@ -20,7 +20,7 @@ public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMove
     }
 
     private readonly List<FileSuggestionWindow> popups = [];
-    private int session;
+    private CancellationTokenSource? monitoringCancellation;
     private bool disposed;
 
     public bool IsMonitoring { get; private set; }
@@ -30,12 +30,10 @@ public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMove
         if (disposed)
             return;
 
-        var currentSession = ++session;
+        StopMonitoring();
+        monitoringCancellation = new CancellationTokenSource();
+        var cancellationToken = monitoringCancellation.Token;
         IsMonitoring = false;
-        monitor.Dispose();
-        foreach (var popup in popups.ToArray())
-            popup.Close();
-
         if (string.IsNullOrWhiteSpace(directory))
         {
             viewModel.MonitoringStatus = "Bitte einen Ueberwachungsordner auswaehlen.";
@@ -44,18 +42,33 @@ public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMove
 
         try
         {
-            monitor.Start(directory, path => Dispatcher.UIThread.Post(() =>
+            monitor.Start(directory, path => Dispatcher.UIThread.Post(async () =>
             {
-                if (disposed || session != currentSession)
+                if (cancellationToken.IsCancellationRequested)
                     return;
+
                 var activity = log is null ? null : new LoggedFileMoveService(fileMoveService, log);
-                var popup = new FileSuggestionWindow(
-                    new FileSuggestionViewModel(
-                        viewModel.TargetFolders,
-                            path,
-                            activity ?? fileMoveService,
-                            ruleEngine,
-                            () => viewModel.CurrentSettings))
+                var suggestion = new FileSuggestionViewModel(viewModel.TargetFolders, path,
+                    activity ?? fileMoveService, ruleEngine, () => viewModel.CurrentSettings);
+                var prepareAutomatically = viewModel.CurrentSettings?.AutoSort == true;
+                if (prepareAutomatically)
+                {
+                    try
+                    {
+                        await suggestion.InitializeFileOperationAsync(cancellationToken);
+                        if (cancellationToken.IsCancellationRequested ||
+                            await suggestion.TryAutoSortAsync(cancellationToken))
+                            return;
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                }
+
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+                var popup = new FileSuggestionWindow(suggestion, initializeOnOpen: !prepareAutomatically)
                 {
                     Topmost = true
                 };
@@ -68,8 +81,9 @@ public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMove
                 popup.Show();
             }), error => Dispatcher.UIThread.Post(() =>
             {
-                if (!disposed && session == currentSession)
+                if (!cancellationToken.IsCancellationRequested)
                 {
+                    monitoringCancellation?.Cancel();
                     monitor.Dispose();
                     IsMonitoring = false;
                     viewModel.MonitoringStatus = error;
@@ -89,7 +103,14 @@ public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMove
     {
         disposed = true;
         IsMonitoring = false;
-        session++;
+        StopMonitoring();
+    }
+
+    private void StopMonitoring()
+    {
+        monitoringCancellation?.Cancel();
+        monitoringCancellation?.Dispose();
+        monitoringCancellation = null;
         monitor.Dispose();
         foreach (var popup in popups.ToArray())
             popup.Close();

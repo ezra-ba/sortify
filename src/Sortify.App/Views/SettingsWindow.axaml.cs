@@ -14,6 +14,7 @@ namespace Sortify.App.Views;
 public partial class SettingsWindow : Window
 {
     private readonly ActivityLogViewModel activityLog;
+    private bool updatingAutoSortToggle;
 
     public SettingsWindow() : this(null)
     {
@@ -30,6 +31,7 @@ public partial class SettingsWindow : Window
             EnsureRuleEditor();
             if (DataContext is MainViewModel main)
             {
+                UpdateAutoSortToggle(main.CurrentSettings?.AutoSort == true);
                 DarkModeToggle.IsChecked = main.CurrentSettings?.DarkMode == true;
                 AutoStartToggle.IsChecked = main.CurrentSettings?.AutoStart == true;
                 StartMinimizedToggle.IsChecked = main.CurrentSettings?.StartMinimized == true;
@@ -120,6 +122,36 @@ public partial class SettingsWindow : Window
         if (DataContext is MainViewModel main)
             await main.SaveDarkModeAsync(isDark);
 
+    }
+
+    private void UpdateAutoSortToggle(bool enabled)
+    {
+        updatingAutoSortToggle = true;
+        AutoSortToggle.IsChecked = enabled;
+        updatingAutoSortToggle = false;
+    }
+
+    private async void AutoSortChanged(object? sender, RoutedEventArgs e)
+    {
+        if (updatingAutoSortToggle || !IsInitialized || DataContext is not MainViewModel main)
+            return;
+
+        AutoSortToggle.IsEnabled = false;
+        AutoSortError.IsVisible = false;
+        try
+        {
+            var result = await main.SaveAutoSortAsync(AutoSortToggle.IsChecked == true);
+            if (!result.IsSuccess)
+            {
+                UpdateAutoSortToggle(main.CurrentSettings?.AutoSort == true);
+                AutoSortError.Text = result.ErrorMessage ?? "Automatisches Sortieren konnte nicht gespeichert werden.";
+                AutoSortError.IsVisible = true;
+            }
+        }
+        finally
+        {
+            AutoSortToggle.IsEnabled = true;
+        }
     }
 
     private async void GeneralSettingChanged(object? sender, RoutedEventArgs e)

@@ -109,6 +109,10 @@ public partial class MainViewModel : ViewModelBase
         this.loginStartup = loginStartup;
     }
 
+    public Task<SettingsSaveResult> SaveAutoSortAsync(bool enabled)
+        => settingsService?.UpdateAsync(settings => settings with { AutoSort = enabled })
+            ?? Task.FromResult(new SettingsSaveResult(false, "Die Einstellungen sind nicht verfügbar."));
+
     public async Task<SettingsSaveResult> SaveGeneralSettingsAsync(
         bool autoStart, bool startMinimized, bool closeToTray)
     {

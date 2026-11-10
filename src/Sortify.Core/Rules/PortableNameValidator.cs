@@ -30,8 +30,7 @@ public static class PortableNameValidator
 
         foreach (var character in name)
         {
-            if (character < 32 ||
-                "<>:\"/\\|?*".Contains(character))
+            if (IsInvalidCharacter(character))
             {
                 return false;
             }
@@ -41,4 +40,22 @@ public static class PortableNameValidator
 
         return !ReservedNames.Contains(baseName);
     }
+
+    public static string SanitizeFileStem(string stem)
+    {
+        var leadingSpaces = stem.Length - stem.TrimStart(' ').Length;
+        var end = stem.TrimEnd(' ').Length;
+        return string.Create(stem.Length, (stem, leadingSpaces, end), (characters, state) =>
+        {
+            for (var i = 0; i < characters.Length; i++)
+            {
+                var character = state.stem[i];
+                characters[i] = IsInvalidCharacter(character) || i < state.leadingSpaces || i >= state.end
+                    ? '-'
+                    : character;
+            }
+        });
+    }
+
+    private static bool IsInvalidCharacter(char character) => character < 32 || "<>:\"/\\|?*".Contains(character);
 }

@@ -33,7 +33,8 @@ public sealed class RuleSuggestionIntegrationTests
             new(first.Id, first.Nickname, first.Path, true),
             new(second.Id, second.Nickname, second.Path)
         };
-        var source = Path.Combine(Path.GetTempPath(), "invoice.pdf");
+        var sourceName = scenario == "no-match" ? "gefangene-pokemon-liste-27-10-2026-19:16:00.txt" : "invoice.pdf";
+        var source = Path.Combine(Path.GetTempPath(), sourceName);
         var service = new MoveService(source);
         var model = new FileSuggestionViewModel(cards, source, service,
             new RuleEngine(new RuleValidator(), new RuleTargetValidator()), () => settings);
@@ -56,7 +57,8 @@ public sealed class RuleSuggestionIntegrationTests
         else
         {
             Assert.Equal(first.Id, model.SelectedTargetFolder?.Id);
-            Assert.Equal("invoice", model.NewFileName);
+            Assert.Equal(scenario == "no-match" ? "gefangene-pokemon-liste-27-10-2026-19-16-00" : "invoice", model.NewFileName);
+            Assert.True(model.CanConfirmMove);
             Assert.Contains("Standardordner", model.SuggestionExplanation);
         }
 
@@ -67,7 +69,7 @@ public sealed class RuleSuggestionIntegrationTests
         Assert.Equal("manual", model.NewFileName);
         Assert.True(await model.ConfirmMoveAsync());
         Assert.Equal(1, service.MoveCount);
-        Assert.Equal(Path.Combine(second.Path, "manual.pdf"), service.Request?.TargetPath);
+        Assert.Equal(Path.Combine(second.Path, "manual" + Path.GetExtension(sourceName)), service.Request?.TargetPath);
     }
 
     private sealed class MoveService(string source) : IFileMoveService

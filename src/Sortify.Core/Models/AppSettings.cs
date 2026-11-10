@@ -19,4 +19,6 @@ public sealed record AppSettings(
 
     public bool StartMinimized { get; init; }
 
+    public bool AutoSort { get; init; }
+
 }

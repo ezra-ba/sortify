@@ -94,6 +94,10 @@ dotnet run --project .\src\Sortify.App
 dotnet test
 ```
 
+## Regelimport und -export
+
+Unter **Einstellungen → Sortierregeln** lassen sich Regeln samt zugehörigen Zielordnern als JSON-Datei exportieren und wieder importieren. Der Import ergänzt vorhandene Regeln; bereits importierte Regeln werden übersprungen, widersprüchliche IDs abgelehnt. Zielordner werden anhand ihres Pfads wiederverwendet oder hinzugefügt. Fehlt ein Zielordner auf diesem Rechner, wird die gesamte Datei abgelehnt und es bleibt alles unverändert. Überwachungsordner und sonstige Einstellungen werden nicht übertragen.
+
 ## Hintergrundbetrieb
 
 Beim normalen Programmstart zeigt Sortify einen kompakten Splashscreen mit Logo, tatsächlicher Build-Version und aktuellem Ladestatus. Er schließt automatisch, sobald die Initialisierung beendet ist; es gibt keine künstliche Mindestanzeigedauer. Bei einem Hintergrundstart mit `--background` oder beim Öffnen einer bereits laufenden Instanz erscheint kein Splashscreen. Startfehler werden im Hauptfenster angezeigt. Wird der Splashscreen während des Ladens geschlossen, wird der Start abgebrochen.

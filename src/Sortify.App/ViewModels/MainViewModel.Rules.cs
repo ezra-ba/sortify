@@ -1,10 +1,63 @@
 using Sortify.Core.Models;
 using Sortify.Core.Rules;
+using Sortify.Infrastructure.Persistence;
 
 namespace Sortify.App.ViewModels;
 
 public partial class MainViewModel
 {
+    public async Task<SettingsSaveResult> ExportRulesAsync(string path)
+    {
+        if (CurrentSettings is not { } settings)
+            return new(false, "Die Einstellungen sind nicht verfügbar.");
+        try
+        {
+            await RuleTransferService.ExportAsync(path, settings);
+            SettingsStatus = $"{settings.Rules.Count} Regeln exportiert.";
+            return new(true, null);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            SettingsStatus = "Regeln konnten nicht exportiert werden: " + exception.Message;
+            return new(false, SettingsStatus);
+        }
+    }
+
+    public async Task<SettingsSaveResult> ImportRulesAsync(string path)
+    {
+        RuleTransferDocument document;
+        try
+        {
+            document = await RuleTransferService.ReadAsync(path);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or System.Text.Json.JsonException)
+        {
+            SettingsStatus = "Regeldatei konnte nicht gelesen werden: " + exception.Message;
+            return new(false, SettingsStatus);
+        }
+
+        var imported = 0;
+        var result = await ChangeRuleAsync(current =>
+        {
+            try
+            {
+                var merged = RuleTransferService.Merge(current, document);
+                imported = merged.Imported;
+                return merged.Settings;
+            }
+            catch (InvalidDataException exception)
+            {
+                throw new RuleChangeRejectedException(exception.Message);
+            }
+        }, "Regeln importiert.");
+        if (result.IsSuccess)
+        {
+            RestoreTargetFolders(settingsService!.Current!);
+            SettingsStatus = imported == 0 ? "Alle Regeln sind bereits vorhanden." : $"{imported} Regeln importiert.";
+        }
+        return result;
+    }
+
     public Task<SettingsSaveResult> AddRuleAsync(SortRule rule)
     {
         ArgumentNullException.ThrowIfNull(rule);

@@ -81,7 +81,7 @@
             <Button x:Name="AppearanceButton" Classes="nav-item" Click="SelectSection" Tag="Darstellung" Content="◐   Darstellung"/>
             <TextBlock Text="DIAGNOSE" FontSize="11" FontWeight="SemiBold" Margin="10,18,0,7"/>
             <Button x:Name="ActivityLogButton" Classes="nav-item" Click="SelectSection" Tag="Aktivitätsprotokoll" Content="≡   Aktivitätsprotokoll"/>
-            <Button x:Name="StatisticsButton" Classes="nav-item" Click="SelectSection" Tag="Download-Statistik" Content="▥   Download-Statistik"/>
+            <Button x:Name="StatisticsButton" Classes="nav-item" Click="SelectSection" Tag="Download-Statistik" Content="▥   Download-Statistik" IsVisible="False"/>
           </StackPanel>
         </ScrollViewer>
       </Grid>

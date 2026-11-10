@@ -236,22 +236,23 @@ public partial class FileSuggestionViewModel : ViewModelBase
         inspectionCancellation?.Cancel();
     }
 
-    public Task<bool> TryAutoSortAsync(CancellationToken cancellationToken)
+    public async Task<string?> TryAutoSortAsync(CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested || !hasAutomaticTarget ||
             settingsProvider?.Invoke() is not { AutoSort: true, WatchedFolderPath: { } watchedFolder } ||
             SelectedTargetFolder is not { } target)
-            return Task.FromResult(false);
+            return null;
 
         // Moving into the watched folder can trigger another suggestion, for example after a rename.
         if (string.Equals(Path.TrimEndingDirectorySeparator(Path.GetFullPath(watchedFolder)),
             Path.TrimEndingDirectorySeparator(Path.GetFullPath(target.Path)), StringComparison.OrdinalIgnoreCase))
         {
             SuggestionExplanation = "Der Zielordner ist der Überwachungsordner. Bitte ein Ziel manuell bestätigen.";
-            return Task.FromResult(false);
+            return null;
         }
 
-        return ConfirmMoveAsync(cancellationToken);
+        var destination = FilePathPreview;
+        return await ConfirmMoveAsync(cancellationToken) ? destination : null;
     }
 
     public async Task<bool> ConfirmMoveAsync(CancellationToken cancellationToken = default)

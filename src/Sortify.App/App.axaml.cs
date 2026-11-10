@@ -1,3 +1,4 @@
+using Sortify.Infrastructure.Notifications;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -105,7 +106,7 @@ public partial class App : Application
         }
         session = new DesktopSession(viewModel, window, settingsService,
             loginStartup, () => desktop.Shutdown(), trayAvailable,
-            moves, engine, monitor, log);
+            moves, engine, monitor, log, new DesktopNotificationService());
         if (icon is not null)
             trayMenu = new TrayMenu(icon, session);
 

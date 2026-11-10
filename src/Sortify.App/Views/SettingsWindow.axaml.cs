@@ -144,7 +144,7 @@ public partial class SettingsWindow : Window
     {
         if (sender is not Button { Tag: string section }) return;
 
-        foreach (var button in new[] { GeneralButton, WatchedButton, RulesButton, AppearanceButton, ActivityLogButton, StatisticsButton })
+        foreach (var button in new[] { GeneralButton, RulesButton, AppearanceButton, ActivityLogButton, StatisticsButton })
             button.Classes.Set("selected", ReferenceEquals(button, sender));
 
         var rulesSelected = section == "Sortierregeln";

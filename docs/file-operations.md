@@ -9,6 +9,17 @@ Bei eingeschaltetem Schalter wartet Sortify auf eine stabil lesbare Datei. Eine 
 Der bestehende Dateidienst prüft den Quellzustand und verhindert Überschreiben. Automatische Verschiebungen in den Überwachungsordner selbst werden zur manuellen Prüfung vorgelegt, damit Umbenennungen keinen weiteren automatischen Vorgang auslösen. Beim Pausieren oder Wechseln des Überwachungsordners werden ausstehende automatische Vorgänge abgebrochen. Verschiebeergebnisse erscheinen im Dateiaktionsprotokoll.
 
 
+## Systembenachrichtigungen (#106)
+
+Der Schalter **Einstellungen → Allgemein → Automatisch sortieren** aktiviert zugleich die native Erfolgsmeldung. Nach erfolgreichem Auto-Sort übergibt Sortify den tatsächlich verwendeten Zieldateinamen, Zielordner und die lokale Uhrzeit. Manuelle Verschiebungen und fehlgeschlagene automatische Versuche erzeugen keine Erfolgsmeldung.
+
+- Windows verwendet die Benachrichtigung der Windows-Shell über `NotifyIcon` und Windows PowerShell. Die kurze Anzeigedauer wird mit 5000 ms angefragt. [Windows-Benachrichtigungsbereich](https://learn.microsoft.com/en-us/windows/win32/shell/notification-area)
+- macOS verwendet `osascript` mit `display notification`. Der Absender kann als Skript-Host erscheinen. Die Anzeige folgt den Mitteilungseinstellungen. [Apple-Dokumentation](https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/DisplayNotifications.html)
+- Linux verwendet `notify-send` in der laufenden Desktop-Sitzung. Dafür müssen das Programm und ein Benachrichtigungsdienst verfügbar sein. Sortify fragt 5000 ms an. [Linux-Desktop-Benachrichtigungen](https://specifications.freedesktop.org/notification/latest-single/)
+
+Die Desktop-Umgebung bestimmt Position und tatsächliche Dauer. Bei deaktivierten oder fehlenden Systembenachrichtigungen bleibt der Verschiebevorgang im Aktivitätsprotokoll nachvollziehbar. Für die native Abnahme auf jedem Betriebssystem Auto-Sort einschalten, eine passende Testdatei ablegen und Anzeige sowie Zeit prüfen. Die automatisierten Tests prüfen die Auslösung und den Inhalt unabhängig von der Desktop-Umgebung.
+
+
 Stand: 27. Oktober 2026.
 
 ## Ablauf im Popup

@@ -179,7 +179,10 @@ public partial class RuleEditorViewModel : ViewModelBase
             return;
         }
 
-        var extensions = Extensions.Split([',', ';', ' ', '\t', '\r', '\n'],
+        var extensionText = string.IsNullOrWhiteSpace(Extensions)
+            ? string.Join(",", ExtensionSelections.Select(selection => selection.SelectedExtension))
+            : Extensions;
+        var extensions = extensionText.Split([',', ';', ' ', '\t', '\r', '\n'],
                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(extension => extension.StartsWith('.') ? extension : "." + extension)
             .Distinct(StringComparer.OrdinalIgnoreCase)

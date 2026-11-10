@@ -112,7 +112,7 @@ public partial class MainWindow : Window
     private void ShowSettingsWindow(SettingsWindow settings)
     {
         if (!settings.IsVisible)
-            settings.Show();
+            settings.Show(this);
         else
             settings.Activate();
     }

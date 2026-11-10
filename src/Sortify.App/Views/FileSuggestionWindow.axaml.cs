@@ -9,6 +9,8 @@ namespace Sortify.App.Views;
 
 public partial class FileSuggestionWindow : Window
 {
+    private Size? _lastPositionedSize;
+
     private async void ConfirmButton_Click(
     object? sender,
     RoutedEventArgs e)
@@ -54,6 +56,8 @@ public partial class FileSuggestionWindow : Window
     {
         InitializeComponent();
         Opened += RemoveWindowsChrome;
+        SizeChanged += (_, _) => PositionBottomRight();
+        LayoutUpdated += FileSuggestionWindow_LayoutUpdated;
         Opened += async (_, _) =>
             {
                 if (DataContext is FileSuggestionViewModel viewModel)
@@ -89,6 +93,9 @@ public partial class FileSuggestionWindow : Window
         if (screen is null)
             return;
 
+        if (ClientSize.Width <= 0 || ClientSize.Height <= 0)
+            return;
+
         var scaling = screen.Scaling;
         var windowWidth = (int)Math.Ceiling(ClientSize.Width * scaling);
         var windowHeight = (int)Math.Ceiling(ClientSize.Height * scaling);
@@ -97,6 +104,13 @@ public partial class FileSuggestionWindow : Window
         Position = new PixelPoint(
             screen.WorkingArea.Right - windowWidth - screenMargin,
             screen.WorkingArea.Bottom - windowHeight - screenMargin);
+        _lastPositionedSize = ClientSize;
+    }
+
+    private void FileSuggestionWindow_LayoutUpdated(object? sender, EventArgs e)
+    {
+        if (_lastPositionedSize != ClientSize)
+            PositionBottomRight();
     }
 
     private static readonly IntPtr WindowStyleIndex = new(-16);

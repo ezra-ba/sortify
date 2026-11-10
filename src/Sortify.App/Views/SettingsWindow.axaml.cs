@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Platform.Storage;
 using Sortify.App.ViewModels;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
@@ -149,6 +150,7 @@ public partial class SettingsWindow : Window
 
         var rulesSelected = section == "Sortierregeln";
         RulesEditor.IsVisible = rulesSelected;
+        RuleTransferPanel.IsVisible = rulesSelected;
         RuleActions.IsVisible = rulesSelected;
         var generalSelected = section == "Allgemein";
         GeneralSettingsPanel.IsVisible = generalSelected;
@@ -162,6 +164,46 @@ public partial class SettingsWindow : Window
         AppearanceCard.IsVisible = appearanceSelected;
         ActivityLogPanel.IsVisible = section == "Aktivitätsprotokoll";
         StatisticsPanel.IsVisible = section == "Download-Statistik";
+    }
+
+    private async void ImportRules(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel main) return;
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Sortierregeln importieren",
+            AllowMultiple = false,
+            FileTypeFilter = [new FilePickerFileType("JSON-Datei") { Patterns = ["*.json"] }]
+        });
+        if (files.Count == 0) return;
+        var path = files[0].TryGetLocalPath();
+        if (path is null) { main.SettingsStatus = "Bitte eine lokale JSON-Datei auswählen."; return; }
+        ImportRulesButton.IsEnabled = false;
+        try
+        {
+            var result = await main.ImportRulesAsync(path);
+            if (result.IsSuccess && RulesEditor.DataContext is RuleEditorViewModel editor)
+                editor.RefreshRules();
+        }
+        finally { ImportRulesButton.IsEnabled = true; }
+    }
+
+    private async void ExportRules(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel main) return;
+        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Sortierregeln exportieren",
+            SuggestedFileName = "sortify-regeln.json",
+            DefaultExtension = "json",
+            FileTypeChoices = [new FilePickerFileType("JSON-Datei") { Patterns = ["*.json"] }]
+        });
+        if (file is null) return;
+        var path = file.TryGetLocalPath();
+        if (path is null) { main.SettingsStatus = "Bitte einen lokalen Speicherort auswählen."; return; }
+        ExportRulesButton.IsEnabled = false;
+        try { await main.ExportRulesAsync(path); }
+        finally { ExportRulesButton.IsEnabled = true; }
     }
 
     private async void DarkModeChanged(object? sender, RoutedEventArgs e)

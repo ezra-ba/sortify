@@ -10,7 +10,7 @@ using Sortify.Infrastructure.FileSystem;
 namespace Sortify.App.Services;
 
 public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMoveService fileMoveService,
-    IRuleEngine ruleEngine, FolderMonitor monitor, IActivityLog? log = null) : IDisposable
+    IRuleEngine ruleEngine, FolderMonitor monitor, IActivityLog? log = null, ISystemNotificationService? notifications = null) : IDisposable
 {
     // Compatibility constructor for existing UI tests and design-time callers.
     public DownloadMonitorController(MainViewModel viewModel)
@@ -56,9 +56,19 @@ public sealed class DownloadMonitorController(MainViewModel viewModel, IFileMove
                     try
                     {
                         await suggestion.InitializeFileOperationAsync(cancellationToken);
-                        if (cancellationToken.IsCancellationRequested ||
-                            await suggestion.TryAutoSortAsync(cancellationToken))
+                        if (cancellationToken.IsCancellationRequested)
                             return;
+
+                        var destination = await suggestion.TryAutoSortAsync(cancellationToken);
+                        if (destination is not null)
+                        {
+                            if (notifications is not null)
+                            {
+                                var message = $"{DateTimeOffset.Now:HH:mm} Uhr · {Path.GetFileName(destination)}\nZiel: {Path.GetDirectoryName(destination)}";
+                                await notifications.ShowAsync("Sortify · Datei verschoben", message);
+                            }
+                            return;
+                        }
                     }
                     catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {

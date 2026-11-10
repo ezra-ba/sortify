@@ -6,6 +6,7 @@ using Sortify.App.ViewModels;
 using Sortify.App.Views;
 using Sortify.Core.Models;
 using Sortify.Core.Rules;
+using Sortify.Core.Services;
 using Sortify.Infrastructure.FileSystem;
 using Sortify.Infrastructure.Logging;
 using Sortify.Infrastructure.Monitoring;
@@ -61,9 +62,10 @@ public sealed class AutomaticSortingTests
                 Assert.True((await store.SaveAsync(settings)).IsSuccess);
                 var main = new MainViewModel(new SettingsService(store));
                 await main.InitializeSettingsAsync();
+                var notifications = new RecordedNotifications();
                 using var controller = new DownloadMonitorController(main,
                     new FileMoveService(TimeSpan.FromMilliseconds(30), TimeSpan.FromMilliseconds(10), TimeSpan.FromSeconds(5)),
-                    new RuleEngine(new RuleValidator(), new RuleTargetValidator()), new FolderMonitor(), log);
+                    new RuleEngine(new RuleValidator(), new RuleTargetValidator()), new FolderMonitor(), log, notifications);
                 var fileName = scenario == "unsupported" ? "invoice.zip" : "invoice.pdf";
                 var source = Path.Combine(watched, fileName);
                 var target = scenario is "rule" or "collision" or "watched-target" ? Path.Combine(ruleTarget.Path, "sorted_invoice.pdf") : Path.Combine(fallback.Path, fileName);
@@ -73,17 +75,22 @@ public sealed class AutomaticSortingTests
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 if (scenario == "rule")
                 {
-                    while (log.ReadRecent().Entries.Count == 0 && popup is null)
+                    while (notifications.Messages.Count == 0 && popup is null)
                         await Task.Delay(20, timeout.Token);
                     Assert.Null(popup);
                     Assert.Equal("FileMove.Succeeded", Assert.Single(log.ReadRecent().Entries).EventName);
                     Assert.False(File.Exists(source));
                     Assert.Equal("source", await File.ReadAllTextAsync(target));
+                    var message = Assert.Single(notifications.Messages);
+                    Assert.Contains("sorted_invoice.pdf", message);
+                    Assert.Contains(ruleTarget.Path, message);
+                    Assert.Matches(@"^\d{2}:\d{2} Uhr", message);
                 }
                 else
                 {
                     while (popup is null) await Task.Delay(20, timeout.Token);
                     Assert.Equal("source", await File.ReadAllTextAsync(source));
+                    Assert.Empty(notifications.Messages);
                     var suggestion = Assert.IsType<FileSuggestionViewModel>(popup.DataContext);
                     if (scenario == "no-default")
                         Assert.Contains("Kein Standardordner", suggestion.SuggestionExplanation);
@@ -102,6 +109,7 @@ public sealed class AutomaticSortingTests
                             Assert.Equal(fallback.Id, suggestion.SelectedTargetFolder?.Id);
                             Assert.False(File.Exists(target));
                             Assert.True(await suggestion.ConfirmMoveAsync());
+                            Assert.Empty(notifications.Messages);
                             Assert.False(File.Exists(source));
                             Assert.Equal("source", await File.ReadAllTextAsync(target));
                         }
@@ -115,6 +123,17 @@ public sealed class AutomaticSortingTests
             }
             return true;
         }, CancellationToken.None);
+    }
+
+    private sealed class RecordedNotifications : ISystemNotificationService
+    {
+        public List<string> Messages { get; } = [];
+
+        public Task ShowAsync(string title, string message)
+        {
+            Messages.Add(message);
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -140,6 +159,7 @@ public sealed class AutomaticSortingTests
                     while (!toggle.IsEnabled) await Task.Delay(20, timeout.Token);
                     Assert.Equal(enabled, (await store.LoadAsync()).Settings?.AutoSort);
                 }
+
             }
             finally
             {

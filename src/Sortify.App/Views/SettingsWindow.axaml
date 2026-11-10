@@ -75,7 +75,6 @@
           <StackPanel Spacing="3">
             <TextBlock x:Name="GeneralHeader" Text="ALLGEMEIN" FontSize="11" FontWeight="SemiBold" Margin="10,4,0,7"/>
             <Button x:Name="GeneralButton" Classes="nav-item selected" Click="SelectSection" Tag="Allgemein" Content="⚙   Allgemein"/>
-            <Button x:Name="WatchedButton" Classes="nav-item" Click="SelectSection" Tag="Überwachungsordner" Content="◉   Überwachungsordner"/>
             <TextBlock x:Name="SortingHeader" Text="SORTIERUNG" FontSize="11" FontWeight="SemiBold" Margin="10,18,0,7"/>
             <Button x:Name="RulesButton" Classes="nav-item" Click="SelectSection" Tag="Sortierregeln" Content="≡   Sortierregeln"/>
             <TextBlock x:Name="AppearanceHeader" Text="DARSTELLUNG" FontSize="11" FontWeight="SemiBold" Margin="10,18,0,7"/>
@@ -131,7 +130,7 @@
             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
               <StackPanel Spacing="3" Margin="0,0,16,0">
                 <TextBlock FontSize="16" FontWeight="SemiBold" Text="Automatisch sortieren" TextWrapping="Wrap"/>
-                <TextBlock Classes="muted" Text="Neue Dateien bei eindeutigem Ziel ohne Nachfrage verschieben." TextWrapping="Wrap"/>
+                <TextBlock Classes="muted" Text="Neue Dateien bei eindeutigem Regelziel verschieben und den Erfolg per Systemmeldung anzeigen." TextWrapping="Wrap"/>
               </StackPanel>
               <ToggleButton x:Name="AutoSortToggle" Classes="animated-toggle" Grid.Column="1" VerticalAlignment="Center"
                             AutomationProperties.Name="Automatisch sortieren" IsCheckedChanged="AutoSortChanged"/>

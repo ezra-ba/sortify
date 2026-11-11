@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<filme>
+  <film id="1">
+    <titel>The Matrix</titel><jahr>1999</jahr><regie>Lana Wachowski und Lilly Wachowski</regie><laufzeitMinuten>136</laufzeitMinuten>
+    <genres><genre>Science-Fiction</genre><genre>Action</genre></genres>
+  </film>
+  <film id="2">
+    <titel>Inception</titel><jahr>2010</jahr><regie>Christopher Nolan</regie><laufzeitMinuten>148</laufzeitMinuten>
+    <genres><genre>Science-Fiction</genre><genre>Thriller</genre></genres>
+  </film>
+  <film id="3">
+    <titel>Interstellar</titel><jahr>2014</jahr><regie>Christopher Nolan</regie><laufzeitMinuten>169</laufzeitMinuten>
+    <genres><genre>Science-Fiction</genre><genre>Drama</genre></genres>
+  </film>
+  <film id="4">
+    <titel>Der Pate</titel><jahr>1972</jahr><regie>Francis Ford Coppola</regie><laufzeitMinuten>175</laufzeitMinuten>
+    <genres><genre>Krimi</genre><genre>Drama</genre></genres>
+  </film>
+  <film id="5">
+    <titel>Chihiros Reise ins Zauberland</titel><jahr>2001</jahr><regie>Hayao Miyazaki</regie><laufzeitMinuten>125</laufzeitMinuten>
+    <genres><genre>Animation</genre><genre>Fantasy</genre></genres>
+  </film>
+</filme>

@@ -1,0 +1,9 @@
+{
+  "filme": [
+    {"id": 1, "titel": "The Matrix", "jahr": 1999, "regie": "Lana Wachowski und Lilly Wachowski", "laufzeitMinuten": 136, "genres": ["Science-Fiction", "Action"]},
+    {"id": 2, "titel": "Inception", "jahr": 2010, "regie": "Christopher Nolan", "laufzeitMinuten": 148, "genres": ["Science-Fiction", "Thriller"]},
+    {"id": 3, "titel": "Interstellar", "jahr": 2014, "regie": "Christopher Nolan", "laufzeitMinuten": 169, "genres": ["Science-Fiction", "Drama"]},
+    {"id": 4, "titel": "Der Pate", "jahr": 1972, "regie": "Francis Ford Coppola", "laufzeitMinuten": 175, "genres": ["Krimi", "Drama"]},
+    {"id": 5, "titel": "Chihiros Reise ins Zauberland", "jahr": 2001, "regie": "Hayao Miyazaki", "laufzeitMinuten": 125, "genres": ["Animation", "Fantasy"]}
+  ]
+}

@@ -21,6 +21,7 @@ public sealed class DesktopSession : IDisposable
     private bool initialized;
     private bool showRequested;
     private bool disposed;
+    private CancellationTokenSource? targetValidationCancellation;
 
     public bool TrayAvailable => lifetime.TrayAvailable;
     public bool IsInBackground => lifetime.IsInBackground;
@@ -68,6 +69,8 @@ public sealed class DesktopSession : IDisposable
                 : ThemeVariant.Light;
         }
         initialized = true;
+        targetValidationCancellation = new CancellationTokenSource();
+        _ = MonitorTargetFoldersAsync(targetValidationCancellation.Token);
         reportStatus?.Invoke("Ordnerüberwachung wird gestartet …");
         RestartMonitoring();
         try
@@ -194,10 +197,26 @@ public sealed class DesktopSession : IDisposable
         if (disposed)
             return;
         disposed = true;
+        targetValidationCancellation?.Cancel();
+        targetValidationCancellation?.Dispose();
+        targetValidationCancellation = null;
         lifetime.Stop();
         viewModel.MonitoringFolderConfigured -= RestartMonitoring;
         window.Closing -= OnClosing;
         monitor.Dispose();
+    }
+
+    private async Task MonitorTargetFoldersAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+                await viewModel.RemoveMissingTargetFoldersAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
     }
 
     private sealed class LifetimeHost(Window window, Action requestShutdown) : IDesktopLifetimeHost

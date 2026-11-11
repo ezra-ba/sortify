@@ -35,8 +35,7 @@
   </UserControl.Styles>
   <Grid>
   <StackPanel Spacing="16">
-    <TextBlock Classes="muted" IsVisible="{Binding IsOverview}" Text="Lege fest, welche Dateien zu welchem Target-Ordner passen. Eine Regel verschiebt selbst keine Datei." TextWrapping="Wrap"/>
-    <TextBlock x:Name="RuleResultMessage" Text="{Binding Message}" Foreground="{Binding MessageColor}" IsVisible="{Binding IsMessageVisible}" TextWrapping="Wrap"/>
+    <TextBlock x:Name="RuleResultMessage" Text="{Binding Message}" Foreground="{Binding MessageColor}" IsVisible="False"/>
     <Border x:Name="EmptyRulesPanel" Classes="rule-card" Padding="32" IsVisible="{Binding ShowEmptyState}">
       <StackPanel Spacing="16" HorizontalAlignment="Center" MaxWidth="480" Margin="0,12">
         <Border Width="56" Height="56" CornerRadius="28" Background="{DynamicResource BrushSurfaceSubtle}" HorizontalAlignment="Center">

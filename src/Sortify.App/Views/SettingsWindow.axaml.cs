@@ -60,6 +60,11 @@ public partial class SettingsWindow : Window
     private void RuleEditorPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (sender is not RuleEditorViewModel editor) return;
+        if (e.PropertyName == nameof(RuleEditorViewModel.ShowRuleList))
+        {
+            RuleTransferPanel.IsVisible = RulesEditor.IsVisible && editor.ShowRuleList;
+            return;
+        }
         if (e.PropertyName == nameof(RuleEditorViewModel.IsDeletePending))
         {
             if (editor.IsDeletePending)
@@ -150,7 +155,7 @@ public partial class SettingsWindow : Window
 
         var rulesSelected = section == "Sortierregeln";
         RulesEditor.IsVisible = rulesSelected;
-        RuleTransferPanel.IsVisible = rulesSelected;
+        RuleTransferPanel.IsVisible = rulesSelected && RulesEditor.DataContext is RuleEditorViewModel { ShowRuleList: true };
         RuleActions.IsVisible = rulesSelected;
         var generalSelected = section == "Allgemein";
         GeneralSettingsPanel.IsVisible = generalSelected;

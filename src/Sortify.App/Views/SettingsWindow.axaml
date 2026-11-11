@@ -142,7 +142,6 @@
         <StackPanel x:Name="RuleTransferPanel" IsVisible="False" Orientation="Horizontal" Spacing="8">
           <Button x:Name="ImportRulesButton" Classes="secondary motion" Content="Regeln importieren" Click="ImportRules"/>
           <Button x:Name="ExportRulesButton" Classes="secondary motion" Content="Regeln exportieren" Click="ExportRules"/>
-          <TextBlock Text="{Binding SettingsStatus}" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="210"/>
         </StackPanel>
         <Border x:Name="AppearanceCard" IsVisible="False" Margin="0,18,0,0" Padding="12,10" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12">
           <Grid ColumnDefinitions="*,Auto">

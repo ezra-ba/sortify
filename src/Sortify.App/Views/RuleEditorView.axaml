@@ -42,7 +42,7 @@
                   Background="{DynamicResource BrushSurfaceSubtle}"
                   BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
             <Path x:Name="CheckMark" Data="M 4,10 L 8,14 L 16,5" Stroke="{DynamicResource BrushText}"
-                  StrokeThickness="2" StrokeLineCap="Round" StrokeLineJoin="Round" IsVisible="False"/>
+                  StrokeThickness="2" StrokeLineCap="Round" IsVisible="False"/>
           </Border>
         </ControlTemplate>
       </Setter>

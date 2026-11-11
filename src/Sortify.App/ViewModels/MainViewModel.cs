@@ -192,9 +192,6 @@ public partial class MainViewModel : ViewModelBase
         var result = await settingsService.InitializeAsync(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
 
-        await RemoveMissingTargetFoldersAsync(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
-
         WatchedFolder = settingsService.Current?.WatchedFolderPath
             ?? "Noch kein Ordner ausgewählt";
 

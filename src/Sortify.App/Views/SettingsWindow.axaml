@@ -89,29 +89,31 @@
     <Grid x:Name="ContentSurface" Grid.Column="1" Background="{DynamicResource BrushCanvas}" RowDefinitions="Auto,*">
       <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="38,28,38,18">
         <TextBlock x:Name="SectionTitle" FontSize="26" FontWeight="SemiBold" Text="Allgemein" VerticalAlignment="Center"/>
-        <StackPanel x:Name="RuleActions" Grid.Column="1" Orientation="Horizontal" Spacing="8" IsVisible="False">
-          <Button x:Name="NewRuleButton" Classes="secondary motion" Width="40" Height="40" Padding="10" CornerRadius="12"
+        <Grid x:Name="RuleActions" Grid.Column="1" IsVisible="False">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button x:Name="NewRuleButton" Classes="secondary motion" Width="40" Height="40" Padding="10" CornerRadius="12"
                   DataContext="{Binding #RulesEditor.DataContext}" x:DataType="vm:RuleEditorViewModel"
                   Command="{Binding BeginCreateCommand}" IsVisible="{Binding IsOverview}"
                   IsEnabled="{Binding !IsSaving}" ToolTip.Tip="Neue Regel erstellen" AutomationProperties.Name="Neue Regel erstellen">
-            <Path Data="M 12,2 L 12,22 M 2,12 L 22,12" Width="16" Height="16" Stretch="Uniform"
-                  Stroke="{DynamicResource BrushText}" StrokeThickness="1.75"/>
-          </Button>
-          <StackPanel x:Name="RuleTransferPanel" Orientation="Horizontal" Spacing="8" IsVisible="False">
-            <Button x:Name="ImportRulesButton" Classes="secondary motion" Width="40" Height="40" Padding="10" CornerRadius="12"
+              <Path Data="M 12,2 L 12,22 M 2,12 L 22,12" Width="16" Height="16" Stretch="Uniform"
+                    Stroke="{DynamicResource BrushText}" StrokeThickness="1.75"/>
+            </Button>
+            <StackPanel x:Name="RuleTransferPanel" Orientation="Horizontal" Spacing="8" IsVisible="False">
+              <Button x:Name="ImportRulesButton" Classes="secondary motion" Width="40" Height="40" Padding="10" CornerRadius="12"
                     Click="ImportRules" ToolTip.Tip="Regeln importieren" AutomationProperties.Name="Regeln importieren">
-              <Path Data="M 12,3 L 12,16 M 7,11 L 12,16 L 17,11 M 4,18 L 4,21 L 20,21 L 20,18"
-                    Width="16" Height="18" Stretch="Uniform" Stroke="{DynamicResource BrushText}" StrokeThickness="1.75"
-                    StrokeLineCap="Round" StrokeJoin="Round"/>
-            </Button>
-            <Button x:Name="ExportRulesButton" Classes="secondary motion" Width="40" Height="40" Padding="10" CornerRadius="12"
+                <Path Data="M 12,3 L 12,16 M 7,11 L 12,16 L 17,11 M 4,18 L 4,21 L 20,21 L 20,18"
+                      Width="16" Height="18" Stretch="Uniform" Stroke="{DynamicResource BrushText}" StrokeThickness="1.75"
+                      StrokeLineCap="Round" StrokeJoin="Round"/>
+              </Button>
+              <Button x:Name="ExportRulesButton" Classes="secondary motion" Width="40" Height="40" Padding="10" CornerRadius="12"
                     Click="ExportRules" ToolTip.Tip="Regeln exportieren" AutomationProperties.Name="Regeln exportieren">
-              <Path Data="M 12,21 L 12,8 M 7,13 L 12,8 L 17,13 M 4,6 L 4,3 L 20,3 L 20,6"
-                    Width="16" Height="18" Stretch="Uniform" Stroke="{DynamicResource BrushText}" StrokeThickness="1.75"
-                    StrokeLineCap="Round" StrokeJoin="Round"/>
-            </Button>
+                <Path Data="M 12,21 L 12,8 M 7,13 L 12,8 L 17,13 M 4,6 L 4,3 L 20,3 L 20,6"
+                      Width="16" Height="18" Stretch="Uniform" Stroke="{DynamicResource BrushText}" StrokeThickness="1.75"
+                      StrokeLineCap="Round" StrokeJoin="Round"/>
+              </Button>
+            </StackPanel>
           </StackPanel>
-        </StackPanel>
+        </Grid>
       </Grid>
     <ScrollViewer x:Name="SettingsContentScroll" Grid.Row="1" Padding="38,0,38,32">
       <StackPanel Spacing="12">

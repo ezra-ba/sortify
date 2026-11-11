@@ -55,11 +55,10 @@
                 Command="{Binding CancelEditCommand}" IsEnabled="{Binding !IsSaving}" HorizontalAlignment="Left" Padding="10,6"/>
         <TextBlock Classes="heading" Text="{Binding EditorTitle}" FontSize="18"/>
         <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsEditing}">
-          <ToggleButton x:Name="RuleActiveToggle"
-                        Classes="animated-toggle"
-                        IsVisible="{Binding IsEditing}"
-                        IsChecked="{Binding IsRuleActive, Mode=TwoWay}"
-                        AutomationProperties.Name="Regel aktiv"/>
+          <CheckBox x:Name="RuleActiveCheckBox"
+                    IsVisible="{Binding IsEditing}"
+                    IsChecked="{Binding IsRuleActive, Mode=TwoWay}"
+                    AutomationProperties.Name="Regel aktiv"/>
           <TextBlock Text="Regel aktiv" VerticalAlignment="Center"/>
         </StackPanel>
         <TextBlock Classes="muted" Text="Neue Regeln sind automatisch aktiv." IsVisible="{Binding !IsEditing}"/>

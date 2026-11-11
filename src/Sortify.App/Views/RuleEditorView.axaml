@@ -32,6 +32,22 @@
       <Setter Property="CornerRadius" Value="12"/>
       <Setter Property="Padding" Value="14"/>
     </Style>
+    <Style Selector="CheckBox.rule-active">
+      <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
+      <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
+    </Style>
+    <Style Selector="CheckBox.rule-active:pointerover">
+      <Setter Property="Background" Value="{DynamicResource BrushSelectedHover}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderHover}"/>
+    </Style>
+    <Style Selector="CheckBox.rule-active:checked">
+      <Setter Property="Background" Value="{DynamicResource BrushAccent}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/>
+    </Style>
+    <Style Selector="CheckBox.rule-active:focus-visible">
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushFocus}"/>
+    </Style>
   </UserControl.Styles>
   <Grid>
   <StackPanel Spacing="16">
@@ -56,6 +72,7 @@
         <TextBlock Classes="heading" Text="{Binding EditorTitle}" FontSize="18"/>
         <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsEditing}">
           <CheckBox x:Name="RuleActiveCheckBox"
+                    Classes="rule-active"
                     IsVisible="{Binding IsEditing}"
                     IsChecked="{Binding IsRuleActive, Mode=TwoWay}"
                     AutomationProperties.Name="Regel aktiv"/>

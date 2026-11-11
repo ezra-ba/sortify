@@ -51,8 +51,6 @@
     </Border>
     <Border x:Name="RuleEditorForm" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="0" IsVisible="{Binding IsFormVisible}">
       <StackPanel Spacing="10" IsEnabled="{Binding !IsSaving}">
-        <Button x:Name="BackToRulesButton" Classes="secondary motion" Content="←  Zur Übersicht"
-                Command="{Binding CancelEditCommand}" IsEnabled="{Binding !IsSaving}" HorizontalAlignment="Left" Padding="10,6"/>
         <TextBlock Classes="heading" Text="{Binding EditorTitle}" FontSize="18"/>
         <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsEditing}">
           <CheckBox x:Name="RuleActiveCheckBox"

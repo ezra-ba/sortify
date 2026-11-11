@@ -209,6 +209,39 @@ public partial class MainViewModel : ViewModelBase
         };
         RefreshRuleTargetWarnings();
     }
+
+    public async Task<bool> RemoveMissingTargetFoldersAsync(CancellationToken cancellationToken = default)
+    {
+        if (settingsService?.Current is not { } current)
+            return false;
+
+        var existingTargets = current.TargetFolders
+            .Where(target => Directory.Exists(target.Path))
+            .ToArray();
+        if (existingTargets.Length == current.TargetFolders.Count)
+            return false;
+
+        var existingIds = existingTargets.Select(target => target.Id).ToHashSet();
+        var result = await settingsService.UpdateAsync(settings => settings with
+        {
+            TargetFolders = existingTargets,
+            Rules = settings.Rules
+                .Where(rule => rule.TargetFolderId is null || existingIds.Contains(rule.TargetFolderId.Value))
+                .ToArray(),
+            DefaultTargetFolderId = settings.DefaultTargetFolderId is { } defaultId && existingIds.Contains(defaultId)
+                ? defaultId
+                : null
+        });
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!result.IsSuccess)
+            return false;
+
+        RestoreTargetFolders(settingsService.Current!);
+        RefreshRuleTargetWarnings();
+        SettingsStatus = "Nicht mehr vorhandene Target-Ordner wurden entfernt.";
+        return true;
+    }
     private void RestoreTargetFolders(AppSettings settings)
     {
         SetSelectedTargetFolder(null);

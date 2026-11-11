@@ -66,7 +66,8 @@ public sealed class RuleOverviewWindowTests
                     Click(window, view.FindControl<Button>("EmptyCreateRuleButton")!);
                     Assert.True(form.IsVisible);
                     Assert.False(plus.IsVisible);
-                    Click(window, view.FindControl<Button>("BackToRulesButton")!);
+                    editor.CancelEditCommand.Execute(null);
+                    Layout();
                     Assert.True(empty.IsVisible);
                 }
                 Click(window, plus);
@@ -97,7 +98,8 @@ public sealed class RuleOverviewWindowTests
                 Assert.True(view.FindControl<CheckBox>("RuleActiveCheckBox")!.IsVisible);
                 Assert.Equal(saved.Name, view.FindControl<TextBox>("RuleNameInput")!.Text);
                 if (ruleCount > 0) Capture(window, $"/tmp/sortify-rules-edit-{(dark ? "dark" : "light")}.png");
-                Click(window, view.FindControl<Button>("BackToRulesButton")!);
+                editor.CancelEditCommand.Execute(null);
+                Layout();
                 Assert.True(overview.IsVisible);
                 Assert.False(form.IsVisible);
                 Assert.True(plus.IsVisible);

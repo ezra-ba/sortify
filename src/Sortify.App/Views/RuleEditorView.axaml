@@ -33,6 +33,10 @@
       <Setter Property="Padding" Value="14"/>
     </Style>
     <Style Selector="CheckBox.rule-active">
+      <Setter Property="Width" Value="24"/>
+      <Setter Property="Height" Value="24"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
       <Setter Property="Background" Value="{DynamicResource BrushSurfaceSubtle}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
